@@ -27,8 +27,8 @@ jobs:
 
       - name: "Copy config"
         run: |
-          echo "::debug::$(mv ./.env.github .env)"
-          echo "::debug::$(ls)"
+          mv ./.env.github .env
+          echo "::debug::$(ls -a)"
 
       - name: "Install the dependencies"
         run: "yarn install --immutable"
