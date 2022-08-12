@@ -25,6 +25,9 @@ jobs:
           cache: "yarn"
           node-version: "16"
 
+      - name: "Copy .env file"
+        run: "cp ./.env.github .env"
+
       - name: "Install the dependencies"
         run: "yarn install --immutable"
 
