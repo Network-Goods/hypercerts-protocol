@@ -1,11 +1,15 @@
-import "@nomicfoundation/hardhat-toolbox";
+import "@nomiclabs/hardhat-ethers";
+import "@nomiclabs/hardhat-etherscan";
+import "@nomiclabs/hardhat-waffle";
+import "@openzeppelin/hardhat-upgrades";
+import "@typechain/hardhat";
 import { config as dotenvConfig } from "dotenv";
+import "hardhat-abi-exporter";
+import "hardhat-deploy";
+import "hardhat-gas-reporter";
 import type { HardhatUserConfig } from "hardhat/config";
 import type { NetworkUserConfig } from "hardhat/types";
 import { resolve } from "path";
-
-import "./tasks/accounts";
-import "./tasks/deploy";
 
 const dotenvConfigPath: string = process.env.DOTENV_CONFIG_PATH || "./.env";
 dotenvConfig({ path: resolve(__dirname, dotenvConfigPath) });
@@ -76,12 +80,18 @@ const config: HardhatUserConfig = {
     excludeContracts: [],
     src: "./contracts",
   },
+  namedAccounts: {
+    deployer: 0,
+    user: 1,
+    anon: 9,
+  },
   networks: {
     hardhat: {
       accounts: {
         mnemonic,
       },
       chainId: chainIds.hardhat,
+      saveDeployments: true,
     },
     arbitrum: getChainConfig("arbitrum-mainnet"),
     avalanche: getChainConfig("avalanche"),
