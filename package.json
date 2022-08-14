@@ -78,9 +78,6 @@
   "publishConfig": {
     "access": "public"
   },
-  "resolutions": {
-    "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers@^0.3.0-beta.13"
-  },
   "scripts": {
     "clean": "shx rm -rf ./artifacts ./cache ./coverage ./src/types ./coverage.json && yarn typechain",
     "commit": "git-cz",
