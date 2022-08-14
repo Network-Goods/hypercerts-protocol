@@ -52,7 +52,10 @@ contract HypercertMinterV0 is
         _mintBatch(to, ids, amounts, data);
     }
 
-    function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
+    // solhint-disable-next-line no-empty-blocks
+    function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {
+        //empty block
+    }
 
     // The following functions are overrides required by Solidity.
 

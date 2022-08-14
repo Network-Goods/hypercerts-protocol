@@ -14,7 +14,7 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log("Deploy HypercertMinter Impl:" + impl.address);
 
   const artifact = await deployments.getExtendedArtifact("HypercertMinterV0");
-  let proxyDeployments = {
+  const proxyDeployments = {
     address: proxy.address,
     ...artifact,
   };
