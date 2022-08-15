@@ -16,56 +16,6 @@ A Hardhat-based template for developing Solidity smart contracts, with sensible 
 - [Solcover](https://github.com/sc-forks/solidity-coverage): code coverage
 - [Prettier Plugin Solidity](https://github.com/prettier-solidity/prettier-plugin-solidity): code formatter
 
-## Getting Started
-
-Click the [`Use this template`](https://github.com/paulrberg/hardhat-template/generate) button at the top of the page to
-create a new repository with this repo as the initial state.
-
-## Features
-
-This template builds upon the frameworks and libraries mentioned above, so for details about their specific features, please consult their respective documentations.
-
-For example, for Hardhat, you can refer to the [Hardhat Tutorial](https://hardhat.org/tutorial) and the [Hardhat
-Docs](https://hardhat.org/docs). You might be in particular interested in reading the [Testing Contracts](https://hardhat.org/tutorial/testing-contracts) section.
-
-### Sensible Defaults
-
-This template comes with sensible default configurations in the following files:
-
-```text
-├── .commitlintrc.yml
-├── .editorconfig
-├── .eslintignore
-├── .eslintrc.yml
-├── .gitignore
-├── .prettierignore
-├── .prettierrc.yml
-├── .solcover.js
-├── .solhintignore
-├── .solhint.json
-├── .yarnrc.yml
-└── hardhat.config.ts
-```
-
-### GitHub Actions
-
-This template comes with GitHub Actions pre-configured. Your contracts will be linted and tested on every push and pull
-request made to the `main` branch.
-
-Note though that to make this work, you must se your `INFURA_API_KEY` and your `MNEMONIC` as GitHub secrets.
-
-You can edit the CI script in [.github/workflows/ci.yml](./.github/workflows/ci.yml).
-
-### Conventional Commits
-
-This template enforces the [Conventional Commits](https://www.conventionalcommits.org/) standard for git commit messages.
-This is a lightweight convention that creates an explicit commit history, which makes it easier to write automated
-tools on top of.
-
-### Git Hooks
-
-This template uses [Husky](https://github.com/typicode/husky) to run automated checks on commit messages, and [Lint Staged](https://github.com/okonet/lint-staged) to automatically format the code with Prettier when making a git commit.
-
 ## Usage
 
 ### Pre Requisites
@@ -74,6 +24,8 @@ Before being able to run any command, you need to create a `.env` file and set a
 variable. You can follow the example in `.env.example`. If you don't already have a mnemonic, you can use this [website](https://iancoleman.io/bip39/) to generate one.
 
 Then, proceed with installing dependencies:
+
+> NOTE: Make sure to use Node 16.
 
 ```sh
 $ yarn install

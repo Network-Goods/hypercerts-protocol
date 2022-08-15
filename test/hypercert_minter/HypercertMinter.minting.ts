@@ -35,4 +35,29 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
       "Mint: token with provided ID already exists",
     );
   });
+
+  it("allows for dynamic URIs", async function () {
+    const { user, minter } = await setupTest();
+
+    await expect(user.minter.mint(user.address, 1, 1, ethers.utils.toUtf8Bytes("Test 1234")))
+      .to.emit(minter, "TransferSingle")
+      .withArgs(user.address, ethers.constants.AddressZero, user.address, 1, 1);
+
+    expect(await user.minter.uri(1)).to.be.eq("Test 1234");
+
+    await expect(
+      user.minter.mint(
+        user.address,
+        2,
+        1,
+        ethers.utils.toUtf8Bytes("https://ipfs.io/ipfs/QmW2WQi7j6c7UgJTarActp7tDNikE4B2qXtFCfLPdsgaTQ/cat.jpg"),
+      ),
+    )
+      .to.emit(minter, "TransferSingle")
+      .withArgs(user.address, ethers.constants.AddressZero, user.address, 2, 1);
+
+    expect(await user.minter.uri(2)).to.be.eq(
+      "https://ipfs.io/ipfs/QmW2WQi7j6c7UgJTarActp7tDNikE4B2qXtFCfLPdsgaTQ/cat.jpg",
+    );
+  });
 }

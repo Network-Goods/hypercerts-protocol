@@ -15,7 +15,7 @@
 **/dist
 **/node_modules
 **/src/types
-**/.openzeppeling
+**/deployments/localhost
 
 # files
 *.env

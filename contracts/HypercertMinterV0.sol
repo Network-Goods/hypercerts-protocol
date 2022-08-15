@@ -5,6 +5,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155BurnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155SupplyUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
@@ -14,6 +15,7 @@ contract HypercertMinterV0 is
     AccessControlUpgradeable,
     ERC1155BurnableUpgradeable,
     ERC1155SupplyUpgradeable,
+    ERC1155URIStorageUpgradeable,
     UUPSUpgradeable
 {
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
@@ -24,9 +26,10 @@ contract HypercertMinterV0 is
     }
 
     function initialize() public initializer {
-        __ERC1155_init("ipfs://{id}");
+        __ERC1155_init("");
         __AccessControl_init();
         __ERC1155Burnable_init();
+        __ERC1155URIStorage_init();
         __UUPSUpgradeable_init();
 
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
@@ -40,16 +43,21 @@ contract HypercertMinterV0 is
         bytes memory data
     ) public {
         require(!exists(id), "Mint: token with provided ID already exists");
+        _setURI(id, string(data));
         _mint(account, id, amount, data);
     }
 
-    function mintBatch(
-        address to,
-        uint256[] memory ids,
-        uint256[] memory amounts,
-        bytes memory data
-    ) public {
-        _mintBatch(to, ids, amounts, data);
+    function uri(uint256 tokenId)
+        public
+        view
+        override(ERC1155Upgradeable, ERC1155URIStorageUpgradeable)
+        returns (string memory)
+    {
+        return super.uri(tokenId);
+    }
+
+    function _setURI(uint256 tokenId, string memory tokenURI) internal override {
+        super._setURI(tokenId, tokenURI);
     }
 
     // solhint-disable-next-line no-empty-blocks
@@ -58,7 +66,6 @@ contract HypercertMinterV0 is
     }
 
     // The following functions are overrides required by Solidity.
-
     function _beforeTokenTransfer(
         address operator,
         address from,
