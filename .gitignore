@@ -25,3 +25,5 @@ coverage.json
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+**/.openzeppelin/*-31337.json
+.DS_Store

@@ -31,6 +31,12 @@ Then, proceed with installing dependencies:
 $ yarn install
 ```
 
+### Run local
+
+```sh
+$ yarn hardhat node
+```
+
 ### Compile
 
 Compile the smart contracts with Hardhat:
