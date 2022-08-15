@@ -3,7 +3,7 @@ pragma solidity ^0.8.4;
 
 import "../HypercertMinterV0.sol";
 
-contract HypercertMinter_Upgrade is HypercertMinterV0 {
+contract HypercertMinterUpgrade is HypercertMinterV0 {
     event Split(uint256 fromID, uint256[] toID);
 
     function split(uint256 id) public {

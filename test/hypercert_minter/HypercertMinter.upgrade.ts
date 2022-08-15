@@ -26,7 +26,7 @@ export function shouldBehaveLikeHypercertMinterUpgrade(): void {
   it("Updates version number on update", async function () {
     const HypercertMinterV0Factory = await ethers.getContractFactory("HypercertMinterV0");
 
-    const UpgradeFactory = await ethers.getContractFactory("HypercertMinter_Upgrade");
+    const UpgradeFactory = await ethers.getContractFactory("HypercertMinterUpgrade");
 
     const proxy = await upgrades.deployProxy(HypercertMinterV0Factory, { kind: "uups" });
 
@@ -41,7 +41,7 @@ export function shouldBehaveLikeHypercertMinterUpgrade(): void {
   it("Retains state of minted tokens", async function () {
     const { user } = await getNamedAccounts();
     const HypercertMinterV0Factory = await ethers.getContractFactory("HypercertMinterV0");
-    const UpgradeFactory = await ethers.getContractFactory("HypercertMinter_Upgrade");
+    const UpgradeFactory = await ethers.getContractFactory("HypercertMinterUpgrade");
 
     const proxy = await upgrades.deployProxy(HypercertMinterV0Factory, { kind: "uups" });
     expect(await proxy.version()).to.be.eq(0);
@@ -59,7 +59,7 @@ export function shouldBehaveLikeHypercertMinterUpgrade(): void {
 
     expect(await upgrade.uri(1)).to.be.eq("ipfs://test");
 
-    const upgradeWithUser = await ethers.getContractAt("HypercertMinter_Upgrade", upgrade.address, user);
+    const upgradeWithUser = await ethers.getContractAt("HypercertMinterUpgrade", upgrade.address, user);
     await expect(upgradeWithUser.split(1)).to.emit(upgrade, "Split").withArgs(1, [2]);
   });
 }
