@@ -22,6 +22,7 @@ export function shouldBehaveLikeHypercertMinterUpgrade(): void {
     });
   });
 
+  //TODO automated update logic
   it("Updates version number on update", async function () {
     const HypercertMinterV0Factory = await ethers.getContractFactory("HypercertMinterV0");
 
