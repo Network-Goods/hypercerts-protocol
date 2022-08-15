@@ -1776,7 +1776,7 @@ __metadata:
     "@types/chai": ^4.3.3
     "@types/fs-extra": ^9.0.13
     "@types/mocha": ^9.1.1
-    "@types/node": ^18.7.3
+    "@types/node": ^18.7.4
     "@typescript-eslint/eslint-plugin": ^5.33.0
     "@typescript-eslint/parser": ^5.33.0
     chai: ^4.3.6
@@ -1784,7 +1784,7 @@ __metadata:
     cross-env: ^7.0.3
     cz-conventional-changelog: ^3.3.0
     dotenv: ^16.0.1
-    eslint: ^8.21.0
+    eslint: ^8.22.0
     eslint-config-prettier: ^8.5.0
     ethereum-waffle: ^3.4.4
     ethers: ^5.6.9
@@ -2270,7 +2270,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:>=12, @types/node@npm:^18.7.3":
+"@types/node@npm:*, @types/node@npm:>=12":
   version: 18.7.3
   resolution: "@types/node@npm:18.7.3"
   checksum: f51ed436a112235ac068d739b4823090a37b869cc186b64dd5c250dd285139c286990fcbeff2fb3ecba5d605fa885de4275247d332e5b96eafdfbb1da62e3ced
@@ -2288,6 +2288,13 @@ __metadata:
   version: 12.20.55
   resolution: "@types/node@npm:12.20.55"
   checksum: e4f86785f4092706e0d3b0edff8dca5a13b45627e4b36700acd8dfe6ad53db71928c8dee914d4276c7fd3b6ccd829aa919811c9eb708a2c8e4c6eb3701178c37
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:^18.7.4":
+  version: 18.7.4
+  resolution: "@types/node@npm:18.7.4"
+  checksum: 051d2147e4d8129fceb63ee9384259b2f224dbc4e4b0c46d96a6b61cbaad4e3fe4060950e7f4fc3d5692b1e6ea47e68ad03b61155754bfa169593747cfe3f8f4
   languageName: node
   linkType: hard
 
@@ -6140,7 +6147,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint@npm:^8.21.0":
+"eslint@npm:^8.22.0":
   version: 8.22.0
   resolution: "eslint@npm:8.22.0"
   dependencies:
@@ -12176,9 +12183,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier-plugin-solidity@npm:^1.0.0-beta.24":
-  version: 1.0.0-beta.24
-  resolution: "prettier-plugin-solidity@npm:1.0.0-beta.24"
+"prettier-plugin-solidity@npm:^1.0.0-dev.23":
+  version: 1.0.0-dev.23
+  resolution: "prettier-plugin-solidity@npm:1.0.0-dev.23"
   dependencies:
     "@solidity-parser/parser": ^0.14.3
     emoji-regex: ^10.1.0
@@ -12188,7 +12195,7 @@ __metadata:
     string-width: ^4.2.3
   peerDependencies:
     prettier: ^2.3.0
-  checksum: 5923fbb2827307a23f3182c85f601b6bae476ac69ab115524fc3f08b823eaf7eaa93844a2564ad0a5ac49be0ce946381e0ef3407c1e5cfd4928811fa071823e0
+  checksum: bf068bcd763b2c2be48859abca5f2aee9543c38e875039470c8c0a850de4218292c7ec46fb63ef6866f51e8c87e80f8de015446ebd9f407712b26a9e30c41050
   languageName: node
   linkType: hard
 
