@@ -1,6 +1,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
+import { shouldBehaveLikeHypercertMinterBurning } from "./HypercertMinter.burning";
 import { shouldBehaveLikeHypercertMinterMinting } from "./HypercertMinter.minting";
 import { shouldBehaveLikeHypercertMinterUpgrade } from "./HypercertMinter.upgrade";
 
@@ -18,5 +19,6 @@ describe("Unit tests", function () {
 
     shouldBehaveLikeHypercertMinterMinting();
     shouldBehaveLikeHypercertMinterUpgrade();
+    shouldBehaveLikeHypercertMinterBurning();
   });
 });
