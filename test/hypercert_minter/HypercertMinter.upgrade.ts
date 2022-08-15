@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { ethers } from "hardhat";
+import { ethers, getNamedAccounts, upgrades } from "hardhat";
 
 import setupTest from "../setup";
 
@@ -22,7 +22,43 @@ export function shouldBehaveLikeHypercertMinterUpgrade(): void {
     });
   });
 
-  it.skip("checks on faulty upgrades", async function () {
-    expect(0);
+  it("Updates version number on update", async function () {
+    const HypercertMinterV0Factory = await ethers.getContractFactory("HypercertMinterV0");
+
+    const UpgradeFactory = await ethers.getContractFactory("HypercertMinter_Upgrade");
+
+    const proxy = await upgrades.deployProxy(HypercertMinterV0Factory, { kind: "uups" });
+
+    expect(await proxy.version()).to.be.eq(0);
+
+    const upgrade = await upgrades.upgradeProxy(proxy, UpgradeFactory);
+
+    expect(await proxy.version()).to.be.eq(1);
+    expect(await upgrade.version()).to.be.eq(1);
+  });
+
+  it("Retains state of minted tokens", async function () {
+    const { user } = await getNamedAccounts();
+    const HypercertMinterV0Factory = await ethers.getContractFactory("HypercertMinterV0");
+    const UpgradeFactory = await ethers.getContractFactory("HypercertMinter_Upgrade");
+
+    const proxy = await upgrades.deployProxy(HypercertMinterV0Factory, { kind: "uups" });
+    expect(await proxy.version()).to.be.eq(0);
+
+    const proxyWithUser = await ethers.getContractAt("HypercertMinterV0", proxy.address, user);
+    await proxyWithUser.mint(user, 1, 1, ethers.utils.toUtf8Bytes("ipfs://test"));
+
+    expect(await proxyWithUser.uri(1)).to.be.eq("ipfs://test");
+
+    const upgrade = await upgrades.upgradeProxy(proxy, UpgradeFactory);
+
+    await expect(
+      proxyWithUser.mint(user, 1, 1, ethers.utils.toUtf8Bytes("ipfs://test-persistance")),
+    ).to.be.revertedWith("Mint: token with provided ID already exists");
+
+    expect(await upgrade.uri(1)).to.be.eq("ipfs://test");
+
+    const upgradeWithUser = await ethers.getContractAt("HypercertMinter_Upgrade", upgrade.address, user);
+    await expect(upgradeWithUser.split(1)).to.emit(upgrade, "Split").withArgs(1, [2]);
   });
 }
