@@ -1,3 +1,4 @@
+import { faker } from "@faker-js/faker";
 import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
@@ -38,7 +39,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
   });
 
   //TODO can supply of token be increased? Either remove ID as input, or only allow creator to mint more of same token
-  it("an already minted claim cannot be minted again", async function () {
+  it("an already minted claim (work, impact, creators) cannot be minted again", async function () {
     const { user, minter } = await setupTest();
     const data = await getEncodedImpactClaim();
 
@@ -46,13 +47,32 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
       .to.emit(minter, "TransferSingle")
       .withArgs(user.address, ethers.constants.AddressZero, user.address, 0, 1);
 
-    await expect(user.minter.mint(user.address, 1, 1, data)).to.be.revertedWith("Mint: cert with claim already exists");
+    await expect(user.minter.mint(user.address, 1, 1, data)).to.be.revertedWith(
+      "Claim: claim for creators overlapping",
+    );
 
     const otherData = await getEncodedImpactClaim({ workScopes: [21, 22] });
 
     await expect(user.minter.mint(user.address, 1, 1, otherData))
       .to.emit(minter, "TransferSingle")
       .withArgs(user.address, ethers.constants.AddressZero, user.address, 1, 1);
+  });
+
+  it("claim can not have overlapping contributors", async function () {
+    const { user, minter } = await setupTest();
+
+    const contributors: string[] = [];
+    Array.from({ length: 3 }).forEach(() => contributors.push(faker.finance.ethereumAddress()));
+
+    const data = await getEncodedImpactClaim({ contributors: contributors });
+
+    await expect(user.minter.mint(user.address, 1, 1, data)).to.emit(minter, "ImpactClaimed");
+
+    const overlappingData = await getEncodedImpactClaim({ contributors: [user.address, contributors[0]] });
+
+    await expect(user.minter.mint(user.address, 1, 1, overlappingData)).to.be.revertedWith(
+      "Claim: claim for creators overlapping",
+    );
   });
 
   it("allows for dynamic URIs", async function () {
@@ -173,11 +193,14 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
   it("parses input data to create hypercert - high", async function () {
     const { user, minter } = await setupTest();
 
+    const contributors: string[] = [];
+    Array.from({ length: 10 }).forEach(() => contributors.push(faker.finance.ethereumAddress()));
+
     const options = {
       rightsID: 1,
       workTimeframe: [1, 2],
       impactTimeframe: [2, 3],
-      contributors: [user.address],
+      contributors,
       workScopes: [...Array(100).keys()],
       impactScopes: [...Array(100).keys()],
       uri: "ipfs://test",
@@ -186,18 +209,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
     const shortdata = await getEncodedImpactClaim(options);
 
     // TODO generate claimHash of options and validate in test
-    await expect(user.minter.mint(user.address, 0, 1, shortdata))
-      .to.emit(minter, "ImpactClaimed")
-      .withArgs(
-        0,
-        "0xd043500349eb2c06a8a519bd23a7fe13fb3c5dd47456f9956d2aefd6c5cc2aae",
-        options.contributors,
-        options.workTimeframe,
-        options.impactTimeframe,
-        options.workScopes,
-        options.impactScopes,
-        "ipfs://test",
-      );
+    await expect(user.minter.mint(user.address, 0, 1, shortdata)).to.emit(minter, "ImpactClaimed");
 
     expect(await user.minter.uri(0)).to.be.eq(options.uri);
 
@@ -205,7 +217,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
 
     expect(claim.exists).to.be.true;
     expect(claim.version).to.be.eq(0);
-
+    expect(claim.contributors.map((address: string) => address.toLowerCase())).to.be.eql(options.contributors);
     expect(claim.workTimeframe.map((timestamp: BigNumber) => timestamp.toNumber())).to.be.eql(options.workTimeframe);
     expect(claim.workScopes.map((scopeID: BigNumber) => scopeID.toNumber())).to.be.eql(options.workScopes);
     expect(claim.impactTimeframe.map((timestamp: BigNumber) => timestamp.toNumber())).to.be.eql(
@@ -216,14 +228,17 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
   });
 
   it("parses input data to create hypercert - approach limit", async function () {
-    // GAS COST 25_996_892
+    // GAS COST 28_372_010
     const { user, minter } = await setupTest();
+
+    const contributors: string[] = [];
+    Array.from({ length: 100 }).forEach(() => contributors.push(faker.finance.ethereumAddress()));
 
     const options = {
       rightsID: 1,
       workTimeframe: [1, 2],
       impactTimeframe: [2, 3],
-      contributors: Array(100).fill(user.address),
+      contributors,
       workScopes: [...Array(500).keys()],
       impactScopes: [...Array(500).keys()],
       uri: "cillum tempor exercitation cillum minim non proident laboris et pariatur dolore duis sit ad Lorem proident voluptate ex officia nostrud officia do esse deserunt adipisicing excepteur nostrud aliqua qui in amet deserunt laboris nostrud tempor in culpa magna ullamco aliquip enim incididunt occaecat eu officia cupidatat reprehenderit anim aliqua do do nulla sint officia eu elit tempor minim eiusmod proident minim nostrud elit occaecat Lorem irure ex sunt pariatur cupidatat eiusmod dolor ea enim velit incididunt est qui dolore dolore laboris amet aute dolore consequat velit excepteur in enim minim consequat ex nisi ut eiusmod tempor consectetur labore reprehenderit enim",
@@ -233,18 +248,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
 
     // TODO generate claimHash of options and validate in test
     const claimHash = "0xe45438c9b8ce52735bf3668be1bb8e0df95cee5f2a4fbbea327dd7f2c6f265da";
-    await expect(user.minter.mint(user.address, 0, 1, shortdata))
-      .to.emit(minter, "ImpactClaimed")
-      .withArgs(
-        0,
-        claimHash,
-        options.contributors,
-        options.workTimeframe,
-        options.impactTimeframe,
-        options.workScopes,
-        options.impactScopes,
-        options.uri,
-      );
+    await expect(user.minter.mint(user.address, 0, 1, shortdata)).to.emit(minter, "ImpactClaimed");
 
     expect(await user.minter.uri(0)).to.be.eq(options.uri);
 
@@ -252,7 +256,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
 
     expect(claim.exists).to.be.true;
     expect(claim.version).to.be.eq(0);
-
+    expect(claim.contributors.map((address: string) => address.toLowerCase())).to.be.eql(options.contributors);
     expect(claim.workTimeframe.map((timestamp: BigNumber) => timestamp.toNumber())).to.be.eql(options.workTimeframe);
     expect(claim.workScopes.map((scopeID: BigNumber) => scopeID.toNumber())).to.be.eql(options.workScopes);
     expect(claim.impactTimeframe.map((timestamp: BigNumber) => timestamp.toNumber())).to.be.eql(

@@ -26,8 +26,9 @@ contract HypercertMinterV0 is
     mapping(uint256 => string) public workScopes;
     mapping(uint256 => string) public impactScopes;
     mapping(uint256 => string) public rights;
-    mapping(address => bytes32[]) public contributorImpacts;
+    mapping(address => mapping(bytes32 => bool)) public contributorImpacts;
     mapping(bytes32 => Claim) internal impactCerts;
+    mapping(bytes32 => uint256) internal impactCertIDs;
 
     struct Claim {
         uint256 rights;
@@ -90,16 +91,16 @@ contract HypercertMinterV0 is
         bytes memory data
     ) public {
         require(account != address(0), "Mint: mint to the zero address");
-        require(!exists(counter), "Mint: token with provided ID already exists");
 
         // Parse data to get Claim
         (Claim memory claim, string memory _uri, bytes32 claimHash) = _bytesToClaimAndURI(data);
-        require(!impactCerts[claimHash].exists, "Mint: cert with claim already exists");
 
-        // TODO Check if no contributors already have claim
+        // Check on overlapping contributor-claims and store if success
+        _storeContributorsClaims(claimHash, claim.contributors);
 
         // Store impact cert
         impactCerts[claimHash] = claim;
+        impactCertIDs[claimHash] = counter;
         _setURI(counter, _uri);
 
         // Mint impact cert
@@ -129,6 +130,10 @@ contract HypercertMinterV0 is
         returns (string memory)
     {
         return super.uri(tokenId);
+    }
+
+    function uriFromHash(bytes32 claimHash) public view returns (string memory) {
+        return super.uri(impactCertIDs[claimHash]);
     }
 
     function version() public pure virtual returns (uint256) {
@@ -163,6 +168,13 @@ contract HypercertMinterV0 is
         bytes memory data
     ) internal override(ERC1155Upgradeable, ERC1155SupplyUpgradeable) {
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
+    }
+
+    function _storeContributorsClaims(bytes32 claimHash, address[] memory creators) internal {
+        for (uint256 i = 0; i < creators.length; i++) {
+            require(!contributorImpacts[creators[i]][claimHash], "Claim: claim for creators overlapping");
+            contributorImpacts[creators[i]][claimHash] = true;
+        }
     }
 
     // Mapped bytes object to claim
