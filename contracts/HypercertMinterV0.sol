@@ -19,6 +19,7 @@ contract HypercertMinterV0 is
     UUPSUpgradeable
 {
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
+    uint16 internal _version;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -34,6 +35,7 @@ contract HypercertMinterV0 is
 
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(UPGRADER_ROLE, msg.sender);
+        _version = 0;
     }
 
     function mint(
@@ -56,8 +58,8 @@ contract HypercertMinterV0 is
         return super.uri(tokenId);
     }
 
-    function _setURI(uint256 tokenId, string memory tokenURI) internal override {
-        super._setURI(tokenId, tokenURI);
+    function version() public pure virtual returns (uint256) {
+        return 0;
     }
 
     // solhint-disable-next-line no-empty-blocks

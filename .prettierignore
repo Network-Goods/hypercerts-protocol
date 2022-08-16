@@ -10,6 +10,8 @@
 **/dist
 **/node_modules
 **/types
+**/deployments
+**/.openzeppelin
 
 # files
 *.env
