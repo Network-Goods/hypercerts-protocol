@@ -2,6 +2,7 @@ import { expect } from "chai";
 import { ethers, getNamedAccounts, upgrades } from "hardhat";
 
 import setupTest from "../setup";
+import { getEncodedImpactClaim } from "../utils";
 
 export function shouldBehaveLikeHypercertMinterUpgrade(): void {
   it("supports upgrader role", async function () {
@@ -40,6 +41,7 @@ export function shouldBehaveLikeHypercertMinterUpgrade(): void {
 
   it("Retains state of minted tokens", async function () {
     const { user } = await getNamedAccounts();
+    const data = await getEncodedImpactClaim();
     const HypercertMinterV0Factory = await ethers.getContractFactory("HypercertMinterV0");
     const UpgradeFactory = await ethers.getContractFactory("HypercertMinterUpgrade");
 
@@ -47,19 +49,15 @@ export function shouldBehaveLikeHypercertMinterUpgrade(): void {
     expect(await proxy.version()).to.be.eq(0);
 
     const proxyWithUser = await ethers.getContractAt("HypercertMinterV0", proxy.address, user);
-    await proxyWithUser.mint(user, 1, 1, ethers.utils.toUtf8Bytes("ipfs://test"));
+    await proxyWithUser.mint(user, 0, 1, data);
 
-    expect(await proxyWithUser.uri(1)).to.be.eq("ipfs://test");
+    expect(await proxyWithUser.uri(0)).to.be.eq("ipfs://mockedImpactClaim");
 
     const upgrade = await upgrades.upgradeProxy(proxy, UpgradeFactory);
 
-    await expect(
-      proxyWithUser.mint(user, 1, 1, ethers.utils.toUtf8Bytes("ipfs://test-persistance")),
-    ).to.be.revertedWith("Mint: token with provided ID already exists");
-
-    expect(await upgrade.uri(1)).to.be.eq("ipfs://test");
+    expect(await upgrade.uri(0)).to.be.eq("ipfs://mockedImpactClaim");
 
     const upgradeWithUser = await ethers.getContractAt("HypercertMinterUpgrade", upgrade.address, user);
-    await expect(upgradeWithUser.split(1)).to.emit(upgrade, "Split").withArgs(1, [2]);
+    await expect(upgradeWithUser.split(0)).to.emit(upgrade, "Split").withArgs(0, [1]);
   });
 }
