@@ -27,10 +27,10 @@ contract HypercertMinterV0 is
     mapping(uint256 => string) public impactScopes;
     mapping(uint256 => string) public rights;
     mapping(address => mapping(bytes32 => bool)) public contributorImpacts;
-    mapping(bytes32 => Claim) internal impactCerts;
-    mapping(bytes32 => uint256) internal impactCertIDs;
+    mapping(uint256 => Claim) internal impactCerts;
 
     struct Claim {
+        bytes32 claimHash;
         uint256 rights;
         uint256[2] workTimeframe;
         uint256[2] impactTimeframe;
@@ -53,6 +53,7 @@ contract HypercertMinterV0 is
         uint256[2] impactTimeframe,
         uint256[] workScopes,
         uint256[] impactScopes,
+        uint256 version,
         string uri
     );
 
@@ -86,7 +87,6 @@ contract HypercertMinterV0 is
 
     function mint(
         address account,
-        uint256 id,
         uint256 amount,
         bytes memory data
     ) public {
@@ -99,27 +99,27 @@ contract HypercertMinterV0 is
         _storeContributorsClaims(claimHash, claim.contributors);
 
         // Store impact cert
-        impactCerts[claimHash] = claim;
-        impactCertIDs[claimHash] = counter;
+        impactCerts[counter] = claim;
         _setURI(counter, _uri);
 
         // Mint impact cert
         _mint(account, counter, amount, data);
         emit ImpactClaimed(
-            id,
+            counter,
             claimHash,
             claim.contributors,
             claim.workTimeframe,
             claim.impactTimeframe,
             claim.workScopes,
             claim.impactScopes,
+            claim.version,
             _uri
         );
 
         counter += 1;
     }
 
-    function getImpactCert(bytes32 claimID) public view returns (Claim memory) {
+    function getImpactCert(uint256 claimID) public view returns (Claim memory) {
         return impactCerts[claimID];
     }
 
@@ -130,10 +130,6 @@ contract HypercertMinterV0 is
         returns (string memory)
     {
         return super.uri(tokenId);
-    }
-
-    function uriFromHash(bytes32 claimHash) public view returns (string memory) {
-        return super.uri(impactCertIDs[claimHash]);
     }
 
     function version() public pure virtual returns (uint256) {
@@ -184,7 +180,7 @@ contract HypercertMinterV0 is
         returns (
             Claim memory,
             string memory,
-            bytes32 claimHash
+            bytes32
         )
     {
         require(data.length > 0, "Parse: input data empty");
@@ -200,7 +196,10 @@ contract HypercertMinterV0 is
             string memory _uri
         ) = abi.decode(data, (uint256, uint256[2], uint256[2], address[], uint256[], uint256[], string));
 
+        bytes32 _claimHash = keccak256(abi.encode(_workTimeframe, _workScopes, _impactTimeframe, _impactScopes, _v));
+
         Claim memory _claim = Claim(
+            _claimHash,
             _rights,
             _workTimeframe,
             _impactTimeframe,
@@ -210,9 +209,6 @@ contract HypercertMinterV0 is
             _v,
             true
         );
-
-        bytes32 _claimHash = keccak256(abi.encode(_workTimeframe, _workScopes, _impactTimeframe, _impactScopes, _v));
-
         return (_claim, _uri, _claimHash);
     }
 }

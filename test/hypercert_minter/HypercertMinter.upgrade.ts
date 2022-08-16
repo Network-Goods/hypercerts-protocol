@@ -49,7 +49,7 @@ export function shouldBehaveLikeHypercertMinterUpgrade(): void {
     expect(await proxy.version()).to.be.eq(0);
 
     const proxyWithUser = await ethers.getContractAt("HypercertMinterV0", proxy.address, user);
-    await proxyWithUser.mint(user, 0, 1, data);
+    await proxyWithUser.mint(user, 1, data);
 
     expect(await proxyWithUser.uri(0)).to.be.eq("ipfs://mockedImpactClaim");
 

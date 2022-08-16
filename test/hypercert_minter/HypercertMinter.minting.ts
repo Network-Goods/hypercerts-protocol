@@ -14,25 +14,25 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
     const data4 = await getEncodedImpactClaim({ workScopes: [10, 40] });
 
     // Empty data
-    await expect(deployer.minter.mint(deployer.address, 0, 1, "0x")).to.be.revertedWith("Parse: input data empty");
+    await expect(deployer.minter.mint(deployer.address, 1, "0x")).to.be.revertedWith("Parse: input data empty");
 
     // Supply 1, multiple users/ids
-    await expect(deployer.minter.mint(deployer.address, 0, 1, data1))
+    await expect(deployer.minter.mint(deployer.address, 1, data1))
       .to.emit(minter, "TransferSingle")
       .withArgs(deployer.address, ethers.constants.AddressZero, deployer.address, 0, 1);
-    await expect(user.minter.mint(user.address, 1, 1, data2))
+    await expect(user.minter.mint(user.address, 1, data2))
       .to.emit(minter, "TransferSingle")
       .withArgs(user.address, ethers.constants.AddressZero, user.address, 1, 1);
-    await expect(anon.minter.mint(anon.address, 2, 1, data3))
+    await expect(anon.minter.mint(anon.address, 1, data3))
       .to.emit(minter, "TransferSingle")
       .withArgs(anon.address, ethers.constants.AddressZero, anon.address, 2, 1);
 
     // Supply >1
-    await expect(deployer.minter.mint(deployer.address, 3, 100_000, data4))
+    await expect(deployer.minter.mint(deployer.address, 100_000, data4))
       .to.emit(minter, "TransferSingle")
       .withArgs(deployer.address, ethers.constants.AddressZero, deployer.address, 3, 100_000);
 
-    await expect(deployer.minter.mint(ethers.constants.AddressZero, 1, 1, data1)).to.be.revertedWith(
+    await expect(deployer.minter.mint(ethers.constants.AddressZero, 1, data1)).to.be.revertedWith(
       "Mint: mint to the zero address",
     );
   });
@@ -42,17 +42,15 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
     const { user, minter } = await setupTest();
     const data = await getEncodedImpactClaim();
 
-    await expect(user.minter.mint(user.address, 1, 1, data))
+    await expect(user.minter.mint(user.address, 1, data))
       .to.emit(minter, "TransferSingle")
       .withArgs(user.address, ethers.constants.AddressZero, user.address, 0, 1);
 
-    await expect(user.minter.mint(user.address, 1, 1, data)).to.be.revertedWith(
-      "Claim: claim for creators overlapping",
-    );
+    await expect(user.minter.mint(user.address, 1, data)).to.be.revertedWith("Claim: claim for creators overlapping");
 
     const otherData = await getEncodedImpactClaim({ workScopes: [21, 22] });
 
-    await expect(user.minter.mint(user.address, 1, 1, otherData))
+    await expect(user.minter.mint(user.address, 1, otherData))
       .to.emit(minter, "TransferSingle")
       .withArgs(user.address, ethers.constants.AddressZero, user.address, 1, 1);
   });
@@ -65,11 +63,11 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
 
     const data = await getEncodedImpactClaim({ contributors: contributors });
 
-    await expect(user.minter.mint(user.address, 1, 1, data)).to.emit(minter, "ImpactClaimed");
+    await expect(user.minter.mint(user.address, 1, data)).to.emit(minter, "ImpactClaimed");
 
     const overlappingData = await getEncodedImpactClaim({ contributors: [user.address, contributors[0]] });
 
-    await expect(user.minter.mint(user.address, 1, 1, overlappingData)).to.be.revertedWith(
+    await expect(user.minter.mint(user.address, 1, overlappingData)).to.be.revertedWith(
       "Claim: claim for creators overlapping",
     );
   });
@@ -79,7 +77,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
 
     const shortdata = await getEncodedImpactClaim({ uri: "Test 1234" });
 
-    await expect(user.minter.mint(user.address, 0, 1, shortdata))
+    await expect(user.minter.mint(user.address, 1, shortdata))
       .to.emit(minter, "TransferSingle")
       .withArgs(user.address, ethers.constants.AddressZero, user.address, 0, 1);
 
@@ -92,7 +90,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
       uri: cid,
     });
 
-    await expect(user.minter.mint(user.address, 1, 1, dataWithIPFS))
+    await expect(user.minter.mint(user.address, 1, dataWithIPFS))
       .to.emit(minter, "TransferSingle")
       .withArgs(user.address, ethers.constants.AddressZero, user.address, 1, 1);
 
@@ -116,7 +114,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
     const shortdata = await getEncodedImpactClaim(options);
     const hash = await getClaimHash(options);
 
-    await expect(user.minter.mint(user.address, 0, 1, shortdata))
+    await expect(user.minter.mint(user.address, 1, shortdata))
       .to.emit(minter, "ImpactClaimed")
       .withArgs(
         0,
@@ -126,12 +124,13 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
         options.impactTimeframe,
         options.workScopes,
         options.impactScopes,
+        options.version,
         options.uri,
       );
 
     expect(await user.minter.uri(0)).to.be.eq(options.uri);
 
-    const claim = await minter.getImpactCert(hash);
+    const claim = await minter.getImpactCert(0);
 
     expect(claim.exists).to.be.true;
 
@@ -155,7 +154,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
     const shortdata = await getEncodedImpactClaim(options);
     const hash = await getClaimHash(options);
 
-    await expect(user.minter.mint(user.address, 0, 1, shortdata))
+    await expect(user.minter.mint(user.address, 1, shortdata))
       .to.emit(minter, "ImpactClaimed")
       .withArgs(
         0,
@@ -165,12 +164,13 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
         options.impactTimeframe,
         options.workScopes,
         options.impactScopes,
+        options.version,
         options.uri,
       );
 
     expect(await user.minter.uri(0)).to.be.eq(options.uri);
 
-    const claim = await minter.getImpactCert(hash);
+    const claim = await minter.getImpactCert(0);
 
     expect(claim.exists).to.be.true;
 
@@ -195,13 +195,12 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
     };
 
     const shortdata = await getEncodedImpactClaim(options);
-    const hash = await getClaimHash(options);
 
-    await expect(user.minter.mint(user.address, 0, 1, shortdata)).to.emit(minter, "ImpactClaimed");
+    await expect(user.minter.mint(user.address, 1, shortdata)).to.emit(minter, "ImpactClaimed");
 
     expect(await user.minter.uri(0)).to.be.eq(options.uri);
 
-    const claim = await minter.getImpactCert(hash);
+    const claim = await minter.getImpactCert(0);
 
     expect(claim.exists).to.be.true;
 
@@ -209,7 +208,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
   });
 
   it("parses input data to create hypercert - approach limit", async function () {
-    // GAS COST 28_372_010
+    // GAS COST 28_285_127
     const { user, minter } = await setupTest();
 
     const contributors: string[] = [];
@@ -227,13 +226,12 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
     };
 
     const shortdata = await getEncodedImpactClaim(options);
-    const hash = await getClaimHash(options);
 
-    await expect(user.minter.mint(user.address, 0, 1, shortdata)).to.emit(minter, "ImpactClaimed");
+    await expect(user.minter.mint(user.address, 1, shortdata)).to.emit(minter, "ImpactClaimed");
 
     expect(await user.minter.uri(0)).to.be.eq(options.uri);
 
-    const claim = await minter.getImpactCert(hash);
+    const claim = await minter.getImpactCert(0);
 
     expect(claim.exists).to.be.true;
 
