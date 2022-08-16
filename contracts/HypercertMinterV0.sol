@@ -188,6 +188,8 @@ contract HypercertMinterV0 is
         )
     {
         require(data.length > 0, "Parse: input data empty");
+        uint256 _v = version();
+
         (
             uint256 _rights,
             uint256[2] memory _workTimeframe,
@@ -205,11 +207,11 @@ contract HypercertMinterV0 is
             _contributors,
             _workScopes,
             _impactScopes,
-            version(),
+            _v,
             true
         );
 
-        bytes32 _claimHash = keccak256(abi.encode(_workTimeframe, _workScopes, _impactTimeframe, _impactScopes));
+        bytes32 _claimHash = keccak256(abi.encode(_workTimeframe, _workScopes, _impactTimeframe, _impactScopes, _v));
 
         return (_claim, _uri, _claimHash);
     }

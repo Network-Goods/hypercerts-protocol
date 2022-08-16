@@ -1,11 +1,13 @@
 import { deployments } from "hardhat";
 
+import { HypercertMinterV0 } from "../src/types";
+
 const setupTest = deployments.createFixture(async ({ deployments, getNamedAccounts, ethers }) => {
   await deployments.fixture(); // ensure you start from a fresh deployments
   const { deployer, user, anon } = await getNamedAccounts();
 
   // Contracts
-  const minter = await ethers.getContract("HypercertMinterV0");
+  const minter: HypercertMinterV0 = await ethers.getContract("HypercertMinterV0");
 
   // Account config
   const setupAddress = async (address: string) => {
