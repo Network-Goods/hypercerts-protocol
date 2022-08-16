@@ -26,8 +26,8 @@ contract HypercertMinterV0 is
     mapping(uint256 => string) public workScopes;
     mapping(uint256 => string) public impactScopes;
     mapping(uint256 => string) public rights;
-    mapping(address => uint256[]) public contributorImpacts;
-    mapping(uint256 => Claim) public impactCerts;
+    mapping(address => bytes32[]) public contributorImpacts;
+    mapping(bytes32 => Claim) internal impactCerts;
 
     struct Claim {
         uint256 rights;
@@ -36,6 +36,7 @@ contract HypercertMinterV0 is
         address[] contributors;
         uint256[] workScopes;
         uint256[] impactScopes;
+        uint256 version;
         bool exists;
     }
 
@@ -44,6 +45,8 @@ contract HypercertMinterV0 is
      ******************/
 
     event ImpactClaimed(
+        uint256 id,
+        bytes32 claimHash,
         address[] contributors,
         uint256[2] workTimeframe,
         uint256[2] impactTimeframe,
@@ -88,20 +91,22 @@ contract HypercertMinterV0 is
     ) public {
         require(account != address(0), "Mint: mint to the zero address");
         require(!exists(counter), "Mint: token with provided ID already exists");
-        require(!impactCerts[counter].exists, "Mint: cert with claim already exists");
 
         // Parse data to get Claim
-        (Claim memory claim, string memory _uri) = _bytesToClaimAndURI(data);
+        (Claim memory claim, string memory _uri, bytes32 claimHash) = _bytesToClaimAndURI(data);
+        require(!impactCerts[claimHash].exists, "Mint: cert with claim already exists");
 
         // TODO Check if no contributors already have claim
 
         // Store impact cert
-        impactCerts[counter] = claim;
+        impactCerts[claimHash] = claim;
         _setURI(counter, _uri);
 
         // Mint impact cert
         _mint(account, counter, amount, data);
         emit ImpactClaimed(
+            id,
+            claimHash,
             claim.contributors,
             claim.workTimeframe,
             claim.impactTimeframe,
@@ -111,6 +116,10 @@ contract HypercertMinterV0 is
         );
 
         counter += 1;
+    }
+
+    function getImpactCert(bytes32 claimID) public view returns (Claim memory) {
+        return impactCerts[claimID];
     }
 
     function uri(uint256 tokenId)
@@ -157,7 +166,15 @@ contract HypercertMinterV0 is
     }
 
     // Mapped bytes object to claim
-    function _bytesToClaimAndURI(bytes memory data) internal view returns (Claim memory, string memory) {
+    function _bytesToClaimAndURI(bytes memory data)
+        internal
+        pure
+        returns (
+            Claim memory,
+            string memory,
+            bytes32 claimHash
+        )
+    {
         require(data.length > 0, "Parse: input data empty");
         (
             uint256 _rights,
@@ -176,8 +193,12 @@ contract HypercertMinterV0 is
             _contributors,
             _workScopes,
             _impactScopes,
+            version(),
             true
         );
-        return (_claim, _uri);
+
+        bytes32 _claimHash = keccak256(abi.encode(_workTimeframe, _workScopes, _impactTimeframe, _impactScopes));
+
+        return (_claim, _uri, _claimHash);
     }
 }
