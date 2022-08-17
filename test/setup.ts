@@ -13,7 +13,7 @@ const setupTest = deployments.createFixture(async ({ deployments, getNamedAccoun
   const setupAddress = async (address: string) => {
     return {
       address: address,
-      minter: await ethers.getContract("HypercertMinterV0", address),
+      minter: <HypercertMinterV0>await ethers.getContract("HypercertMinterV0", address),
     };
   };
 

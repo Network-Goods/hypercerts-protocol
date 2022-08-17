@@ -31,12 +31,12 @@ contract HypercertMinterV0 is
 
     struct Claim {
         bytes32 claimHash;
-        uint256 rights;
+        address[] contributors;
         uint256[2] workTimeframe;
         uint256[2] impactTimeframe;
-        address[] contributors;
         uint256[] workScopes;
         uint256[] impactScopes;
+        uint256[] rights;
         uint256 version;
         bool exists;
     }
@@ -187,28 +187,28 @@ contract HypercertMinterV0 is
         uint256 _v = version();
 
         (
-            uint256 _rights,
+            uint256[] memory _rights,
+            uint256[] memory _workScopes,
+            uint256[] memory _impactScopes,
             uint256[2] memory _workTimeframe,
             uint256[2] memory _impactTimeframe,
             address[] memory _contributors,
-            uint256[] memory _workScopes,
-            uint256[] memory _impactScopes,
             string memory _uri
-        ) = abi.decode(data, (uint256, uint256[2], uint256[2], address[], uint256[], uint256[], string));
+        ) = abi.decode(data, (uint256[], uint256[], uint256[], uint256[2], uint256[2], address[], string));
 
         bytes32 _claimHash = keccak256(abi.encode(_workTimeframe, _workScopes, _impactTimeframe, _impactScopes, _v));
 
-        Claim memory _claim = Claim(
-            _claimHash,
-            _rights,
-            _workTimeframe,
-            _impactTimeframe,
-            _contributors,
-            _workScopes,
-            _impactScopes,
-            _v,
-            true
-        );
+        Claim memory _claim;
+
+        _claim.claimHash = _claimHash;
+        _claim.contributors = _contributors;
+        _claim.workTimeframe = _workTimeframe;
+        _claim.impactTimeframe = _impactTimeframe;
+        _claim.workScopes = _workScopes;
+        _claim.impactScopes = _impactScopes;
+        _claim.rights = _rights;
+        _claim.version = _v;
+        _claim.exists = true;
         return (_claim, _uri, _claimHash);
     }
 }

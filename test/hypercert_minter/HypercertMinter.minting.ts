@@ -101,7 +101,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
     const { user, minter } = await setupTest();
 
     const options = {
-      rightsID: 1,
+      rightsIDs: [1],
       workTimeframe: [1, 2],
       impactTimeframe: [2, 3],
       contributors: [user.address],
@@ -141,7 +141,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
     const { user, minter } = await setupTest();
 
     const options = {
-      rightsID: 1,
+      rightsIDs: [1],
       workTimeframe: [1, 2],
       impactTimeframe: [2, 3],
       contributors: [user.address],
@@ -184,7 +184,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
     Array.from({ length: 10 }).forEach(() => contributors.push(faker.finance.ethereumAddress()));
 
     const options = {
-      rightsID: 1,
+      rightsIDs: [1],
       workTimeframe: [1, 2],
       impactTimeframe: [2, 3],
       contributors,
@@ -215,7 +215,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
     Array.from({ length: 100 }).forEach(() => contributors.push(faker.finance.ethereumAddress()));
 
     const options = {
-      rightsID: 1,
+      rightsIDs: [1],
       workTimeframe: [1, 2],
       impactTimeframe: [2, 3],
       contributors,
