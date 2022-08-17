@@ -57,8 +57,6 @@ contract HypercertMinterV0 is
         string uri
     );
 
-    event ImpactBurned(uint256 impactCertID);
-
     /*******************
      * DEPLOY
      ******************/
