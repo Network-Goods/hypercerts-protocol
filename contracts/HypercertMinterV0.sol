@@ -26,11 +26,11 @@ contract HypercertMinterV0 is
     mapping(uint256 => string) public workScopes;
     mapping(uint256 => string) public impactScopes;
     mapping(uint256 => string) public rights;
-    mapping(address => mapping(bytes32 => bool)) public contributorImpacts;
+    mapping(address => mapping(uint256 => bool)) public contributorImpacts;
     mapping(uint256 => Claim) internal impactCerts;
 
     struct Claim {
-        bytes32 claimHash;
+        uint256 claimHash;
         address[] contributors;
         uint256[2] workTimeframe;
         uint256[2] impactTimeframe;
@@ -46,16 +46,23 @@ contract HypercertMinterV0 is
      ******************/
 
     event ImpactClaimed(
-        uint256 id,
-        bytes32 claimHash,
+        uint256 indexed id,
+        uint256 indexed claimHash,
         address[] contributors,
         uint256[2] workTimeframe,
         uint256[2] impactTimeframe,
         uint256[] workScopes,
         uint256[] impactScopes,
+        uint256[] rights,
         uint256 version,
         string uri
     );
+
+    event ImpactScopeAdded(uint256 indexed id, string indexed text);
+
+    event RightAdded(uint256 indexed id, string indexed text);
+
+    event WorkScopeAdded(uint256 indexed id, string indexed text);
 
     /*******************
      * DEPLOY
@@ -83,6 +90,30 @@ contract HypercertMinterV0 is
      * PUBLIC
      ******************/
 
+    function addImpactScope(string memory text) public returns (uint256 id) {
+        require(bytes(text).length > 0, "addImpactScope: empty text");
+        id = _hash(text);
+        require(!_hasKey(impactScopes, id), "addImpactScope: already exists");
+        impactScopes[id] = text;
+        emit ImpactScopeAdded(id, text);
+    }
+
+    function addRight(string memory text) public returns (uint256 id) {
+        require(bytes(text).length > 0, "addRight: empty text");
+        id = _hash(text);
+        require(!_hasKey(rights, id), "addRight: already exists");
+        rights[id] = text;
+        emit RightAdded(id, text);
+    }
+
+    function addWorkScope(string memory text) public returns (uint256 id) {
+        require(bytes(text).length > 0, "addWorkScope: empty text");
+        id = _hash(text);
+        require(!_hasKey(workScopes, id), "addWorkScope: already exists");
+        workScopes[id] = text;
+        emit WorkScopeAdded(id, text);
+    }
+
     function mint(
         address account,
         uint256 amount,
@@ -91,10 +122,18 @@ contract HypercertMinterV0 is
         require(account != address(0), "Mint: mint to the zero address");
 
         // Parse data to get Claim
-        (Claim memory claim, string memory _uri, bytes32 claimHash) = _bytesToClaimAndURI(data);
+        (Claim memory claim, string memory _uri) = _bytesToClaimAndURI(data);
+
+        for (uint256 i = 0; i < claim.impactScopes.length; i++) {
+            require(_hasKey(impactScopes, claim.impactScopes[i]), "Mint: invalid impact scope");
+        }
+
+        for (uint256 i = 0; i < claim.workScopes.length; i++) {
+            require(_hasKey(workScopes, claim.workScopes[i]), "Mint: invalid work scope");
+        }
 
         // Check on overlapping contributor-claims and store if success
-        _storeContributorsClaims(claimHash, claim.contributors);
+        _storeContributorsClaims(claim.claimHash, claim.contributors);
 
         // Store impact cert
         impactCerts[counter] = claim;
@@ -104,12 +143,13 @@ contract HypercertMinterV0 is
         _mint(account, counter, amount, data);
         emit ImpactClaimed(
             counter,
-            claimHash,
+            claim.claimHash,
             claim.contributors,
             claim.workTimeframe,
             claim.impactTimeframe,
             claim.workScopes,
             claim.impactScopes,
+            claim.rights,
             claim.version,
             _uri
         );
@@ -164,7 +204,7 @@ contract HypercertMinterV0 is
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
     }
 
-    function _storeContributorsClaims(bytes32 claimHash, address[] memory creators) internal {
+    function _storeContributorsClaims(uint256 claimHash, address[] memory creators) internal {
         for (uint256 i = 0; i < creators.length; i++) {
             require(!contributorImpacts[creators[i]][claimHash], "Claim: claim for creators overlapping");
             contributorImpacts[creators[i]][claimHash] = true;
@@ -172,15 +212,7 @@ contract HypercertMinterV0 is
     }
 
     // Mapped bytes object to claim
-    function _bytesToClaimAndURI(bytes memory data)
-        internal
-        pure
-        returns (
-            Claim memory,
-            string memory,
-            bytes32
-        )
-    {
+    function _bytesToClaimAndURI(bytes memory data) internal pure returns (Claim memory, string memory) {
         require(data.length > 0, "Parse: input data empty");
         uint256 _v = version();
 
@@ -194,10 +226,11 @@ contract HypercertMinterV0 is
             string memory _uri
         ) = abi.decode(data, (uint256[], uint256[], uint256[], uint256[2], uint256[2], address[], string));
 
-        bytes32 _claimHash = keccak256(abi.encode(_workTimeframe, _workScopes, _impactTimeframe, _impactScopes, _v));
+        uint256 _claimHash = uint256(
+            keccak256(abi.encode(_workTimeframe, _workScopes, _impactTimeframe, _impactScopes, _v))
+        );
 
         Claim memory _claim;
-
         _claim.claimHash = _claimHash;
         _claim.contributors = _contributors;
         _claim.workTimeframe = _workTimeframe;
@@ -207,6 +240,15 @@ contract HypercertMinterV0 is
         _claim.rights = _rights;
         _claim.version = _v;
         _claim.exists = true;
-        return (_claim, _uri, _claimHash);
+
+        return (_claim, _uri);
+    }
+
+    function _hash(string memory value) internal pure returns (uint256) {
+        return uint256(keccak256(abi.encode(value)));
+    }
+
+    function _hasKey(mapping(uint256 => string) storage map, uint256 key) internal view returns (bool) {
+        return (bytes(map[key]).length > 0);
     }
 }

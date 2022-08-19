@@ -1,79 +1,87 @@
+import { ParamType } from "@ethersproject/abi";
 import { expect } from "chai";
-import { BigNumber } from "ethers";
 import { ethers, getNamedAccounts } from "hardhat";
 
 import { HypercertMinterV0 } from "../src/types";
+import { ImpactScopes, LoremIpsum, Rights, WorkScopes } from "./wellKnown";
 
-export const getEncodedImpactClaim = async (options?: {
-  rightsIDs?: number[];
+export type Claim = {
+  rights: bigint[] | string[];
+  workTimeframe: number[];
+  impactTimeframe: number[];
+  contributors: string[];
+  workScopes: bigint[] | string[];
+  impactScopes: bigint[] | string[];
+  uri: string;
+  version: number;
+};
+
+export const getEncodedImpactClaim = async (claim?: {
+  rightsIDs?: bigint[] | string[];
   workTimeframe?: number[];
   impactTimeframe?: number[];
   contributors?: string[];
-  workScopes?: number[];
-  impactScopes?: number[];
+  workScopes?: bigint[] | string[];
+  impactScopes?: bigint[] | string[];
   uri?: string;
+  version?: number;
 }) => {
   const { user, anon } = await getNamedAccounts();
-  const abiCoder = new ethers.utils.AbiCoder();
 
-  const _rightsIDs = options?.rightsIDs || [1];
-  const _workTimeframe = options?.workTimeframe || [123456789, 0];
-  const _impactTimeframe = options?.impactTimeframe || [987654321, 0];
-  const _contributors = options?.contributors || [user, anon];
-  const _workScopes = options?.workScopes || [1, 2, 3, 4, 5];
-  const _impactScopes = options?.impactScopes || [10, 20, 30, 40, 50];
-  const _uri = options?.uri || "ipfs://mockedImpactClaim";
+  const _rightsIDs = claim?.rightsIDs || Object.keys(Rights);
+  const _workTimeframe = claim?.workTimeframe || [123456789, 0];
+  const _impactTimeframe = claim?.impactTimeframe || [987654321, 0];
+  const _contributors = claim?.contributors || [user, anon];
+  const _workScopes = claim?.workScopes || Object.keys(WorkScopes);
+  const _impactScopes = claim?.impactScopes || Object.keys(ImpactScopes);
+  const _uri = claim?.uri || "ipfs://mockedImpactClaim";
 
   const types = ["uint256[]", "uint256[]", "uint256[]", "uint256[2]", "uint256[2]", "address[]", "string"];
   const values = [_rightsIDs, _workScopes, _impactScopes, _workTimeframe, _impactTimeframe, _contributors, _uri];
 
-  return abiCoder.encode(types, values);
+  return encode(types, values);
 };
 
-export const getClaimHash = async (options: {
-  rightsIDs: number[];
-  workTimeframe: number[];
-  impactTimeframe: number[];
-  contributors: string[];
-  workScopes: number[];
-  impactScopes: number[];
-  uri: string;
-  version: number;
-}) => {
-  const abiCoder = new ethers.utils.AbiCoder();
-
-  const _workTimeframe = options.workTimeframe;
-  const _impactTimeframe = options.impactTimeframe;
-  const _workScopes = options.workScopes;
-  const _impactScopes = options.impactScopes;
-  const _version = options.version;
-
+export const getClaimHash = async (claim: Claim) => {
+  const { workTimeframe, workScopes, impactTimeframe, impactScopes, version } = claim;
   const types = ["uint256[2]", "uint256[]", "uint256[2]", "uint256[]", "uint256"];
-  const values = [_workTimeframe, _workScopes, _impactTimeframe, _impactScopes, _version];
+  const values = [workTimeframe, workScopes, impactTimeframe, impactScopes, version];
 
-  return ethers.utils.keccak256(abiCoder.encode(types, values));
+  return hash256(types, values);
 };
 
-export const compareClaimAgainstInput = async (
-  claim: HypercertMinterV0.ClaimStructOutput,
-  options: {
-    rightsIDs: number[];
-    workTimeframe: number[];
-    impactTimeframe: number[];
-    contributors: string[];
-    workScopes: number[];
-    impactScopes: number[];
-    uri: string;
-    version: number;
-  },
-) => {
-  expect(claim.rights.map((timestamp: BigNumber) => timestamp.toNumber())).to.be.eql(options.rightsIDs);
+export const encode = (
+  types: ReadonlyArray<string | ParamType>,
+  values: ReadonlyArray<number | number[] | bigint | bigint[] | string | string[]>,
+) => new ethers.utils.AbiCoder().encode(types, values);
+
+export const hash256 = (
+  types: ReadonlyArray<string | ParamType>,
+  values: ReadonlyArray<number | number[] | bigint | bigint[] | string | string[]>,
+) => ethers.utils.keccak256(encode(types, values));
+
+export const toHashMap = (array: string[]) => Object.fromEntries(array.map(s => [hash256(["string"], [s]), s]));
+
+export const randomScopes = (limit?: number) => {
+  const loremIpsum = LoremIpsum.split(/[\s,.]+/).map(s => s.toLowerCase());
+  const l = loremIpsum.length;
+  const scopes = [];
+
+  for (let i = 0; i < (limit ?? l); i++) {
+    scopes.push(`${loremIpsum[Math.random() * l]}-${loremIpsum[Math.random() * l]}`);
+  }
+
+  return toHashMap(scopes);
+};
+
+export const compareClaimAgainstInput = async (claim: HypercertMinterV0.ClaimStructOutput, options: Claim) => {
+  expect(claim.rights.map(right => right.toBigInt())).to.be.eql(options.rights.map(right => BigInt(right)));
   expect(claim.version).to.be.eq(options.version);
-  expect(claim.contributors.map((address: string) => address.toLowerCase())).to.be.eql(
-    options.contributors.map((addr: string) => addr.toLowerCase()),
+  expect(claim.contributors.map(address => address.toLowerCase())).to.be.eql(
+    options.contributors.map(addr => addr.toLowerCase()),
   );
-  expect(claim.workTimeframe.map((timestamp: BigNumber) => timestamp.toNumber())).to.be.eql(options.workTimeframe);
-  expect(claim.workScopes.map((scope: BigNumber) => scope.toNumber())).to.be.eql(options.workScopes);
-  expect(claim.impactTimeframe.map((timestamp: BigNumber) => timestamp.toNumber())).to.be.eql(options.impactTimeframe);
-  expect(claim.impactScopes.map((scope: BigNumber) => scope.toNumber())).to.be.eql(options.impactScopes);
+  expect(claim.workTimeframe.map(timestamp => timestamp.toNumber())).to.be.eql(options.workTimeframe);
+  expect(claim.workScopes.map(scope => scope.toBigInt())).to.be.eql(options.workScopes.map(scope => BigInt(scope)));
+  expect(claim.impactTimeframe.map(timestamp => timestamp.toNumber())).to.be.eql(options.impactTimeframe);
+  expect(claim.impactScopes.map(scope => scope.toBigInt())).to.be.eql(options.impactScopes.map(scope => BigInt(scope)));
 };
