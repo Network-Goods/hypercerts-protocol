@@ -23,20 +23,20 @@ contract HypercertMinterV0 is
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
     uint256 public counter;
 
-    mapping(uint256 => string) public workScopes;
-    mapping(uint256 => string) public impactScopes;
-    mapping(uint256 => string) public rights;
-    mapping(address => mapping(uint256 => bool)) public contributorImpacts;
+    mapping(bytes32 => string) public workScopes;
+    mapping(bytes32 => string) public impactScopes;
+    mapping(bytes32 => string) public rights;
+    mapping(address => mapping(bytes32 => bool)) public contributorImpacts;
     mapping(uint256 => Claim) internal impactCerts;
 
     struct Claim {
-        uint256 claimHash;
+        bytes32 claimHash;
         address[] contributors;
         uint256[2] workTimeframe;
         uint256[2] impactTimeframe;
-        uint256[] workScopes;
-        uint256[] impactScopes;
-        uint256[] rights;
+        bytes32[] workScopes;
+        bytes32[] impactScopes;
+        bytes32[] rights;
         uint256 version;
         bool exists;
     }
@@ -47,22 +47,22 @@ contract HypercertMinterV0 is
 
     event ImpactClaimed(
         uint256 indexed id,
-        uint256 indexed claimHash,
+        bytes32 indexed claimHash,
         address[] contributors,
         uint256[2] workTimeframe,
         uint256[2] impactTimeframe,
-        uint256[] workScopes,
-        uint256[] impactScopes,
-        uint256[] rights,
+        bytes32[] workScopes,
+        bytes32[] impactScopes,
+        bytes32[] rights,
         uint256 version,
         string uri
     );
 
-    event ImpactScopeAdded(uint256 indexed id, string indexed text);
+    event ImpactScopeAdded(bytes32 indexed id, string indexed text);
 
-    event RightAdded(uint256 indexed id, string indexed text);
+    event RightAdded(bytes32 indexed id, string indexed text);
 
-    event WorkScopeAdded(uint256 indexed id, string indexed text);
+    event WorkScopeAdded(bytes32 indexed id, string indexed text);
 
     /*******************
      * DEPLOY
@@ -90,7 +90,7 @@ contract HypercertMinterV0 is
      * PUBLIC
      ******************/
 
-    function addImpactScope(string memory text) public returns (uint256 id) {
+    function addImpactScope(string memory text) public returns (bytes32 id) {
         require(bytes(text).length > 0, "addImpactScope: empty text");
         id = _hash(text);
         require(!_hasKey(impactScopes, id), "addImpactScope: already exists");
@@ -98,7 +98,7 @@ contract HypercertMinterV0 is
         emit ImpactScopeAdded(id, text);
     }
 
-    function addRight(string memory text) public returns (uint256 id) {
+    function addRight(string memory text) public returns (bytes32 id) {
         require(bytes(text).length > 0, "addRight: empty text");
         id = _hash(text);
         require(!_hasKey(rights, id), "addRight: already exists");
@@ -106,7 +106,7 @@ contract HypercertMinterV0 is
         emit RightAdded(id, text);
     }
 
-    function addWorkScope(string memory text) public returns (uint256 id) {
+    function addWorkScope(string memory text) public returns (bytes32 id) {
         require(bytes(text).length > 0, "addWorkScope: empty text");
         id = _hash(text);
         require(!_hasKey(workScopes, id), "addWorkScope: already exists");
@@ -204,7 +204,7 @@ contract HypercertMinterV0 is
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
     }
 
-    function _storeContributorsClaims(uint256 claimHash, address[] memory creators) internal {
+    function _storeContributorsClaims(bytes32 claimHash, address[] memory creators) internal {
         for (uint256 i = 0; i < creators.length; i++) {
             require(!contributorImpacts[creators[i]][claimHash], "Claim: claim for creators overlapping");
             contributorImpacts[creators[i]][claimHash] = true;
@@ -217,18 +217,16 @@ contract HypercertMinterV0 is
         uint256 _v = version();
 
         (
-            uint256[] memory _rights,
-            uint256[] memory _workScopes,
-            uint256[] memory _impactScopes,
+            bytes32[] memory _rights,
+            bytes32[] memory _workScopes,
+            bytes32[] memory _impactScopes,
             uint256[2] memory _workTimeframe,
             uint256[2] memory _impactTimeframe,
             address[] memory _contributors,
             string memory _uri
-        ) = abi.decode(data, (uint256[], uint256[], uint256[], uint256[2], uint256[2], address[], string));
+        ) = abi.decode(data, (bytes32[], bytes32[], bytes32[], uint256[2], uint256[2], address[], string));
 
-        uint256 _claimHash = uint256(
-            keccak256(abi.encode(_workTimeframe, _workScopes, _impactTimeframe, _impactScopes, _v))
-        );
+        bytes32 _claimHash = keccak256(abi.encode(_workTimeframe, _workScopes, _impactTimeframe, _impactScopes, _v));
 
         Claim memory _claim;
         _claim.claimHash = _claimHash;
@@ -244,11 +242,11 @@ contract HypercertMinterV0 is
         return (_claim, _uri);
     }
 
-    function _hash(string memory value) internal pure returns (uint256) {
-        return uint256(keccak256(abi.encode(value)));
+    function _hash(string memory value) internal pure returns (bytes32) {
+        return keccak256(abi.encode(value));
     }
 
-    function _hasKey(mapping(uint256 => string) storage map, uint256 key) internal view returns (bool) {
+    function _hasKey(mapping(bytes32 => string) storage map, bytes32 key) internal view returns (bool) {
         return (bytes(map[key]).length > 0);
     }
 }

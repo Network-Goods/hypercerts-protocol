@@ -75,13 +75,13 @@ export const randomScopes = (limit?: number) => {
 };
 
 export const compareClaimAgainstInput = async (claim: HypercertMinterV0.ClaimStructOutput, options: Claim) => {
-  expect(claim.rights.map(right => right.toBigInt())).to.be.eql(options.rights.map(right => BigInt(right)));
+  expect(claim.rights).to.be.eql(options.rights);
   expect(claim.version).to.be.eq(options.version);
   expect(claim.contributors.map(address => address.toLowerCase())).to.be.eql(
     options.contributors.map(addr => addr.toLowerCase()),
   );
   expect(claim.workTimeframe.map(timestamp => timestamp.toNumber())).to.be.eql(options.workTimeframe);
-  expect(claim.workScopes.map(scope => scope.toBigInt())).to.be.eql(options.workScopes.map(scope => BigInt(scope)));
+  expect(claim.workScopes).to.be.eql(options.workScopes);
   expect(claim.impactTimeframe.map(timestamp => timestamp.toNumber())).to.be.eql(options.impactTimeframe);
-  expect(claim.impactScopes.map(scope => scope.toBigInt())).to.be.eql(options.impactScopes.map(scope => BigInt(scope)));
+  expect(claim.impactScopes).to.be.eql(options.impactScopes);
 };
