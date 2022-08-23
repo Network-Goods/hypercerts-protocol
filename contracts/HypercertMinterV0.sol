@@ -46,8 +46,8 @@ contract HypercertMinterV0 is
      ******************/
 
     event ImpactClaimed(
-        uint256 indexed id,
-        bytes32 indexed claimHash,
+        uint256 id,
+        bytes32 claimHash,
         address[] contributors,
         uint256[2] workTimeframe,
         uint256[2] impactTimeframe,
@@ -58,11 +58,11 @@ contract HypercertMinterV0 is
         string uri
     );
 
-    event ImpactScopeAdded(bytes32 indexed id, string indexed text);
+    event ImpactScopeAdded(bytes32 id, string text);
 
-    event RightAdded(bytes32 indexed id, string indexed text);
+    event RightAdded(bytes32 id, string text);
 
-    event WorkScopeAdded(bytes32 indexed id, string indexed text);
+    event WorkScopeAdded(bytes32 id, string text);
 
     /*******************
      * DEPLOY
