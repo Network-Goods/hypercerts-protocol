@@ -7,6 +7,11 @@ export function shouldBehaveLikeHypercertMinterAddingImpactScopes(): void {
   it("should allow anyone to add new impact scopes", async function () {
     const { anon, minter } = await setupTest({ impactScopes: {} });
     await setupImpactScopes(anon.minter, minter);
+
+    expect(await minter.impactScopes(Object.keys(ImpactScopes)[0])).to.be.eq("clean-air");
+    expect(await minter.impactScopes(Object.keys(ImpactScopes)[1])).to.be.eq("biodiversity");
+    expect(await minter.impactScopes(Object.keys(ImpactScopes)[2])).to.be.eq("pollution-reduction");
+    expect(await minter.impactScopes(Object.keys(ImpactScopes)[3])).to.be.eq("top-soil-growth");
   });
 
   it("should reject duplicate impact scopes", async function () {
@@ -29,6 +34,11 @@ export function shouldBehaveLikeHypercertMinterAddingWorkScopes(): void {
   it("should allow anyone to add new work scopes", async function () {
     const { anon, minter } = await setupTest({ workScopes: {} });
     await setupWorkScopes(anon.minter, minter);
+
+    expect(await minter.workScopes(Object.keys(WorkScopes)[0])).to.be.eq("clean-air-tech");
+    expect(await minter.workScopes(Object.keys(WorkScopes)[1])).to.be.eq("education");
+    expect(await minter.workScopes(Object.keys(WorkScopes)[2])).to.be.eq("tree-planting");
+    expect(await minter.workScopes(Object.keys(WorkScopes)[3])).to.be.eq("waterway-cleaning");
   });
 
   it("should reject duplicate work scopes", async function () {
