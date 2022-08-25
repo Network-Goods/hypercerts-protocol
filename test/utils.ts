@@ -6,29 +6,20 @@ import { HypercertMinterV0 } from "../src/types";
 import { ImpactScopes, LoremIpsum, Rights, WorkScopes } from "./wellKnown";
 
 export type Claim = {
-  rights: bigint[] | string[];
+  rights: string[];
   workTimeframe: number[];
   impactTimeframe: number[];
   contributors: string[];
-  workScopes: bigint[] | string[];
-  impactScopes: bigint[] | string[];
+  workScopes: string[];
+  impactScopes: string[];
   uri: string;
   version: number;
 };
 
-export const getEncodedImpactClaim = async (claim?: {
-  rightsIDs?: bigint[] | string[];
-  workTimeframe?: number[];
-  impactTimeframe?: number[];
-  contributors?: string[];
-  workScopes?: bigint[] | string[];
-  impactScopes?: bigint[] | string[];
-  uri?: string;
-  version?: number;
-}) => {
+export const getEncodedImpactClaim = async (claim?: Partial<Claim>) => {
   const { user, anon } = await getNamedAccounts();
 
-  const _rightsIDs = claim?.rightsIDs || Object.keys(Rights);
+  const _rightsIDs = claim?.rights || Object.keys(Rights);
   const _workTimeframe = claim?.workTimeframe || [123456789, 0];
   const _impactTimeframe = claim?.impactTimeframe || [987654321, 0];
   const _contributors = claim?.contributors || [user, anon];
