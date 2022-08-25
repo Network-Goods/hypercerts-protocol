@@ -17,7 +17,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
     const data4 = await getEncodedImpactClaim();
 
     // Empty data
-    await expect(deployer.minter.mint(deployer.address, 1, "0x")).to.be.revertedWith("Parse: input data empty");
+    await expect(deployer.minter.mint(deployer.address, 1, "0x")).to.be.revertedWith("Mint: input data empty");
 
     // Supply 1, multiple users/ids
     await expect(deployer.minter.mint(deployer.address, 1, data1))

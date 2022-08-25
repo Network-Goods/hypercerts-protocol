@@ -120,37 +120,62 @@ contract HypercertMinterV0 is
         bytes memory data
     ) public {
         require(account != address(0), "Mint: mint to the zero address");
+        require(data.length > 0, "Mint: input data empty");
 
         // Parse data to get Claim
-        (Claim memory claim, string memory _uri) = _bytesToClaimAndURI(data);
+        uint256 _v = version();
 
-        for (uint256 i = 0; i < claim.impactScopes.length; i++) {
-            require(_hasKey(impactScopes, claim.impactScopes[i]), "Mint: invalid impact scope");
+        (
+            bytes32[] memory _rights,
+            bytes32[] memory _workScopes,
+            bytes32[] memory _impactScopes,
+            uint256[2] memory _workTimeframe,
+            uint256[2] memory _impactTimeframe,
+            address[] memory _contributors,
+            string memory _uri
+        ) = abi.decode(data, (bytes32[], bytes32[], bytes32[], uint256[2], uint256[2], address[], string));
+
+        bytes32 _claimHash = keccak256(abi.encode(_workTimeframe, _workScopes, _impactTimeframe, _impactScopes, _v));
+
+        for (uint256 i = 0; i < _impactScopes.length; i++) {
+            require(_hasKey(impactScopes, _impactScopes[i]), "Mint: invalid impact scope");
         }
 
-        for (uint256 i = 0; i < claim.workScopes.length; i++) {
-            require(_hasKey(workScopes, claim.workScopes[i]), "Mint: invalid work scope");
+        for (uint256 i = 0; i < _workScopes.length; i++) {
+            require(_hasKey(workScopes, _workScopes[i]), "Mint: invalid work scope");
         }
 
         // Check on overlapping contributor-claims and store if success
-        _storeContributorsClaims(claim.claimHash, claim.contributors);
+        _storeContributorsClaims(_claimHash, _contributors);
+
+        Claim memory _claim;
+        _claim.claimHash = _claimHash;
+        _claim.contributors = _contributors;
+        _claim.workTimeframe = _workTimeframe;
+        _claim.impactTimeframe = _impactTimeframe;
+        _claim.workScopes = _workScopes;
+        _claim.impactScopes = _impactScopes;
+        _claim.rights = _rights;
+        _claim.version = _v;
+        _claim.exists = true;
 
         // Store impact cert
-        impactCerts[counter] = claim;
+        impactCerts[counter] = _claim;
         _setURI(counter, _uri);
 
         // Mint impact cert
         _mint(account, counter, amount, data);
+
         emit ImpactClaimed(
             counter,
-            claim.claimHash,
-            claim.contributors,
-            claim.workTimeframe,
-            claim.impactTimeframe,
-            claim.workScopes,
-            claim.impactScopes,
-            claim.rights,
-            claim.version,
+            _claim.claimHash,
+            _claim.contributors,
+            _claim.workTimeframe,
+            _claim.impactTimeframe,
+            _claim.workScopes,
+            _claim.impactScopes,
+            _claim.rights,
+            _claim.version,
             _uri
         );
 
@@ -209,37 +234,6 @@ contract HypercertMinterV0 is
             require(!contributorImpacts[creators[i]][claimHash], "Claim: claim for creators overlapping");
             contributorImpacts[creators[i]][claimHash] = true;
         }
-    }
-
-    // Mapped bytes object to claim
-    function _bytesToClaimAndURI(bytes memory data) internal pure returns (Claim memory, string memory) {
-        require(data.length > 0, "Parse: input data empty");
-        uint256 _v = version();
-
-        (
-            bytes32[] memory _rights,
-            bytes32[] memory _workScopes,
-            bytes32[] memory _impactScopes,
-            uint256[2] memory _workTimeframe,
-            uint256[2] memory _impactTimeframe,
-            address[] memory _contributors,
-            string memory _uri
-        ) = abi.decode(data, (bytes32[], bytes32[], bytes32[], uint256[2], uint256[2], address[], string));
-
-        bytes32 _claimHash = keccak256(abi.encode(_workTimeframe, _workScopes, _impactTimeframe, _impactScopes, _v));
-
-        Claim memory _claim;
-        _claim.claimHash = _claimHash;
-        _claim.contributors = _contributors;
-        _claim.workTimeframe = _workTimeframe;
-        _claim.impactTimeframe = _impactTimeframe;
-        _claim.workScopes = _workScopes;
-        _claim.impactScopes = _impactScopes;
-        _claim.rights = _rights;
-        _claim.version = _v;
-        _claim.exists = true;
-
-        return (_claim, _uri);
     }
 
     function _hash(string memory value) internal pure returns (bytes32) {
