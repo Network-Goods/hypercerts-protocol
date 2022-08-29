@@ -149,7 +149,7 @@ contract HypercertMinterV0 is
     /// @notice mints a new hypercert
     /// @param account account minting the new hypercert
     /// @param amount amount of the new token to mint
-    /// @param data data representing the parameters of the new hypercert (rights, work-scopes, impact-scopes, work time-frames, impact time-frames, contributors, uri)
+    /// @param data data representing the parameters of the new hypercert
     function mint(
         address account,
         uint256 amount,
