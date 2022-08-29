@@ -57,7 +57,7 @@ const config: HardhatUserConfig = {
   gasReporter: {
     currency: "USD",
     enabled: process.env.REPORT_GAS ? true : false,
-    excludeContracts: [],
+    excludeContracts: ["mocks"],
     src: "./contracts",
   },
   namedAccounts: {
@@ -83,7 +83,7 @@ const config: HardhatUserConfig = {
     tests: "./test",
   },
   solidity: {
-    version: "0.8.15",
+    version: "0.8.16",
     settings: {
       metadata: {
         // Not including the metadata hash

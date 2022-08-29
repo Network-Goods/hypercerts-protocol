@@ -3,6 +3,11 @@ import { ethers } from "hardhat";
 
 import { shouldBehaveLikeHypercertMinterBurning } from "./HypercertMinter.burning";
 import { shouldBehaveLikeHypercertMinterMinting } from "./HypercertMinter.minting";
+import { shouldBehaveLikeHypercertMinterAddingRights } from "./HypercertMinter.rights";
+import {
+  shouldBehaveLikeHypercertMinterAddingImpactScopes,
+  shouldBehaveLikeHypercertMinterAddingWorkScopes,
+} from "./HypercertMinter.scopes";
 import { shouldBehaveLikeHypercertMinterUpgrade } from "./HypercertMinter.upgrade";
 
 describe("Unit tests", function () {
@@ -20,5 +25,8 @@ describe("Unit tests", function () {
     shouldBehaveLikeHypercertMinterMinting();
     shouldBehaveLikeHypercertMinterUpgrade();
     shouldBehaveLikeHypercertMinterBurning();
+    shouldBehaveLikeHypercertMinterAddingImpactScopes();
+    shouldBehaveLikeHypercertMinterAddingWorkScopes();
+    shouldBehaveLikeHypercertMinterAddingRights();
   });
 });

@@ -1,7 +1,8 @@
 import { expect } from "chai";
 import { ethers, getNamedAccounts, upgrades } from "hardhat";
 
-import setupTest from "../setup";
+import { HypercertMinterV0 } from "../../src/types";
+import setupTest, { setupImpactScopes, setupRights, setupWorkScopes } from "../setup";
 import { getEncodedImpactClaim } from "../utils";
 
 export function shouldBehaveLikeHypercertMinterUpgrade(): void {
@@ -24,7 +25,7 @@ export function shouldBehaveLikeHypercertMinterUpgrade(): void {
   });
 
   //TODO automated update logic
-  it("Updates version number on update", async function () {
+  it("updates version number on update", async function () {
     const HypercertMinterV0Factory = await ethers.getContractFactory("HypercertMinterV0");
 
     const UpgradeFactory = await ethers.getContractFactory("HypercertMinterUpgrade");
@@ -39,7 +40,7 @@ export function shouldBehaveLikeHypercertMinterUpgrade(): void {
     expect(await upgrade.version()).to.be.eq(1);
   });
 
-  it("Retains state of minted tokens", async function () {
+  it("retains state of minted tokens", async function () {
     const { user } = await getNamedAccounts();
     const data = await getEncodedImpactClaim();
     const HypercertMinterV0Factory = await ethers.getContractFactory("HypercertMinterV0");
@@ -48,7 +49,10 @@ export function shouldBehaveLikeHypercertMinterUpgrade(): void {
     const proxy = await upgrades.deployProxy(HypercertMinterV0Factory, { kind: "uups" });
     expect(await proxy.version()).to.be.eq(0);
 
-    const proxyWithUser = await ethers.getContractAt("HypercertMinterV0", proxy.address, user);
+    const proxyWithUser = <HypercertMinterV0>await ethers.getContractAt("HypercertMinterV0", proxy.address, user);
+    await setupImpactScopes(proxyWithUser);
+    await setupRights(proxyWithUser);
+    await setupWorkScopes(proxyWithUser);
     await proxyWithUser.mint(user, 1, data);
 
     expect(await proxyWithUser.uri(0)).to.be.eq("ipfs://mockedImpactClaim");
