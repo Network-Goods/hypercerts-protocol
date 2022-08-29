@@ -43,6 +43,7 @@ function getChainConfig(chain: keyof typeof chainIds): NetworkUserConfig {
     },
     chainId: chainIds[chain],
     url: jsonRpcUrl,
+    saveDeployments: true,
   };
 }
 
