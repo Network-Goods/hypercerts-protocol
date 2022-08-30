@@ -270,10 +270,14 @@ contract HypercertMinterV0 is
 
     /// @notice upgrade authorization logic
     /// @dev adds onlyRole(UPGRADER_ROLE) requirement
-    // solhint-disable-next-line no-empty-blocks
     function _authorizeUpgrade(
         address /*newImplementation*/
-    ) internal view override onlyRole(UPGRADER_ROLE) {
+    )
+        internal
+        view
+        override
+        onlyRole(UPGRADER_ROLE) // solhint-disable-next-line no-empty-blocks
+    {
         //empty block
     }
 
