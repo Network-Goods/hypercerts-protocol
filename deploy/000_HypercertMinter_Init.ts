@@ -4,7 +4,13 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployments } = hre; // we get the deployments and getNamedAccounts which are provided by hardhat-deploy.
-  const { save } = deployments; // The deployments field itself contains the deploy function.
+  const { save, get } = deployments; // The deployments field itself contains the deploy function.
+
+  const exists = await get("HypercertMinterV0");
+  if (exists) {
+    console.log("Already deployed HypercertMinterV0");
+    return undefined;
+  }
 
   const HypercertMinter = await ethers.getContractFactory("HypercertMinterV0");
   const proxy = await upgrades.deployProxy(HypercertMinter, { kind: "uups" });
