@@ -1,5 +1,9 @@
 import { toHashMap } from "./utils";
 
+export const Contracts = {
+  HypercertMinter: "HypercertMinterV0",
+  HypercertMinterUpgrade: "HypercertMinterUpgrade",
+};
 export const Rights = toHashMap(["admin", "mint", "merge", "split", "burn"]);
 export const ImpactScopes = toHashMap(["clean-air", "biodiversity", "pollution-reduction", "top-soil-growth"]);
 export const WorkScopes = toHashMap(["clean-air-tech", "education", "tree-planting", "waterway-cleaning"]);

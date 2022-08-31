@@ -1,23 +1,21 @@
 import { ethers, upgrades } from "hardhat";
 import { DeployFunction } from "hardhat-deploy/types";
-import { HardhatRuntimeEnvironment } from "hardhat/types";
 
-const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const { deployments } = hre; // we get the deployments and getNamedAccounts which are provided by hardhat-deploy.
-  const { save } = deployments; // The deployments field itself contains the deploy function.
+const HYPERCERT_MINTER = "HypercertMinterV0";
 
-  const HypercertMinter = await ethers.getContractFactory("HypercertMinterV0");
+const deploy: DeployFunction = async function ({ getNamedAccounts, deployments }) {
+  const { deploy } = deployments; // The deployments field itself contains the deploy function.
+  const { deployer } = await getNamedAccounts();
+
+  const HypercertMinter = await ethers.getContractFactory(HYPERCERT_MINTER);
   const proxy = await upgrades.deployProxy(HypercertMinter, { kind: "uups" });
   console.log("Address HypercertMinter Proxy: " + proxy.address);
 
-  const artifact = await deployments.getExtendedArtifact("HypercertMinterV0");
-  const proxyDeployments = {
-    address: proxy.address,
-    ...artifact,
-  };
-
-  await save("HypercertMinterV0", proxyDeployments);
+  await deploy(HYPERCERT_MINTER, {
+    from: deployer,
+    log: true,
+  });
 };
 
 export default deploy;
-deploy.tags = ["local", "staging"];
+deploy.tags = [HYPERCERT_MINTER, "local", "staging"];

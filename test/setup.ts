@@ -2,7 +2,9 @@ import { expect } from "chai";
 import { deployments } from "hardhat";
 
 import { HypercertMinterV0 } from "../src/types";
-import { ImpactScopes, Rights, WorkScopes } from "./wellKnown";
+import { Contracts, ImpactScopes, Rights, WorkScopes } from "./wellKnown";
+
+const { HypercertMinter } = Contracts;
 
 export type AddressedHypercertMinterV0 = {
   address: string;
@@ -31,16 +33,19 @@ const setupTest = deployments.createFixture<
   }
 >(async ({ deployments, getNamedAccounts, ethers }, options) => {
   await deployments.fixture(); // ensure you start from a fresh deployments
+  const deployment = await deployments.get(HypercertMinter);
   const { deployer, user, anon } = await getNamedAccounts();
 
   // Contracts
-  const minter: HypercertMinterV0 = await ethers.getContract("HypercertMinterV0");
+  const minter = <HypercertMinterV0>await ethers.getContractAt(HypercertMinter, deployment.address);
 
   // Account config
   const setupAddress = async (address: string) => {
     return {
       address: address,
-      minter: <HypercertMinterV0>await ethers.getContract("HypercertMinterV0", address),
+      minter: <HypercertMinterV0>(
+        await ethers.getContractAt(HypercertMinter, deployment.address, await ethers.getSigner(address))
+      ),
     };
   };
 
