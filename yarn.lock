@@ -2270,7 +2270,7 @@ __metadata:
     mocha: ^10.0.0
     pinst: ^3.0.0
     prettier: ^2.7.1
-    prettier-plugin-solidity: ^1.0.0-dev.23
+    prettier-plugin-solidity: ^1.0.0-beta.24
     shx: ^0.3.4
     solhint: ^3.3.7
     solhint-plugin-prettier: ^0.0.5
@@ -12736,7 +12736,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier-plugin-solidity@npm:^1.0.0-dev.23":
+"prettier-plugin-solidity@npm:^1.0.0-beta.24":
   version: 1.0.0-dev.23
   resolution: "prettier-plugin-solidity@npm:1.0.0-dev.23"
   dependencies:
