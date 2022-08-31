@@ -202,6 +202,7 @@ contract HypercertMinterV0 is
         // Mint impact cert
         _mint(account, counter, amount, data);
 
+        // TODO surface info on owner for Graph
         emit ImpactClaimed(
             counter,
             _claim.claimHash,

@@ -106,7 +106,25 @@ $ yarn clean
 Deploy the contracts to Hardhat Network:
 
 ```sh
-$ yarn deploy --greeting "Bonjour, le monde!"
+$ yarn deploy
+```
+
+Deploy the contracts to live network (e.g. goerli):
+
+```sh
+$ yarn deploy --network goerli
+```
+
+### Verify on Etherscan
+
+To verify on Etherscan, first get the implementation address via Etherscan:
+
+- Under the contract tab select 'is this a Proxy?' and Etherscan will display the implementation address
+
+Example for Goerli:
+
+```sh
+yarn hardhat --network goerli verify CONTRACT_IMPLEMENTATION_ADDRESS
 ```
 
 ## Tips

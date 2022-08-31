@@ -114,7 +114,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
       workScopes: [] as string[],
       impactScopes: [] as string[],
       uri: "ipfs://test",
-      version: 0,
+      version: 1,
     };
 
     const shortdata = await getEncodedImpactClaim(options);
@@ -157,7 +157,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
       impactScopes: Object.keys(impactScopes),
       workScopes: Object.keys(workScopes),
       uri: "ipfs://test",
-      version: 0,
+      version: 1,
     };
 
     await setupImpactScopes(minter, user.minter, impactScopes);
@@ -206,7 +206,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
       impactScopes: Object.keys(impactScopes),
       workScopes: Object.keys(workScopes),
       uri: "ipfs://test",
-      version: 0,
+      version: 1,
     };
 
     await setupImpactScopes(minter, user.minter, impactScopes);
@@ -242,7 +242,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
       impactScopes: Object.keys(impactScopes),
       workScopes: Object.keys(workScopes),
       uri: "cillum tempor exercitation cillum minim non proident laboris et pariatur dolore duis sit ad Lorem proident voluptate ex officia nostrud officia do esse deserunt adipisicing excepteur nostrud aliqua qui in amet deserunt laboris nostrud tempor in culpa magna ullamco aliquip enim incididunt occaecat eu officia cupidatat reprehenderit anim aliqua do do nulla sint officia eu elit tempor minim eiusmod proident minim nostrud elit occaecat Lorem irure ex sunt pariatur cupidatat eiusmod dolor ea enim velit incididunt est qui dolore dolore laboris amet aute dolore consequat velit excepteur in enim minim consequat ex nisi ut eiusmod tempor consectetur labore reprehenderit enim",
-      version: 0,
+      version: 1,
     };
 
     await setupImpactScopes(minter, user.minter, impactScopes);
