@@ -161,6 +161,10 @@ contract HypercertMinterV0 is
         // Parse data to get Claim
         (Claim memory claim, string memory uri_) = _parseData(data);
 
+        require(claim.workTimeframe[0] < claim.workTimeframe[1], "Mint: invalid workTimeframe");
+        require(claim.impactTimeframe[0] < claim.impactTimeframe[1], "Mint: invalid impactTimeframe");
+        require(claim.workTimeframe[0] <= claim.impactTimeframe[0], "Mint: impactTimeframe prior to workTimeframe");
+
         for (uint256 i = 0; i < claim.impactScopes.length; i++) {
             require(_hasKey(impactScopes, claim.impactScopes[i]), "Mint: invalid impact scope");
         }
@@ -257,7 +261,8 @@ contract HypercertMinterV0 is
     /// @notice Parse bytes to Claim and URI
     /// @param data Byte data representing the claim
     /// @dev This function is overridable in order to support future schema changes
-    /// @return The parsed Claim struct and URI string
+    /// @return claim The parsed Claim struct
+    /// @return Claim metadata URI
     function _parseData(bytes memory data) internal pure virtual returns (Claim memory claim, string memory) {
         require(data.length > 0, "_parseData: input data empty");
 

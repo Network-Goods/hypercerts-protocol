@@ -19,16 +19,16 @@ export type Claim = {
 export const getEncodedImpactClaim = async (claim?: Partial<Claim>) => {
   const { user, anon } = await getNamedAccounts();
 
-  const _rightsIDs = claim?.rights || Object.keys(Rights);
-  const _workTimeframe = claim?.workTimeframe || [123456789, 0];
-  const _impactTimeframe = claim?.impactTimeframe || [987654321, 0];
-  const _contributors = claim?.contributors || [user, anon];
-  const _workScopes = claim?.workScopes || Object.keys(WorkScopes);
-  const _impactScopes = claim?.impactScopes || Object.keys(ImpactScopes);
-  const _uri = claim?.uri || "ipfs://mockedImpactClaim";
+  const rights = claim?.rights || Object.keys(Rights);
+  const workTimeframe = claim?.workTimeframe || [123456789, 234567890];
+  const impactTimeframe = claim?.impactTimeframe || [987654321, 1087654321];
+  const contributors = claim?.contributors || [user, anon];
+  const workScopes = claim?.workScopes || Object.keys(WorkScopes);
+  const impactScopes = claim?.impactScopes || Object.keys(ImpactScopes);
+  const uri = claim?.uri || "ipfs://mockedImpactClaim";
 
   const types = ["uint256[]", "uint256[]", "uint256[]", "uint256[2]", "uint256[2]", "address[]", "string"];
-  const values = [_rightsIDs, _workScopes, _impactScopes, _workTimeframe, _impactTimeframe, _contributors, _uri];
+  const values = [rights, workScopes, impactScopes, workTimeframe, impactTimeframe, contributors, uri];
 
   return encode(types, values);
 };
