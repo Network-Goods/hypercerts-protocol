@@ -12,6 +12,6 @@ contract HypercertMinterV1 is HypercertMinterV0 {
 
     /// @notice gets the current version of the contract
     function version() public pure virtual override returns (uint256) {
-        return 0;
+        return 1;
     }
 }

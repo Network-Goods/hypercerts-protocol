@@ -1,6 +1,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
+import { HypercertMinter_V0 } from "../wellKnown";
 import { shouldBehaveLikeHypercertMinterBurning } from "./HypercertMinter.burning";
 import { shouldBehaveLikeHypercertMinterMinting } from "./HypercertMinter.minting";
 import { shouldBehaveLikeHypercertMinterAddingRights } from "./HypercertMinter.rights";
@@ -13,7 +14,7 @@ import { shouldBehaveLikeHypercertMinterUpgrade } from "./HypercertMinter.upgrad
 describe("Unit tests", function () {
   describe("Hypercert Minter", function () {
     it("is an initializable ERC1155 contract", async () => {
-      const tokenFactory = await ethers.getContractFactory("HypercertMinterV0");
+      const tokenFactory = await ethers.getContractFactory(HypercertMinter_V0);
       const tokenInstance = await tokenFactory.deploy();
 
       // 0xd9b67a26 is the ERC165 interface identifier for EIP1155
