@@ -68,6 +68,7 @@ export const randomScopes = (limit?: number) => {
 export const compareClaimAgainstInput = async (claim: HypercertMinterV0.ClaimStructOutput, options: Claim) => {
   expect(claim.rights).to.be.eql(options.rights);
   expect(claim.version).to.be.eq(options.version);
+
   expect(claim.contributors.map(address => address.toLowerCase())).to.be.eql(
     options.contributors.map(addr => addr.toLowerCase()),
   );
