@@ -6,10 +6,14 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployments } = hre; // we get the deployments and getNamedAccounts which are provided by hardhat-deploy.
   const { save, get } = deployments; // The deployments field itself contains the deploy function.
 
-  const exists = await get("HypercertMinterV0");
-  if (exists) {
-    console.log("Already deployed HypercertMinterV0");
-    return undefined;
+  try {
+    const exists = await get("HypercertMinterV0");
+    if (exists && hre.network.name !== "hardhat") {
+      console.log("Already deployed HypercertMinterV0");
+      return undefined;
+    }
+  } catch {
+    console.log("No deployment for HypercertMinterV0 found");
   }
 
   const HypercertMinter = await ethers.getContractFactory("HypercertMinterV0");
