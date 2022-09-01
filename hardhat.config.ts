@@ -57,6 +57,10 @@ const config: HardhatUserConfig = {
     strict: true,
   },
   defaultNetwork: "hardhat",
+  docgen: {
+    exclude: ["mocks"],
+    pages: "single",
+  },
   etherscan: {
     apiKey: {
       mainnet: process.env.ETHERSCAN_API_KEY || "",
