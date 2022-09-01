@@ -161,8 +161,8 @@ contract HypercertMinterV0 is
         // Parse data to get Claim
         (Claim memory claim, string memory uri_) = _parseData(data);
 
-        require(claim.workTimeframe[0] < claim.workTimeframe[1], "Mint: invalid workTimeframe");
-        require(claim.impactTimeframe[0] < claim.impactTimeframe[1], "Mint: invalid impactTimeframe");
+        require(claim.workTimeframe[0] <= claim.workTimeframe[1], "Mint: invalid workTimeframe");
+        require(claim.impactTimeframe[0] <= claim.impactTimeframe[1], "Mint: invalid impactTimeframe");
         require(claim.workTimeframe[0] <= claim.impactTimeframe[0], "Mint: impactTimeframe prior to workTimeframe");
 
         for (uint256 i = 0; i < claim.impactScopes.length; i++) {

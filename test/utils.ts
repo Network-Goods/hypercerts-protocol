@@ -20,8 +20,8 @@ export const getEncodedImpactClaim = async (claim?: Partial<Claim>) => {
   const { user, anon } = await getNamedAccounts();
 
   const rights = claim?.rights || Object.keys(Rights);
-  const workTimeframe = claim?.workTimeframe || [123456789, 234567890];
-  const impactTimeframe = claim?.impactTimeframe || [987654321, 1087654321];
+  const workTimeframe = claim?.workTimeframe || [123456789, 123456789];
+  const impactTimeframe = claim?.impactTimeframe || [987654321, 987654321];
   const contributors = claim?.contributors || [user, anon];
   const workScopes = claim?.workScopes || Object.keys(WorkScopes);
   const impactScopes = claim?.impactScopes || Object.keys(ImpactScopes);
