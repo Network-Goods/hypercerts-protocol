@@ -15,9 +15,20 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
     const data2 = await getEncodedImpactClaim({ workScopes: workScopes.slice(1, 2) });
     const data3 = await getEncodedImpactClaim({ workScopes: workScopes.slice(2, 3) });
     const data4 = await getEncodedImpactClaim();
+    const data5 = await getEncodedImpactClaim({ workTimeframe: [234567890, 123456789] });
+    const data6 = await getEncodedImpactClaim({ impactTimeframe: [1087654321, 987654321] });
+    const data7 = await getEncodedImpactClaim({ impactTimeframe: [108765432, 109999432] });
 
     // Empty data
     await expect(deployer.minter.mint(deployer.address, 1, "0x")).to.be.revertedWith("Mint: input data empty");
+    // Invalid workTimeframe
+    await expect(deployer.minter.mint(deployer.address, 1, data5)).to.be.revertedWith("Mint: invalid workTimeframe");
+    // Invalid impactTimeframe
+    await expect(deployer.minter.mint(deployer.address, 1, data6)).to.be.revertedWith("Mint: invalid impactTimeframe");
+    // Invalid impactTimeframe
+    await expect(deployer.minter.mint(deployer.address, 1, data7)).to.be.revertedWith(
+      "Mint: impactTimeframe prior to workTimeframe",
+    );
 
     // Supply 1, multiple users/ids
     await expect(deployer.minter.mint(deployer.address, 1, data1))
