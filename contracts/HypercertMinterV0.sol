@@ -262,7 +262,7 @@ contract HypercertMinterV0 is
     /// @dev This function is overridable in order to support future schema changes
     /// @return claim The parsed Claim struct
     /// @return Claim metadata URI
-    function _parseData(bytes memory data) internal pure virtual returns (Claim memory claim, string memory) {
+    function _parseData(bytes memory data) internal view virtual returns (Claim memory claim, string memory) {
         require(data.length > 0, "_parseData: input data empty");
 
         uint256 v = version();
