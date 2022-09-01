@@ -27,7 +27,7 @@ export const getEncodedImpactClaim = async (claim?: Partial<Claim>) => {
   const impactScopes = claim?.impactScopes || Object.keys(ImpactScopes);
   const uri = claim?.uri || "ipfs://mockedImpactClaim";
 
-  const types = ["uint256[]", "uint256[]", "uint256[]", "uint256[2]", "uint256[2]", "address[]", "string"];
+  const types = ["uint256[]", "uint256[]", "uint256[]", "uint64[2]", "uint64[2]", "address[]", "string"];
   const values = [rights, workScopes, impactScopes, workTimeframe, impactTimeframe, contributors, uri];
 
   return encode(types, values);
@@ -35,7 +35,7 @@ export const getEncodedImpactClaim = async (claim?: Partial<Claim>) => {
 
 export const getClaimHash = async (claim: Claim) => {
   const { workTimeframe, workScopes, impactTimeframe, impactScopes, version } = claim;
-  const types = ["uint256[2]", "uint256[]", "uint256[2]", "uint256[]", "uint256"];
+  const types = ["uint64[2]", "uint256[]", "uint64[2]", "uint256[]", "uint256"];
   const values = [workTimeframe, workScopes, impactTimeframe, impactScopes, version];
 
   return hash256(types, values);

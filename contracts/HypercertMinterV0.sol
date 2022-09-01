@@ -23,9 +23,9 @@ contract HypercertMinterV0 is
     UUPSUpgradeable
 {
     uint16 internal _version;
-    string public constant NAME = "Impact hypercertificates";
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
     uint256 public counter;
+    string public constant NAME = "Impact hypercertificates";
 
     mapping(bytes32 => string) public workScopes;
     mapping(bytes32 => string) public impactScopes;
@@ -36,8 +36,8 @@ contract HypercertMinterV0 is
     struct Claim {
         bytes32 claimHash;
         address[] contributors;
-        uint256[2] workTimeframe;
-        uint256[2] impactTimeframe;
+        uint64[2] workTimeframe;
+        uint64[2] impactTimeframe;
         bytes32[] workScopes;
         bytes32[] impactScopes;
         bytes32[] rights;
@@ -62,10 +62,11 @@ contract HypercertMinterV0 is
     /// @param uri URI of the metadata of the hypercert.
     event ImpactClaimed(
         uint256 id,
+        address owner,
         bytes32 claimHash,
         address[] contributors,
-        uint256[2] workTimeframe,
-        uint256[2] impactTimeframe,
+        uint64[2] workTimeframe,
+        uint64[2] impactTimeframe,
         bytes32[] workScopes,
         bytes32[] impactScopes,
         bytes32[] rights,
@@ -157,7 +158,8 @@ contract HypercertMinterV0 is
         bytes memory data
     ) public {
         require(account != address(0), "Mint: mint to the zero address");
-        require(data.length > 0, "Mint: input data empty");
+        uint256 index = counter;
+        counter += 1;
 
         // Parse data to get Claim
         (Claim memory claim, string memory uri_) = _parseData(data);
@@ -166,11 +168,13 @@ contract HypercertMinterV0 is
         require(claim.impactTimeframe[0] <= claim.impactTimeframe[1], "Mint: invalid impactTimeframe");
         require(claim.workTimeframe[0] <= claim.impactTimeframe[0], "Mint: impactTimeframe prior to workTimeframe");
 
-        for (uint256 i = 0; i < claim.impactScopes.length; i++) {
+        uint256 impactScopelength = claim.impactScopes.length;
+        for (uint256 i = 0; i < impactScopelength; i++) {
             require(_hasKey(impactScopes, claim.impactScopes[i]), "Mint: invalid impact scope");
         }
 
-        for (uint256 i = 0; i < claim.workScopes.length; i++) {
+        uint256 workScopelength = claim.workScopes.length;
+        for (uint256 i = 0; i < workScopelength; i++) {
             require(_hasKey(workScopes, claim.workScopes[i]), "Mint: invalid work scope");
         }
 
@@ -178,15 +182,15 @@ contract HypercertMinterV0 is
         _storeContributorsClaims(claim.claimHash, claim.contributors);
 
         // Store impact cert
-        impactCerts[counter] = claim;
-        _setURI(counter, uri_);
+        impactCerts[index] = claim;
+        _setURI(index, uri_);
 
         // Mint impact cert
-        _mint(account, counter, amount, data);
+        _mint(account, index, amount, data);
 
-        // TODO surface info on owner for Graph
         emit ImpactClaimed(
-            counter,
+            index,
+            account,
             claim.claimHash,
             claim.contributors,
             claim.workTimeframe,
@@ -197,8 +201,6 @@ contract HypercertMinterV0 is
             claim.version,
             uri_
         );
-
-        counter += 1;
     }
 
     /// @notice Gets the impact claim with the specified id
@@ -276,11 +278,11 @@ contract HypercertMinterV0 is
             bytes32[] memory rights_,
             bytes32[] memory workScopes_,
             bytes32[] memory impactScopes_,
-            uint256[2] memory workTimeframe,
-            uint256[2] memory impactTimeframe,
+            uint64[2] memory workTimeframe,
+            uint64[2] memory impactTimeframe,
             address[] memory contributors,
             string memory uri_
-        ) = abi.decode(data, (bytes32[], bytes32[], bytes32[], uint256[2], uint256[2], address[], string));
+        ) = abi.decode(data, (bytes32[], bytes32[], bytes32[], uint64[2], uint64[2], address[], string));
 
         bytes32 claimHash = keccak256(abi.encode(workTimeframe, workScopes_, impactTimeframe, impactScopes_, v));
 
