@@ -10,8 +10,8 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "hardhat/console.sol";
 
-/// @title Hypercert Minting logic
-/// @notice Contains functions and events to initialize and issue a hypercert
+/// @title Hypercertificate minting logic
+/// @notice Contains functions and events to initialize and issue a hypercertifcate
 /// @author bitbeckers, mr_bluesky
 contract HypercertMinterV0 is
     Initializable,
@@ -90,13 +90,13 @@ contract HypercertMinterV0 is
     /*******************
      * DEPLOY
      ******************/
-    /// @notice constructor
+    /// @notice Contract constructor logic
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }
 
-    /// @notice Initializes the hypercert.
+    /// @notice Contract initialization logic
     function initialize() public initializer {
         __ERC1155_init("");
         __AccessControl_init();
@@ -113,9 +113,9 @@ contract HypercertMinterV0 is
     /*******************
      * PUBLIC
      ******************/
-    /// @notice adds a new impact scope
-    /// @param text text representing the impact scope
-    /// @return id id of the impact scope
+    /// @notice Adds a new impact scope
+    /// @param text Text representing the impact scope
+    /// @return id Id of the impact scope
     function addImpactScope(string memory text) public returns (bytes32 id) {
         require(bytes(text).length > 0, "addImpactScope: empty text");
         id = _hash(text);
@@ -124,9 +124,9 @@ contract HypercertMinterV0 is
         emit ImpactScopeAdded(id, text);
     }
 
-    /// @notice adds a new right
-    /// @param text text representing the right
-    /// @return id id of the right
+    /// @notice Adds a new right
+    /// @param text Text representing the right
+    /// @return id Id of the right
     function addRight(string memory text) public returns (bytes32 id) {
         require(bytes(text).length > 0, "addRight: empty text");
         id = _hash(text);
@@ -135,9 +135,9 @@ contract HypercertMinterV0 is
         emit RightAdded(id, text);
     }
 
-    /// @notice adds a new work scope
-    /// @param text text representing the work scope
-    /// @return id id of the work scope
+    /// @notice Adds a new work scope
+    /// @param text Text representing the work scope
+    /// @return id Id of the work scope
     function addWorkScope(string memory text) public returns (bytes32 id) {
         require(bytes(text).length > 0, "addWorkScope: empty text");
         id = _hash(text);
@@ -146,10 +146,10 @@ contract HypercertMinterV0 is
         emit WorkScopeAdded(id, text);
     }
 
-    /// @notice mints a new hypercert
-    /// @param account account minting the new hypercert
-    /// @param amount amount of the new token to mint
-    /// @param data data representing the parameters of the new hypercert
+    /// @notice Issues a new hypercertificate
+    /// @param account Account issuing the new hypercertificate
+    /// @param amount Amount of the new hypercertificate to mint
+    /// @param data Data representing the parameters of the claim
     function mint(
         address account,
         uint256 amount,
@@ -159,45 +159,26 @@ contract HypercertMinterV0 is
         require(data.length > 0, "Mint: input data empty");
 
         // Parse data to get Claim
-        uint256 _v = version();
+        (Claim memory claim, string memory uri_) = _parseData(data);
 
-        (
-            bytes32[] memory _rights,
-            bytes32[] memory _workScopes,
-            bytes32[] memory _impactScopes,
-            uint256[2] memory _workTimeframe,
-            uint256[2] memory _impactTimeframe,
-            address[] memory _contributors,
-            string memory _uri
-        ) = abi.decode(data, (bytes32[], bytes32[], bytes32[], uint256[2], uint256[2], address[], string));
+        require(claim.workTimeframe[0] <= claim.workTimeframe[1], "Mint: invalid workTimeframe");
+        require(claim.impactTimeframe[0] <= claim.impactTimeframe[1], "Mint: invalid impactTimeframe");
+        require(claim.workTimeframe[0] <= claim.impactTimeframe[0], "Mint: impactTimeframe prior to workTimeframe");
 
-        bytes32 _claimHash = keccak256(abi.encode(_workTimeframe, _workScopes, _impactTimeframe, _impactScopes, _v));
-
-        for (uint256 i = 0; i < _impactScopes.length; i++) {
-            require(_hasKey(impactScopes, _impactScopes[i]), "Mint: invalid impact scope");
+        for (uint256 i = 0; i < claim.impactScopes.length; i++) {
+            require(_hasKey(impactScopes, claim.impactScopes[i]), "Mint: invalid impact scope");
         }
 
-        for (uint256 i = 0; i < _workScopes.length; i++) {
-            require(_hasKey(workScopes, _workScopes[i]), "Mint: invalid work scope");
+        for (uint256 i = 0; i < claim.workScopes.length; i++) {
+            require(_hasKey(workScopes, claim.workScopes[i]), "Mint: invalid work scope");
         }
 
         // Check on overlapping contributor-claims and store if success
-        _storeContributorsClaims(_claimHash, _contributors);
-
-        Claim memory _claim;
-        _claim.claimHash = _claimHash;
-        _claim.contributors = _contributors;
-        _claim.workTimeframe = _workTimeframe;
-        _claim.impactTimeframe = _impactTimeframe;
-        _claim.workScopes = _workScopes;
-        _claim.impactScopes = _impactScopes;
-        _claim.rights = _rights;
-        _claim.version = _v;
-        _claim.exists = true;
+        _storeContributorsClaims(claim.claimHash, claim.contributors);
 
         // Store impact cert
-        impactCerts[counter] = _claim;
-        _setURI(counter, _uri);
+        impactCerts[counter] = claim;
+        _setURI(counter, uri_);
 
         // Mint impact cert
         _mint(account, counter, amount, data);
@@ -205,28 +186,30 @@ contract HypercertMinterV0 is
         // TODO surface info on owner for Graph
         emit ImpactClaimed(
             counter,
-            _claim.claimHash,
-            _claim.contributors,
-            _claim.workTimeframe,
-            _claim.impactTimeframe,
-            _claim.workScopes,
-            _claim.impactScopes,
-            _claim.rights,
-            _claim.version,
-            _uri
+            claim.claimHash,
+            claim.contributors,
+            claim.workTimeframe,
+            claim.impactTimeframe,
+            claim.workScopes,
+            claim.impactScopes,
+            claim.rights,
+            claim.version,
+            uri_
         );
 
         counter += 1;
     }
 
-    /// @notice gets the hypercert with the specified id
-    /// @param claimID id of the claim
+    /// @notice Gets the impact claim with the specified id
+    /// @param claimID Id of the claim
+    /// @return The claim, if it exists
     function getImpactCert(uint256 claimID) public view returns (Claim memory) {
         return impactCerts[claimID];
     }
 
-    /// @notice gets the URI of the token with the specified id
-    /// @param tokenId id of the token
+    /// @notice Gets the URI of the token with the specified id
+    /// @param tokenId Id of the token
+    /// @return URI of the specified token
     function uri(uint256 tokenId)
         public
         view
@@ -236,13 +219,15 @@ contract HypercertMinterV0 is
         return super.uri(tokenId);
     }
 
-    /// @notice gets the current version of the contract
+    /// @notice Gets the current version of the contract
+    /// @return Version of the contract
     function version() public pure virtual returns (uint256) {
         return 0;
     }
 
-    /// @notice returns a flag indicating if the contract supports the specified interface
-    /// @param interfaceId id of the interface
+    /// @notice Returns a flag indicating if the contract supports the specified interface
+    /// @param interfaceId Id of the interface
+    /// @return true, if the interface is supported
     function supportsInterface(bytes4 interfaceId)
         public
         view
@@ -271,6 +256,41 @@ contract HypercertMinterV0 is
         bytes memory data
     ) internal override(ERC1155Upgradeable, ERC1155SupplyUpgradeable) {
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
+    }
+
+    /// @notice Parse bytes to Claim and URI
+    /// @param data Byte data representing the claim
+    /// @dev This function is overridable in order to support future schema changes
+    /// @return claim The parsed Claim struct
+    /// @return Claim metadata URI
+    function _parseData(bytes memory data) internal pure virtual returns (Claim memory claim, string memory) {
+        require(data.length > 0, "_parseData: input data empty");
+
+        uint256 v = version();
+
+        (
+            bytes32[] memory rights_,
+            bytes32[] memory workScopes_,
+            bytes32[] memory impactScopes_,
+            uint256[2] memory workTimeframe,
+            uint256[2] memory impactTimeframe,
+            address[] memory contributors,
+            string memory uri_
+        ) = abi.decode(data, (bytes32[], bytes32[], bytes32[], uint256[2], uint256[2], address[], string));
+
+        bytes32 claimHash = keccak256(abi.encode(workTimeframe, workScopes_, impactTimeframe, impactScopes_, v));
+
+        claim.claimHash = claimHash;
+        claim.contributors = contributors;
+        claim.workTimeframe = workTimeframe;
+        claim.impactTimeframe = impactTimeframe;
+        claim.workScopes = workScopes_;
+        claim.impactScopes = impactScopes_;
+        claim.rights = rights_;
+        claim.version = v;
+        claim.exists = true;
+
+        return (claim, uri_);
     }
 
     function _storeContributorsClaims(bytes32 claimHash, address[] memory creators) internal {
