@@ -10,12 +10,6 @@ import "./HypercertMinterV0.sol";
 contract HypercertMinterV1 is HypercertMinterV0 {
     string public constant NAME = "Impact hypercertificates";
 
-    /// @notice gets the current version of the contract
-    // FIXME changes from pure to view, update method name to original when merging
-    function getVersion() public view virtual returns (uint16) {
-        return _version;
-    }
-
     function updateVersion() external onlyRole(UPGRADER_ROLE) {
         _version += 1;
     }
