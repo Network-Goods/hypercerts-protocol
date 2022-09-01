@@ -312,6 +312,8 @@ contract HypercertMinterV0 is
     }
 
     /// @notice Stores contributor claims in the `contributorImpacts` mapping; guards against overlapping claims
+    /// @param claimHash Claim data hash-code value
+    /// @param creators Array of addresses for contributors
     function _storeContributorsClaims(bytes32 claimHash, address[] memory creators) internal {
         for (uint256 i = 0; i < creators.length; i++) {
             require(!contributorImpacts[creators[i]][claimHash], "Claim: claim for creators overlapping");
