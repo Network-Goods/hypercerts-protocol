@@ -6,6 +6,7 @@ export const HypercertMinter_V0 = "HypercertMinterV0";
 export const HypercertMinter_V1 = "HypercertMinterV1";
 
 export const HypercertMinter_Upgrade = "HypercertMinterUpgrade";
+export const HypercertMinter_Current = HypercertMinter_V1;
 
 export const UPGRADER_ROLE = ethers.utils.id("UPGRADER_ROLE");
 
