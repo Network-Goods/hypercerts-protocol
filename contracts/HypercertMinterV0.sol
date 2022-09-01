@@ -219,10 +219,9 @@ contract HypercertMinterV0 is
         return super.uri(tokenId);
     }
 
-    /// @notice Gets the current version of the contract
-    /// @return Version of the contract
-    function version() public pure virtual returns (uint256) {
-        return 0;
+    /// @notice gets the current version of the contract
+    function version() public view virtual returns (uint256) {
+        return _version;
     }
 
     /// @notice Returns a flag indicating if the contract supports the specified interface
@@ -263,7 +262,7 @@ contract HypercertMinterV0 is
     /// @dev This function is overridable in order to support future schema changes
     /// @return claim The parsed Claim struct
     /// @return Claim metadata URI
-    function _parseData(bytes memory data) internal pure virtual returns (Claim memory claim, string memory) {
+    function _parseData(bytes memory data) internal view virtual returns (Claim memory claim, string memory) {
         require(data.length > 0, "_parseData: input data empty");
 
         uint256 v = version();
