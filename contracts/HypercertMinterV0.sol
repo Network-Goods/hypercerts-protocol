@@ -237,8 +237,8 @@ contract HypercertMinterV0 is
     }
 
     /// @notice gets the current version of the contract
-    function version() public pure virtual returns (uint256) {
-        return 0;
+    function version() public view virtual returns (uint256) {
+        return _version;
     }
 
     /// @notice returns a flag indicating if the contract supports the specified interface

@@ -6,12 +6,17 @@ import "./HypercertMinterV0.sol";
 /// @title Hypercert Minting logic
 /// @notice Contains functions and events to initialize and issue a hypercert
 /// @author bitbeckers, mr_bluesky
-//TODO Merge in changes to main contract. This upgrade is used to aggregate changes
+//FIXME Merge in changes to main contract. This upgrade is used to aggregate changes
 contract HypercertMinterV1 is HypercertMinterV0 {
     string public constant NAME = "Impact hypercertificates";
 
     /// @notice gets the current version of the contract
-    function version() public pure virtual override returns (uint256) {
-        return 1;
+    // FIXME changes from pure to view, update method name to original when merging
+    function getVersion() public view virtual returns (uint16) {
+        return _version;
+    }
+
+    function updateVersion() external onlyRole(UPGRADER_ROLE) {
+        _version += 1;
     }
 }

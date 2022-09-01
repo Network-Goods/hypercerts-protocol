@@ -4,7 +4,7 @@ import { ethers, getNamedAccounts, upgrades } from "hardhat";
 import { HypercertMinterV0 } from "../../src/types";
 import setupTest, { setupImpactScopes, setupRights, setupWorkScopes } from "../setup";
 import { getEncodedImpactClaim } from "../utils";
-import { HypercertMinter_Upgrade, HypercertMinter_V0, UPGRADER_ROLE } from "../wellKnown";
+import { HypercertMinter_Upgrade, HypercertMinter_V0, HypercertMinter_V1, UPGRADER_ROLE } from "../wellKnown";
 
 export function shouldBehaveLikeHypercertMinterUpgrade(): void {
   it("supports upgrader role", async function () {
@@ -24,7 +24,6 @@ export function shouldBehaveLikeHypercertMinterUpgrade(): void {
     });
   });
 
-  //TODO automated update logic
   it("updates version number on update", async function () {
     const HypercertMinterV0Factory = await ethers.getContractFactory(HypercertMinter_V0);
 
@@ -43,7 +42,7 @@ export function shouldBehaveLikeHypercertMinterUpgrade(): void {
   it("retains state of minted tokens", async function () {
     const { user } = await getNamedAccounts();
     const data = await getEncodedImpactClaim();
-    const HypercertMinterV0Factory = await ethers.getContractFactory(HypercertMinter_V0);
+    const HypercertMinterV0Factory = await ethers.getContractFactory(HypercertMinter_V1);
     const UpgradeFactory = await ethers.getContractFactory(HypercertMinter_Upgrade);
 
     const proxy = await upgrades.deployProxy(HypercertMinterV0Factory, { kind: "uups" });

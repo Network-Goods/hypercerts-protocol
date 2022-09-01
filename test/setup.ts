@@ -1,19 +1,19 @@
 import { expect } from "chai";
 import { deployments } from "hardhat";
 
-import { HypercertMinterV0 } from "../src/types";
-import { ImpactScopes, Rights, WorkScopes } from "./wellKnown";
+import { HypercertMinterV0, HypercertMinterV1 } from "../src/types";
+import { HypercertMinter_V0, HypercertMinter_V1, ImpactScopes, Rights, WorkScopes } from "./wellKnown";
 
-export type AddressedHypercertMinterV0 = {
+export type AddressedHypercertMinterV1 = {
   address: string;
-  minter: HypercertMinterV0;
+  minter: HypercertMinterV1;
 };
 
 export type HypercertCollection = {
-  minter: HypercertMinterV0;
-  deployer: AddressedHypercertMinterV0;
-  user: AddressedHypercertMinterV0;
-  anon: AddressedHypercertMinterV0;
+  minter: HypercertMinterV1;
+  deployer: AddressedHypercertMinterV1;
+  user: AddressedHypercertMinterV1;
+  anon: AddressedHypercertMinterV1;
 };
 
 const setupTest = deployments.createFixture<
@@ -34,13 +34,13 @@ const setupTest = deployments.createFixture<
   const { deployer, user, anon } = await getNamedAccounts();
 
   // Contracts
-  const minter: HypercertMinterV0 = await ethers.getContract("HypercertMinterV0");
+  const minter: HypercertMinterV1 = await ethers.getContract(HypercertMinter_V1);
 
   // Account config
   const setupAddress = async (address: string) => {
     return {
       address: address,
-      minter: <HypercertMinterV0>await ethers.getContract("HypercertMinterV0", address),
+      minter: <HypercertMinterV1>await ethers.getContract(HypercertMinter_V1, address),
     };
   };
 
@@ -58,8 +58,8 @@ const setupTest = deployments.createFixture<
 });
 
 export const setupImpactScopes = async (
-  contract: HypercertMinterV0,
-  contractAtAddress?: HypercertMinterV0,
+  contract: HypercertMinterV1 | HypercertMinterV0,
+  contractAtAddress?: HypercertMinterV1 | HypercertMinterV0,
   impactScopes = ImpactScopes,
 ) => {
   for (const [hash, text] of Object.entries(impactScopes)) {
@@ -70,8 +70,8 @@ export const setupImpactScopes = async (
 };
 
 export const setupRights = async (
-  contract: HypercertMinterV0,
-  contractAtAddress?: HypercertMinterV0,
+  contract: HypercertMinterV1 | HypercertMinterV0,
+  contractAtAddress?: HypercertMinterV1 | HypercertMinterV0,
   rights = Rights,
 ) => {
   for (const [hash, text] of Object.entries(rights)) {
@@ -82,8 +82,8 @@ export const setupRights = async (
 };
 
 export const setupWorkScopes = async (
-  contract: HypercertMinterV0,
-  contractAtAddress?: HypercertMinterV0,
+  contract: HypercertMinterV1 | HypercertMinterV0,
+  contractAtAddress?: HypercertMinterV1 | HypercertMinterV0,
   workScopes = WorkScopes,
 ) => {
   for (const [hash, text] of Object.entries(workScopes)) {
