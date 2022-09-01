@@ -23,6 +23,7 @@ contract HypercertMinterV0 is
     UUPSUpgradeable
 {
     uint16 internal _version;
+    string public constant NAME = "Impact hypercertificates";
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
     uint256 public counter;
 
@@ -222,6 +223,10 @@ contract HypercertMinterV0 is
     /// @notice gets the current version of the contract
     function version() public view virtual returns (uint256) {
         return _version;
+    }
+
+    function updateVersion() external onlyRole(UPGRADER_ROLE) {
+        _version += 1;
     }
 
     /// @notice Returns a flag indicating if the contract supports the specified interface
