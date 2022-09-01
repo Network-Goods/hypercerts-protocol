@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { ethers, getNamedAccounts, upgrades } from "hardhat";
 
-import { HypercertMinterV0 } from "../../src/types";
+import { HypercertMinterUpgrade, HypercertMinterV0 } from "../../src/types";
 import setupTest, { setupImpactScopes, setupRights, setupWorkScopes } from "../setup";
 import { getEncodedImpactClaim } from "../utils";
 import { HypercertMinter_Upgrade, HypercertMinter_V0, UPGRADER_ROLE } from "../wellKnown";
@@ -24,7 +24,6 @@ export function shouldBehaveLikeHypercertMinterUpgrade(): void {
     });
   });
 
-  //TODO automated update logic
   it("updates version number on update", async function () {
     const HypercertMinterV0Factory = await ethers.getContractFactory(HypercertMinter_V0);
 
@@ -61,7 +60,9 @@ export function shouldBehaveLikeHypercertMinterUpgrade(): void {
 
     expect(await upgrade.uri(0)).to.be.eq("ipfs://mockedImpactClaim");
 
-    const upgradeWithUser = await ethers.getContractAt(HypercertMinter_Upgrade, upgrade.address, user);
+    const upgradeWithUser = <HypercertMinterUpgrade>(
+      await ethers.getContractAt(HypercertMinter_Upgrade, upgrade.address, user)
+    );
     await expect(upgradeWithUser.split(0)).to.emit(upgrade, "Split").withArgs(0, [1]);
   });
 }
