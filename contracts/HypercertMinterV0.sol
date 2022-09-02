@@ -22,10 +22,11 @@ contract HypercertMinterV0 is
     ERC1155URIStorageUpgradeable,
     UUPSUpgradeable
 {
-    uint16 internal _version;
-    bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
-    uint256 public counter;
     string public constant NAME = "Impact hypercertificates";
+    bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
+
+    uint16 internal _version;
+    uint256 internal _counter;
 
     mapping(bytes32 => string) public workScopes;
     mapping(bytes32 => string) public impactScopes;
@@ -41,7 +42,7 @@ contract HypercertMinterV0 is
         bytes32[] impactScopes;
         bytes32[] rights;
         address[] contributors;
-        uint64 version;
+        uint16 version;
         bool exists;
     }
 
@@ -51,6 +52,7 @@ contract HypercertMinterV0 is
 
     /// @notice Emitted when an impact is claimed.
     /// @param id Id of the claimed impact.
+    /// @param minter Address of cert minter.
     /// @param claimHash Hash value of the claim data.
     /// @param contributors Contributors to the claimed impact.
     /// @param workTimeframe To/from date of the work related to the claim.
@@ -62,7 +64,7 @@ contract HypercertMinterV0 is
     /// @param uri URI of the metadata of the hypercert.
     event ImpactClaimed(
         uint256 id,
-        address owner,
+        address minter,
         bytes32 claimHash,
         address[] contributors,
         uint64[2] workTimeframe,
@@ -148,14 +150,14 @@ contract HypercertMinterV0 is
         address account,
         uint256 amount,
         bytes memory data
-    ) public {
+    ) public virtual {
         // Parse data to get Claim
-        (Claim memory claim, string memory uri_) = _parseData(_version, data);
+        (Claim memory claim, string memory uri_) = _parseData(data);
 
         _authorizeMint(account, claim);
 
-        uint256 id = counter;
-        counter += 1;
+        uint256 id = _counter;
+        _counter += 1;
 
         // Check on overlapping contributor-claims and store if success
         _storeContributorsClaims(claim.claimHash, claim.contributors);
@@ -206,6 +208,8 @@ contract HypercertMinterV0 is
         return _version;
     }
 
+    /// @notice Update the contract version number
+    /// @notice Only allowed for member of UPGRADER_ROLE
     function updateVersion() external onlyRole(UPGRADER_ROLE) {
         _version += 1;
     }
@@ -282,12 +286,7 @@ contract HypercertMinterV0 is
     /// @dev This function is overridable in order to support future schema changes
     /// @return claim The parsed Claim struct
     /// @return Claim metadata URI
-    function _parseData(uint256 version_, bytes memory data)
-        internal
-        pure
-        virtual
-        returns (Claim memory claim, string memory)
-    {
+    function _parseData(bytes memory data) internal pure virtual returns (Claim memory claim, string memory) {
         require(data.length > 0, "_parseData: input data empty");
 
         (
@@ -300,7 +299,7 @@ contract HypercertMinterV0 is
             string memory uri_
         ) = abi.decode(data, (bytes32[], bytes32[], bytes32[], uint64[2], uint64[2], address[], string));
 
-        bytes32 claimHash = keccak256(abi.encode(workTimeframe, workScopes_, impactTimeframe, impactScopes_, version_));
+        bytes32 claimHash = keccak256(abi.encode(workTimeframe, workScopes_, impactTimeframe, impactScopes_));
 
         claim.claimHash = claimHash;
         claim.contributors = contributors;
@@ -309,13 +308,13 @@ contract HypercertMinterV0 is
         claim.workScopes = workScopes_;
         claim.impactScopes = impactScopes_;
         claim.rights = rights_;
-        claim.version = uint64(version_);
+        claim.version = uint16(0);
         claim.exists = true;
 
         return (claim, uri_);
     }
 
-    function _storeContributorsClaims(bytes32 claimHash, address[] memory creators) internal {
+    function _storeContributorsClaims(bytes32 claimHash, address[] memory creators) internal virtual {
         for (uint256 i = 0; i < creators.length; i++) {
             require(!_contributorImpacts[creators[i]][claimHash], "Claim: claim for creators overlapping");
             _contributorImpacts[creators[i]][claimHash] = true;

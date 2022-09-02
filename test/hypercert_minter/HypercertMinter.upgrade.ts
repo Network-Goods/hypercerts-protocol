@@ -33,7 +33,7 @@ export function shouldBehaveLikeHypercertMinterUpgrade(): void {
 
     expect(await proxy.version()).to.be.eq(0);
 
-    const upgrade = await upgrades.upgradeProxy(proxy, UpgradeFactory);
+    const upgrade = await upgrades.upgradeProxy(proxy, UpgradeFactory, { call: "updateVersion" });
 
     expect(await proxy.version()).to.be.eq(1);
     expect(await upgrade.version()).to.be.eq(1);
@@ -56,7 +56,7 @@ export function shouldBehaveLikeHypercertMinterUpgrade(): void {
 
     expect(await proxyWithUser.uri(0)).to.be.eq("ipfs://mockedImpactClaim");
 
-    const upgrade = await upgrades.upgradeProxy(proxy, UpgradeFactory);
+    const upgrade = await upgrades.upgradeProxy(proxy, UpgradeFactory, { call: "updateVersion" });
 
     expect(await upgrade.uri(0)).to.be.eq("ipfs://mockedImpactClaim");
 

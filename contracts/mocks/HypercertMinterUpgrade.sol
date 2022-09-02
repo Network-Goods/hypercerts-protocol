@@ -18,8 +18,4 @@ contract HypercertMinterUpgrade is HypercertMinterV0 {
         newIDs[0] = id + 1;
         emit Split(id, newIDs);
     }
-
-    function version() public pure virtual override returns (uint256) {
-        return 1;
-    }
 }
