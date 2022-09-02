@@ -19,14 +19,14 @@ export function shouldBehaveLikeHypercertMinterAddingImpactScopes(): void {
     await setupImpactScopes(deployer.minter, minter);
 
     for (const text of Object.values(ImpactScopes)) {
-      await expect(deployer.minter.addImpactScope(text)).to.be.revertedWith("addImpactScope: already exists");
+      await expect(deployer.minter.addImpactScope(text)).to.be.revertedWith("already exists");
     }
   });
 
   it("should reject empty impact scopes", async function () {
     const { user } = await setupTest();
 
-    await expect(user.minter.addImpactScope("")).to.be.revertedWith("addImpactScope: empty text");
+    await expect(user.minter.addImpactScope("")).to.be.revertedWith("empty text");
   });
 }
 
@@ -46,13 +46,13 @@ export function shouldBehaveLikeHypercertMinterAddingWorkScopes(): void {
     await setupWorkScopes(deployer.minter, minter);
 
     for (const text of Object.values(WorkScopes)) {
-      await expect(deployer.minter.addWorkScope(text)).to.be.revertedWith("addWorkScope: already exists");
+      await expect(deployer.minter.addWorkScope(text)).to.be.revertedWith("already exists");
     }
   });
 
   it("should reject empty work scopes", async function () {
     const { user } = await setupTest();
 
-    await expect(user.minter.addWorkScope("")).to.be.revertedWith("addWorkScope: empty text");
+    await expect(user.minter.addWorkScope("")).to.be.revertedWith("empty text");
   });
 }
