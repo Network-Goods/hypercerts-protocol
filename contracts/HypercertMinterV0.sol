@@ -186,7 +186,7 @@ contract HypercertMinterV0 is
 
     /// @notice Gets the impact claim with the specified id
     /// @param claimID Id of the claim
-    /// @return The claim, if it exists
+    /// @return The claim, if it doesn't exist with default values
     function getImpactCert(uint256 claimID) public view returns (Claim memory) {
         return _impactCerts[claimID];
     }

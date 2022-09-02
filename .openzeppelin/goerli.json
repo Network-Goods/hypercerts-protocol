@@ -2,15 +2,15 @@
   "manifestVersion": "3.2",
   "proxies": [
     {
-      "address": "0x126abf1ca4db7389b1f5fd3B8a84b3434313854d",
-      "txHash": "0x20842edd9d2b4c7a3475696108f2b4d4155d830ccf5860de188845258a6281fd",
+      "address": "0x858FA89820BF3D886F94C7841C676bE2A14bd8e9",
+      "txHash": "0x36f86916658e7da203e478ca58f90584f86c0d093709a470715a5f3b40895c19",
       "kind": "uups"
     }
   ],
   "impls": {
-    "f51e2eaec42cf5e8be23745294f315b5a3e81579c928449f1af9c699f285c144": {
-      "address": "0x560b2FE313884c82A2BCE3dB396D331C5205bE68",
-      "txHash": "0x7cd725d7d42ce5ffc86013e471ecea059102bdffe45f85028685717ed303cf9b",
+    "6c74c3236ece3b2a08b24e31d4d4b4b4537b46db35106e0d5e2327f85417e639": {
+      "address": "0x5cFBa5a37aD94cd7fad259555a22F1C0c3FC0f74",
+      "txHash": "0x6d6c50f151ebc24f2989353c498404ce36b915bfabfd628ea18ddf8dadd9f054",
       "layout": {
         "storage": [
           {
@@ -164,15 +164,15 @@
             "slot": "451",
             "type": "t_uint16",
             "contract": "HypercertMinterV0",
-            "src": "contracts/HypercertMinterV0.sol:25"
+            "src": "contracts/HypercertMinterV0.sol:28"
           },
           {
-            "label": "counter",
+            "label": "_counter",
             "offset": 0,
             "slot": "452",
             "type": "t_uint256",
             "contract": "HypercertMinterV0",
-            "src": "contracts/HypercertMinterV0.sol:27"
+            "src": "contracts/HypercertMinterV0.sol:29"
           },
           {
             "label": "workScopes",
@@ -180,7 +180,7 @@
             "slot": "453",
             "type": "t_mapping(t_bytes32,t_string_storage)",
             "contract": "HypercertMinterV0",
-            "src": "contracts/HypercertMinterV0.sol:29"
+            "src": "contracts/HypercertMinterV0.sol:31"
           },
           {
             "label": "impactScopes",
@@ -188,7 +188,7 @@
             "slot": "454",
             "type": "t_mapping(t_bytes32,t_string_storage)",
             "contract": "HypercertMinterV0",
-            "src": "contracts/HypercertMinterV0.sol:30"
+            "src": "contracts/HypercertMinterV0.sol:32"
           },
           {
             "label": "rights",
@@ -196,23 +196,23 @@
             "slot": "455",
             "type": "t_mapping(t_bytes32,t_string_storage)",
             "contract": "HypercertMinterV0",
-            "src": "contracts/HypercertMinterV0.sol:31"
+            "src": "contracts/HypercertMinterV0.sol:33"
           },
           {
-            "label": "contributorImpacts",
+            "label": "_contributorImpacts",
             "offset": 0,
             "slot": "456",
             "type": "t_mapping(t_address,t_mapping(t_bytes32,t_bool))",
             "contract": "HypercertMinterV0",
-            "src": "contracts/HypercertMinterV0.sol:32"
+            "src": "contracts/HypercertMinterV0.sol:34"
           },
           {
-            "label": "impactCerts",
+            "label": "_impactCerts",
             "offset": 0,
             "slot": "457",
-            "type": "t_mapping(t_uint256,t_struct(Claim)3602_storage)",
+            "type": "t_mapping(t_uint256,t_struct(Claim)3605_storage)",
             "contract": "HypercertMinterV0",
-            "src": "contracts/HypercertMinterV0.sol:33"
+            "src": "contracts/HypercertMinterV0.sol:35"
           }
         ],
         "types": {
@@ -227,10 +227,6 @@
           "t_array(t_bytes32)dyn_storage": {
             "label": "bytes32[]",
             "numberOfBytes": "32"
-          },
-          "t_array(t_uint256)2_storage": {
-            "label": "uint256[2]",
-            "numberOfBytes": "64"
           },
           "t_array(t_uint256)47_storage": {
             "label": "uint256[47]",
@@ -247,6 +243,10 @@
           "t_array(t_uint256)50_storage": {
             "label": "uint256[50]",
             "numberOfBytes": "1600"
+          },
+          "t_array(t_uint64)2_storage": {
+            "label": "uint64[2]",
+            "numberOfBytes": "32"
           },
           "t_bool": {
             "label": "bool",
@@ -292,7 +292,7 @@
             "label": "mapping(uint256 => string)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint256,t_struct(Claim)3602_storage)": {
+          "t_mapping(t_uint256,t_struct(Claim)3605_storage)": {
             "label": "mapping(uint256 => struct HypercertMinterV0.Claim)",
             "numberOfBytes": "32"
           },
@@ -304,7 +304,7 @@
             "label": "string",
             "numberOfBytes": "32"
           },
-          "t_struct(Claim)3602_storage": {
+          "t_struct(Claim)3605_storage": {
             "label": "struct HypercertMinterV0.Claim",
             "members": [
               {
@@ -314,55 +314,55 @@
                 "slot": "0"
               },
               {
-                "label": "contributors",
-                "type": "t_array(t_address)dyn_storage",
+                "label": "workTimeframe",
+                "type": "t_array(t_uint64)2_storage",
                 "offset": 0,
                 "slot": "1"
               },
               {
-                "label": "workTimeframe",
-                "type": "t_array(t_uint256)2_storage",
+                "label": "impactTimeframe",
+                "type": "t_array(t_uint64)2_storage",
                 "offset": 0,
                 "slot": "2"
-              },
-              {
-                "label": "impactTimeframe",
-                "type": "t_array(t_uint256)2_storage",
-                "offset": 0,
-                "slot": "4"
               },
               {
                 "label": "workScopes",
                 "type": "t_array(t_bytes32)dyn_storage",
                 "offset": 0,
-                "slot": "6"
+                "slot": "3"
               },
               {
                 "label": "impactScopes",
                 "type": "t_array(t_bytes32)dyn_storage",
                 "offset": 0,
-                "slot": "7"
+                "slot": "4"
               },
               {
                 "label": "rights",
                 "type": "t_array(t_bytes32)dyn_storage",
                 "offset": 0,
-                "slot": "8"
+                "slot": "5"
+              },
+              {
+                "label": "contributors",
+                "type": "t_array(t_address)dyn_storage",
+                "offset": 0,
+                "slot": "6"
               },
               {
                 "label": "version",
-                "type": "t_uint256",
+                "type": "t_uint16",
                 "offset": 0,
-                "slot": "9"
+                "slot": "7"
               },
               {
                 "label": "exists",
                 "type": "t_bool",
-                "offset": 0,
-                "slot": "10"
+                "offset": 2,
+                "slot": "7"
               }
             ],
-            "numberOfBytes": "352"
+            "numberOfBytes": "256"
           },
           "t_struct(RoleData)34_storage": {
             "label": "struct AccessControlUpgradeable.RoleData",
@@ -390,394 +390,9 @@
             "label": "uint256",
             "numberOfBytes": "32"
           },
-          "t_uint8": {
-            "label": "uint8",
-            "numberOfBytes": "1"
-          }
-        }
-      }
-    },
-    "06478b4abac1e1f08657fb4d8096470cdc7d7d6d4070f626a2f25c91479eedda": {
-      "address": "0xC3Da8241829880723CA15F5658EdD49AdbBa06d0",
-      "txHash": "0xcd6209daf40f09bda82b94168657dc54cb43477a4930a0a88112de6a1265278e",
-      "layout": {
-        "storage": [
-          {
-            "label": "_initialized",
-            "offset": 0,
-            "slot": "0",
-            "type": "t_uint8",
-            "contract": "Initializable",
-            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:62",
-            "retypedFrom": "bool"
-          },
-          {
-            "label": "_initializing",
-            "offset": 1,
-            "slot": "0",
-            "type": "t_bool",
-            "contract": "Initializable",
-            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:67"
-          },
-          {
-            "label": "__gap",
-            "offset": 0,
-            "slot": "1",
-            "type": "t_array(t_uint256)50_storage",
-            "contract": "ContextUpgradeable",
-            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
-          },
-          {
-            "label": "__gap",
-            "offset": 0,
-            "slot": "51",
-            "type": "t_array(t_uint256)50_storage",
-            "contract": "ERC165Upgradeable",
-            "src": "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol:41"
-          },
-          {
-            "label": "_balances",
-            "offset": 0,
-            "slot": "101",
-            "type": "t_mapping(t_uint256,t_mapping(t_address,t_uint256))",
-            "contract": "ERC1155Upgradeable",
-            "src": "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol:25"
-          },
-          {
-            "label": "_operatorApprovals",
-            "offset": 0,
-            "slot": "102",
-            "type": "t_mapping(t_address,t_mapping(t_address,t_bool))",
-            "contract": "ERC1155Upgradeable",
-            "src": "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol:28"
-          },
-          {
-            "label": "_uri",
-            "offset": 0,
-            "slot": "103",
-            "type": "t_string_storage",
-            "contract": "ERC1155Upgradeable",
-            "src": "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol:31"
-          },
-          {
-            "label": "__gap",
-            "offset": 0,
-            "slot": "104",
-            "type": "t_array(t_uint256)47_storage",
-            "contract": "ERC1155Upgradeable",
-            "src": "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol:528"
-          },
-          {
-            "label": "_roles",
-            "offset": 0,
-            "slot": "151",
-            "type": "t_mapping(t_bytes32,t_struct(RoleData)34_storage)",
-            "contract": "AccessControlUpgradeable",
-            "src": "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol:61"
-          },
-          {
-            "label": "__gap",
-            "offset": 0,
-            "slot": "152",
-            "type": "t_array(t_uint256)49_storage",
-            "contract": "AccessControlUpgradeable",
-            "src": "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol:259"
-          },
-          {
-            "label": "__gap",
-            "offset": 0,
-            "slot": "201",
-            "type": "t_array(t_uint256)50_storage",
-            "contract": "ERC1155BurnableUpgradeable",
-            "src": "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155BurnableUpgradeable.sol:52"
-          },
-          {
-            "label": "_totalSupply",
-            "offset": 0,
-            "slot": "251",
-            "type": "t_mapping(t_uint256,t_uint256)",
-            "contract": "ERC1155SupplyUpgradeable",
-            "src": "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155SupplyUpgradeable.sol:23"
-          },
-          {
-            "label": "__gap",
-            "offset": 0,
-            "slot": "252",
-            "type": "t_array(t_uint256)49_storage",
-            "contract": "ERC1155SupplyUpgradeable",
-            "src": "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155SupplyUpgradeable.sol:76"
-          },
-          {
-            "label": "_baseURI",
-            "offset": 0,
-            "slot": "301",
-            "type": "t_string_storage",
-            "contract": "ERC1155URIStorageUpgradeable",
-            "src": "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol:27"
-          },
-          {
-            "label": "_tokenURIs",
-            "offset": 0,
-            "slot": "302",
-            "type": "t_mapping(t_uint256,t_string_storage)",
-            "contract": "ERC1155URIStorageUpgradeable",
-            "src": "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol:30"
-          },
-          {
-            "label": "__gap",
-            "offset": 0,
-            "slot": "303",
-            "type": "t_array(t_uint256)48_storage",
-            "contract": "ERC1155URIStorageUpgradeable",
-            "src": "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol:77"
-          },
-          {
-            "label": "__gap",
-            "offset": 0,
-            "slot": "351",
-            "type": "t_array(t_uint256)50_storage",
-            "contract": "ERC1967UpgradeUpgradeable",
-            "src": "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol:211"
-          },
-          {
-            "label": "__gap",
-            "offset": 0,
-            "slot": "401",
-            "type": "t_array(t_uint256)50_storage",
-            "contract": "UUPSUpgradeable",
-            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol:107"
-          },
-          {
-            "label": "_version",
-            "offset": 0,
-            "slot": "451",
-            "type": "t_uint16",
-            "contract": "HypercertMinterV0",
-            "src": "contracts/HypercertMinterV0.sol:25"
-          },
-          {
-            "label": "counter",
-            "offset": 0,
-            "slot": "452",
-            "type": "t_uint256",
-            "contract": "HypercertMinterV0",
-            "src": "contracts/HypercertMinterV0.sol:27"
-          },
-          {
-            "label": "workScopes",
-            "offset": 0,
-            "slot": "453",
-            "type": "t_mapping(t_bytes32,t_string_storage)",
-            "contract": "HypercertMinterV0",
-            "src": "contracts/HypercertMinterV0.sol:29"
-          },
-          {
-            "label": "impactScopes",
-            "offset": 0,
-            "slot": "454",
-            "type": "t_mapping(t_bytes32,t_string_storage)",
-            "contract": "HypercertMinterV0",
-            "src": "contracts/HypercertMinterV0.sol:30"
-          },
-          {
-            "label": "rights",
-            "offset": 0,
-            "slot": "455",
-            "type": "t_mapping(t_bytes32,t_string_storage)",
-            "contract": "HypercertMinterV0",
-            "src": "contracts/HypercertMinterV0.sol:31"
-          },
-          {
-            "label": "contributorImpacts",
-            "offset": 0,
-            "slot": "456",
-            "type": "t_mapping(t_address,t_mapping(t_bytes32,t_bool))",
-            "contract": "HypercertMinterV0",
-            "src": "contracts/HypercertMinterV0.sol:32"
-          },
-          {
-            "label": "impactCerts",
-            "offset": 0,
-            "slot": "457",
-            "type": "t_mapping(t_uint256,t_struct(Claim)3602_storage)",
-            "contract": "HypercertMinterV0",
-            "src": "contracts/HypercertMinterV0.sol:33"
-          }
-        ],
-        "types": {
-          "t_address": {
-            "label": "address",
-            "numberOfBytes": "20"
-          },
-          "t_array(t_address)dyn_storage": {
-            "label": "address[]",
-            "numberOfBytes": "32"
-          },
-          "t_array(t_bytes32)dyn_storage": {
-            "label": "bytes32[]",
-            "numberOfBytes": "32"
-          },
-          "t_array(t_uint256)2_storage": {
-            "label": "uint256[2]",
-            "numberOfBytes": "64"
-          },
-          "t_array(t_uint256)47_storage": {
-            "label": "uint256[47]",
-            "numberOfBytes": "1504"
-          },
-          "t_array(t_uint256)48_storage": {
-            "label": "uint256[48]",
-            "numberOfBytes": "1536"
-          },
-          "t_array(t_uint256)49_storage": {
-            "label": "uint256[49]",
-            "numberOfBytes": "1568"
-          },
-          "t_array(t_uint256)50_storage": {
-            "label": "uint256[50]",
-            "numberOfBytes": "1600"
-          },
-          "t_bool": {
-            "label": "bool",
-            "numberOfBytes": "1"
-          },
-          "t_bytes32": {
-            "label": "bytes32",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_address,t_bool)": {
-            "label": "mapping(address => bool)",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_address,t_mapping(t_address,t_bool))": {
-            "label": "mapping(address => mapping(address => bool))",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_address,t_mapping(t_bytes32,t_bool))": {
-            "label": "mapping(address => mapping(bytes32 => bool))",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_address,t_uint256)": {
-            "label": "mapping(address => uint256)",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_bytes32,t_bool)": {
-            "label": "mapping(bytes32 => bool)",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_bytes32,t_string_storage)": {
-            "label": "mapping(bytes32 => string)",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_bytes32,t_struct(RoleData)34_storage)": {
-            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_uint256,t_mapping(t_address,t_uint256))": {
-            "label": "mapping(uint256 => mapping(address => uint256))",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_uint256,t_string_storage)": {
-            "label": "mapping(uint256 => string)",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_uint256,t_struct(Claim)3602_storage)": {
-            "label": "mapping(uint256 => struct HypercertMinterV0.Claim)",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_uint256,t_uint256)": {
-            "label": "mapping(uint256 => uint256)",
-            "numberOfBytes": "32"
-          },
-          "t_string_storage": {
-            "label": "string",
-            "numberOfBytes": "32"
-          },
-          "t_struct(Claim)3602_storage": {
-            "label": "struct HypercertMinterV0.Claim",
-            "members": [
-              {
-                "label": "claimHash",
-                "type": "t_bytes32",
-                "offset": 0,
-                "slot": "0"
-              },
-              {
-                "label": "contributors",
-                "type": "t_array(t_address)dyn_storage",
-                "offset": 0,
-                "slot": "1"
-              },
-              {
-                "label": "workTimeframe",
-                "type": "t_array(t_uint256)2_storage",
-                "offset": 0,
-                "slot": "2"
-              },
-              {
-                "label": "impactTimeframe",
-                "type": "t_array(t_uint256)2_storage",
-                "offset": 0,
-                "slot": "4"
-              },
-              {
-                "label": "workScopes",
-                "type": "t_array(t_bytes32)dyn_storage",
-                "offset": 0,
-                "slot": "6"
-              },
-              {
-                "label": "impactScopes",
-                "type": "t_array(t_bytes32)dyn_storage",
-                "offset": 0,
-                "slot": "7"
-              },
-              {
-                "label": "rights",
-                "type": "t_array(t_bytes32)dyn_storage",
-                "offset": 0,
-                "slot": "8"
-              },
-              {
-                "label": "version",
-                "type": "t_uint256",
-                "offset": 0,
-                "slot": "9"
-              },
-              {
-                "label": "exists",
-                "type": "t_bool",
-                "offset": 0,
-                "slot": "10"
-              }
-            ],
-            "numberOfBytes": "352"
-          },
-          "t_struct(RoleData)34_storage": {
-            "label": "struct AccessControlUpgradeable.RoleData",
-            "members": [
-              {
-                "label": "members",
-                "type": "t_mapping(t_address,t_bool)",
-                "offset": 0,
-                "slot": "0"
-              },
-              {
-                "label": "adminRole",
-                "type": "t_bytes32",
-                "offset": 0,
-                "slot": "1"
-              }
-            ],
-            "numberOfBytes": "64"
-          },
-          "t_uint16": {
-            "label": "uint16",
-            "numberOfBytes": "2"
-          },
-          "t_uint256": {
-            "label": "uint256",
-            "numberOfBytes": "32"
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
           },
           "t_uint8": {
             "label": "uint8",
