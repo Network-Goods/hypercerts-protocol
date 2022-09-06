@@ -20,13 +20,13 @@ export function shouldBehaveLikeHypercertMinterAddingRights(): void {
     await setupRights(deployer.minter, minter);
 
     for (const text of Object.values(Rights)) {
-      await expect(deployer.minter.addRight(text)).to.be.revertedWith("addRight: already exists");
+      await expect(deployer.minter.addRight(text)).to.be.revertedWith("already exists");
     }
   });
 
   it("should reject empty right", async function () {
     const { user } = await setupTest();
 
-    await expect(user.minter.addRight("")).to.be.revertedWith("addRight: empty text");
+    await expect(user.minter.addRight("")).to.be.revertedWith("empty text");
   });
 }

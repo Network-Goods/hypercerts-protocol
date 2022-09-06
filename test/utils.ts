@@ -27,16 +27,16 @@ export const getEncodedImpactClaim = async (claim?: Partial<Claim>) => {
   const impactScopes = claim?.impactScopes || Object.keys(ImpactScopes);
   const uri = claim?.uri || "ipfs://mockedImpactClaim";
 
-  const types = ["uint256[]", "uint256[]", "uint256[]", "uint256[2]", "uint256[2]", "address[]", "string"];
+  const types = ["uint256[]", "uint256[]", "uint256[]", "uint64[2]", "uint64[2]", "address[]", "string"];
   const values = [rights, workScopes, impactScopes, workTimeframe, impactTimeframe, contributors, uri];
 
   return encode(types, values);
 };
 
 export const getClaimHash = async (claim: Claim) => {
-  const { workTimeframe, workScopes, impactTimeframe, impactScopes, version } = claim;
-  const types = ["uint256[2]", "uint256[]", "uint256[2]", "uint256[]", "uint256"];
-  const values = [workTimeframe, workScopes, impactTimeframe, impactScopes, version];
+  const { workTimeframe, workScopes, impactTimeframe, impactScopes } = claim;
+  const types = ["uint64[2]", "uint256[]", "uint64[2]", "uint256[]"];
+  const values = [workTimeframe, workScopes, impactTimeframe, impactScopes];
 
   return hash256(types, values);
 };
@@ -74,6 +74,7 @@ export const compareClaimAgainstInput = async (claim: HypercertMinterV0.ClaimStr
   );
   expect(claim.workTimeframe.map(timestamp => timestamp.toNumber())).to.be.eql(options.workTimeframe);
   expect(claim.workScopes).to.be.eql(options.workScopes);
+
   expect(claim.impactTimeframe.map(timestamp => timestamp.toNumber())).to.be.eql(options.impactTimeframe);
   expect(claim.impactScopes).to.be.eql(options.impactScopes);
 };

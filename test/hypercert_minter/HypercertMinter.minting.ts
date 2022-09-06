@@ -20,7 +20,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
     const data7 = await getEncodedImpactClaim({ impactTimeframe: [108765432, 109999432] });
 
     // Empty data
-    await expect(deployer.minter.mint(deployer.address, 1, "0x")).to.be.revertedWith("Mint: input data empty");
+    await expect(deployer.minter.mint(deployer.address, 1, "0x")).to.be.revertedWith("_parseData: input data empty");
     // Invalid workTimeframe
     await expect(deployer.minter.mint(deployer.address, 1, data5)).to.be.revertedWith("Mint: invalid workTimeframe");
     // Invalid impactTimeframe
@@ -125,7 +125,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
       workScopes: [] as string[],
       impactScopes: [] as string[],
       uri: "ipfs://test",
-      version: 1,
+      version: 0,
     };
 
     const shortdata = await getEncodedImpactClaim(options);
@@ -135,6 +135,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
       .to.emit(minter, "ImpactClaimed")
       .withArgs(
         0,
+        user.address,
         hash,
         options.contributors,
         options.workTimeframe,
@@ -168,7 +169,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
       impactScopes: Object.keys(impactScopes),
       workScopes: Object.keys(workScopes),
       uri: "ipfs://test",
-      version: 1,
+      version: 0,
     };
 
     await setupImpactScopes(minter, user.minter, impactScopes);
@@ -181,6 +182,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
       .to.emit(minter, "ImpactClaimed")
       .withArgs(
         0,
+        user.address,
         hash,
         options.contributors,
         options.workTimeframe,
@@ -217,7 +219,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
       impactScopes: Object.keys(impactScopes),
       workScopes: Object.keys(workScopes),
       uri: "ipfs://test",
-      version: 1,
+      version: 0,
     };
 
     await setupImpactScopes(minter, user.minter, impactScopes);
@@ -253,7 +255,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
       impactScopes: Object.keys(impactScopes),
       workScopes: Object.keys(workScopes),
       uri: "cillum tempor exercitation cillum minim non proident laboris et pariatur dolore duis sit ad Lorem proident voluptate ex officia nostrud officia do esse deserunt adipisicing excepteur nostrud aliqua qui in amet deserunt laboris nostrud tempor in culpa magna ullamco aliquip enim incididunt occaecat eu officia cupidatat reprehenderit anim aliqua do do nulla sint officia eu elit tempor minim eiusmod proident minim nostrud elit occaecat Lorem irure ex sunt pariatur cupidatat eiusmod dolor ea enim velit incididunt est qui dolore dolore laboris amet aute dolore consequat velit excepteur in enim minim consequat ex nisi ut eiusmod tempor consectetur labore reprehenderit enim",
-      version: 1,
+      version: 0,
     };
 
     await setupImpactScopes(minter, user.minter, impactScopes);
