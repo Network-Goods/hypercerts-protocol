@@ -52,13 +52,13 @@ export function shouldBehaveLikeHypercertMinterUpgrade(): void {
     await setupImpactScopes(proxyWithUser);
     await setupRights(proxyWithUser);
     await setupWorkScopes(proxyWithUser);
-    await proxyWithUser.mint(user, 1, data);
+    await proxyWithUser.mint(user, data);
 
-    expect(await proxyWithUser.uri(0)).to.be.eq("ipfs://mockedImpactClaim");
+    expect(await proxyWithUser.tokenURI(0)).to.be.eq("ipfs://mockedImpactClaim");
 
     const upgrade = await upgrades.upgradeProxy(proxy, UpgradeFactory, { call: "updateVersion" });
 
-    expect(await upgrade.uri(0)).to.be.eq("ipfs://mockedImpactClaim");
+    expect(await upgrade.tokenURI(0)).to.be.eq("ipfs://mockedImpactClaim");
 
     const upgradeWithUser = <HypercertMinterUpgrade>(
       await ethers.getContractAt(HypercertMinter_Upgrade, upgrade.address, user)
