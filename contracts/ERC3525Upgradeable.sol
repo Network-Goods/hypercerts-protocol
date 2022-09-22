@@ -1,5 +1,5 @@
-//SPDX-License-Identifier: CC0-1.0
-pragma solidity ^0.8.0;
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.4;
 
 import "./interfaces/IERC3525Upgradeable.sol";
 import "./interfaces/IERC3525MetadataUpgradeable.sol";
