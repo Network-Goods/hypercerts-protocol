@@ -13,7 +13,7 @@ contract HypercertMinterUpgrade is HypercertMinterV0 {
     }
 
     function split(uint256 id) public {
-        require(exists(id), "Mint: token does not exist");
+        require(_exists(id), "Mint: token does not exist");
         uint256[] memory newIDs = new uint256[](1);
         newIDs[0] = id + 1;
         emit Split(id, newIDs);
