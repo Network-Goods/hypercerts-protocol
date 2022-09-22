@@ -257,13 +257,15 @@ abstract contract ERC3525Upgradeable is
         emit ApprovalValue(tokenId_, to_, value_);
     }
 
-    function _getNewTokenId(uint256 fromTokenId_) internal virtual returns (uint256) {
+    function _getNewTokenId(
+        uint256 /*fromTokenId_*/
+    ) internal virtual returns (uint256) {
         return ERC721EnumerableUpgradeable.totalSupply() + 1;
     }
 
     function _beforeTokenTransfer(
-        address from,
-        address to,
+        address, /*from*/
+        address, /*to*/
         uint256 tokenId
     ) internal virtual override(ERC721EnumerableUpgradeable, ERC721Upgradeable) {
         //clear approve data

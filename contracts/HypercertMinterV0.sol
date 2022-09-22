@@ -334,21 +334,21 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
      *  MUST revert or return any value other than 0x009ce20b if the transfer is rejected.
      *  The EIP-3525 smart contract that calls this function MUST revert the transfer transaction if the return value
      *  is not equal to 0x009ce20b.
-     * @param _operator The address which triggered the transfer
-     * @param _fromTokenId The token id to transfer value from
-     * @param _toTokenId The token id to transfer value to
-     * @param _value The transferred value
-     * @param _data Additional data with no specified format
+     * @ param _operator The address which triggered the transfer
+     * @ param _fromTokenId The token id to transfer value from
+     * @ param _toTokenId The token id to transfer value to
+     * @ param _value The transferred value
+     * @ param _data Additional data with no specified format
      * @return `bytes4(keccak256('onERC3525Received(address,uint256,uint256,uint256,bytes)'))`
      *  unless the transfer is rejected.
      */
     function onERC3525Received(
-        address _operator,
-        uint256 _fromTokenId,
-        uint256 _toTokenId,
-        uint256 _value,
-        bytes calldata _data
-    ) external returns (bytes4) {
+        address, /*_operator*/
+        uint256, /*_fromTokenId*/
+        uint256, /*_toTokenId*/
+        uint256, /*_value*/
+        bytes calldata /*_data*/
+    ) external pure returns (bytes4) {
         // TODO: implement
         return bytes4(0);
     }
