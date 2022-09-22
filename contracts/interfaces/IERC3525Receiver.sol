@@ -3,7 +3,8 @@ pragma solidity ^0.8.4;
 
 /**
  * @title EIP-3525 token receiver interface
- * @dev Interface for any contract that wants to be informed by EIP-3525 contracts when receiving values from other addresses.
+ * @dev Interface for any contract that wants to be informed by EIP-3525 contracts when receiving values from other
+ *      addresses.
  * Note: the EIP-165 identifier for this interface is 0x009ce20b.
  */
 interface IERC3525Receiver {

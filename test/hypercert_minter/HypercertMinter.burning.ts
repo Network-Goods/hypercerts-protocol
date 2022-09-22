@@ -16,7 +16,7 @@ export function shouldBehaveLikeHypercertMinterBurning(): void {
     await expect(deployer.minter.burn(0))
       .to.emit(minter, "Transfer")
       .withArgs(deployer.address, ethers.constants.AddressZero, 0);
-    expect(await deployer.minter.balanceOf(deployer.address)).to.equal(0);
+    expect(await deployer.minter["balanceOf(address)"](deployer.address)).to.equal(0);
   });
 
   it("user cannot burn another's token", async function () {

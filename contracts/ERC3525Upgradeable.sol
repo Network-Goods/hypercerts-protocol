@@ -135,6 +135,7 @@ abstract contract ERC3525Upgradeable is
     function tokenURI(uint256 tokenId)
         public
         view
+        virtual
         override(ERC721URIStorageUpgradeable, ERC721Upgradeable, IERC721MetadataUpgradeable)
         returns (string memory)
     {
@@ -277,8 +278,10 @@ abstract contract ERC3525Upgradeable is
     function _afterTokenTransfer(
         address from,
         address to,
-        uint256 tokenId
-    ) internal virtual override {}
+        uint256 tokenId // solhint-disable-next-line no-empty-blocks
+    ) internal virtual override {
+        // empty block
+    }
 
     function _checkOnERC3525Received(
         uint256 fromTokenId_,
@@ -313,8 +316,10 @@ abstract contract ERC3525Upgradeable is
         uint256 fromTokenId_,
         uint256 toTokenId_,
         uint256 slot_,
-        uint256 value_
-    ) internal virtual {}
+        uint256 value_ // solhint-disable-next-line no-empty-blocks
+    ) internal virtual {
+        // empty block
+    }
 
     function _afterValueTransfer(
         address from_,
@@ -322,6 +327,8 @@ abstract contract ERC3525Upgradeable is
         uint256 fromTokenId_,
         uint256 toTokenId_,
         uint256 slot_,
-        uint256 value_
-    ) internal virtual {}
+        uint256 value_ // solhint-disable-next-line no-empty-blocks
+    ) internal virtual {
+        // empty block
+    }
 }
