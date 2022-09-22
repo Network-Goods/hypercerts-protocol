@@ -14,6 +14,8 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
     string public constant NAME = "Impact hypercertificates";
     /// @notice User role required in order to upgrade the contract
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
+    /// @notice
+    uint256 public constant DEFAULT_UNITS = 10000;
     /// @notice Current version of the contract
     uint16 internal _version;
     /// @notice Counter incremented to form the hypercertificate ID
@@ -138,27 +140,27 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
     /// @param account Account issuing the new hypercertificate
     /// @param data Data representing the parameters of the claim
     function mint(address account, bytes memory data) public virtual {
-        // TODO hardcode minted units
         // Parse data to get Claim
-        (Claim memory claim, string memory uri_) = _parseData(data);
+        (Claim memory claim, string memory tokenURI_) = _parseData(data);
 
         _authorizeMint(account, claim);
 
-        uint256 id = _counter;
         _counter += 1;
+        uint256 tokenId = _counter;
 
         // Check on overlapping contributor-claims and store if success
         _storeContributorsClaims(claim.claimHash, claim.contributors);
 
         // Store impact cert
-        _impactCerts[id] = claim;
+        _impactCerts[tokenId] = claim;
 
         // Mint impact cert
-        _safeMint(account, id, data);
-        _setTokenURI(id, uri_);
+        // _safeMint(account, tokenId, data);
+        _mintValue(account, tokenId, uint256(claim.claimHash), DEFAULT_UNITS);
+        _setTokenURI(tokenId, tokenURI_);
 
         emit ImpactClaimed(
-            id,
+            tokenId,
             account,
             claim.claimHash,
             claim.contributors,
@@ -168,7 +170,7 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
             claim.impactScopes,
             claim.rights,
             claim.version,
-            uri_
+            tokenURI_
         );
     }
 
