@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: CC0-1.0
 pragma solidity ^0.8.0;
 
-import "./IERC3525Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/interfaces/IERC721MetadataUpgradeable.sol";
 
 /**
@@ -15,7 +14,6 @@ import "@openzeppelin/contracts-upgradeable/interfaces/IERC721MetadataUpgradeabl
  *  See https://eips.ethereum.org/EIPS/eip-3525
  * Note: the ERC-165 identifier for this interface is 0xe1600902.
  */
-/*IERC3525Upgradeable,*/
 interface IERC3525MetadataUpgradeable is IERC721MetadataUpgradeable {
     /**
      * @notice Returns the Uniform Resource Identifier (URI) for the current ERC3525 contract.

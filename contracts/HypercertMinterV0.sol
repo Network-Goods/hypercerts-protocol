@@ -95,10 +95,8 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
     }
 
     /// @notice Contract initialization logic
-    function initialize() public initializer {
-        __ERC721_init("MyToken", "MTK");
-        __ERC721URIStorage_init();
-        __ERC721Burnable_init();
+    function initialize() public override initializer {
+        ERC3525Upgradeable.initialize();
         __AccessControl_init();
         __UUPSUpgradeable_init();
 
@@ -157,7 +155,8 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
 
         // Mint impact cert
         _safeMint(account, id, data);
-        _setTokenURI(id, uri_);
+        // TODO: do we still need this; replace with something else??
+        // _setTokenURI(id, uri_);
 
         emit ImpactClaimed(
             id,
@@ -188,7 +187,7 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
     function tokenURI(uint256 tokenId)
         public
         view
-        override(ERC721Upgradeable, ERC721URIStorageUpgradeable)
+        override(ERC721Upgradeable, IERC721MetadataUpgradeable)
         returns (string memory)
     {
         return super.tokenURI(tokenId);
@@ -211,7 +210,7 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
     function supportsInterface(bytes4 interfaceId)
         public
         view
-        override(ERC721Upgradeable, AccessControlUpgradeable)
+        override(ERC3525Upgradeable, AccessControlUpgradeable)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
@@ -268,7 +267,7 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
         }
     }
 
-    function _burn(uint256 tokenId) internal override(ERC721Upgradeable, ERC721URIStorageUpgradeable) {
+    function _burn(uint256 tokenId) internal override(ERC3525Upgradeable) {
         super._burn(tokenId);
     }
 
@@ -328,5 +327,34 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
     /// @return true, if the key exists in the mapping
     function _hasKey(mapping(bytes32 => string) storage map, bytes32 key) internal view returns (bool) {
         return (bytes(map[key]).length > 0);
+    }
+
+    /**
+     * @notice Handle the receipt of an EIP-3525 token value.
+     * @dev An EIP-3525 smart contract MUST check whether this function is implemented by the recipient contract, if the
+     *  recipient contract implements this function, the EIP-3525 contract MUST call this function after a
+     *  value transfer (i.e. `transferFrom(uint256,uint256,uint256,bytes)`).
+     *  MUST return 0x009ce20b (i.e. `bytes4(keccak256('onERC3525Received(address,uint256,uint256,
+     *  uint256,bytes)'))`) if the transfer is accepted.
+     *  MUST revert or return any value other than 0x009ce20b if the transfer is rejected.
+     *  The EIP-3525 smart contract that calls this function MUST revert the transfer transaction if the return value
+     *  is not equal to 0x009ce20b.
+     * @param _operator The address which triggered the transfer
+     * @param _fromTokenId The token id to transfer value from
+     * @param _toTokenId The token id to transfer value to
+     * @param _value The transferred value
+     * @param _data Additional data with no specified format
+     * @return `bytes4(keccak256('onERC3525Received(address,uint256,uint256,uint256,bytes)'))`
+     *  unless the transfer is rejected.
+     */
+    function onERC3525Received(
+        address _operator,
+        uint256 _fromTokenId,
+        uint256 _toTokenId,
+        uint256 _value,
+        bytes calldata _data
+    ) external returns (bytes4) {
+        // TODO: implement
+        return bytes4(0);
     }
 }

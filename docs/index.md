@@ -1,16 +1,244 @@
 # Solidity API
 
+## ERC3525Upgradeable
+
+### ApproveData
+
+```solidity
+struct ApproveData {
+  address[] approvals;
+  mapping(address => uint256) allowances;
+}
+
+```
+
+### \_values
+
+```solidity
+mapping(uint256 => uint256) _values
+```
+
+_tokenId => values_
+
+### \_approvedValues
+
+```solidity
+mapping(uint256 => struct ERC3525Upgradeable.ApproveData) _approvedValues
+```
+
+_tokenId => operator => units_
+
+### \_slots
+
+```solidity
+mapping(uint256 => uint256) _slots
+```
+
+_tokenId => slot_
+
+### \_name
+
+```solidity
+string _name
+```
+
+### \_symbol
+
+```solidity
+string _symbol
+```
+
+### \_decimals
+
+```solidity
+uint8 _decimals
+```
+
+### initialize
+
+```solidity
+function initialize() public virtual
+```
+
+Contract initialization logic
+
+### supportsInterface
+
+```solidity
+function supportsInterface(bytes4 interfaceId) public view virtual returns (bool)
+```
+
+### valueDecimals
+
+```solidity
+function valueDecimals() public view virtual returns (uint8)
+```
+
+### balanceOf
+
+```solidity
+function balanceOf(uint256 tokenId_) public view virtual returns (uint256)
+```
+
+### slotOf
+
+```solidity
+function slotOf(uint256 tokenId_) public view virtual returns (uint256)
+```
+
+### contractURI
+
+```solidity
+function contractURI() public view virtual returns (string)
+```
+
+Returns the Uniform Resource Identifier (URI) for the current ERC3525 contract.
+
+_This function SHOULD return the URI for this contract in JSON format, starting with
+header `data:application/json;`.
+See https://eips.ethereum.org/EIPS/eip-3525 for the JSON schema for contract URI._
+
+| Name | Type   | Description                                            |
+| ---- | ------ | ------------------------------------------------------ |
+| [0]  | string | The JSON formatted URI of the current ERC3525 contract |
+
+### slotURI
+
+```solidity
+function slotURI(uint256 slot_) public view virtual returns (string)
+```
+
+### approve
+
+```solidity
+function approve(uint256 tokenId_, address to_, uint256 value_) external payable virtual
+```
+
+### allowance
+
+```solidity
+function allowance(uint256 tokenId_, address operator_) public view virtual returns (uint256)
+```
+
+### transferFrom
+
+```solidity
+function transferFrom(uint256 fromTokenId_, address to_, uint256 value_) public payable virtual returns (uint256)
+```
+
+### transferFrom
+
+```solidity
+function transferFrom(uint256 fromTokenId_, uint256 toTokenId_, uint256 value_) public payable virtual
+```
+
+### \_mint
+
+```solidity
+function _mint(address to_, uint256 tokenId_, uint256 slot_) private
+```
+
+### \_mintValue
+
+```solidity
+function _mintValue(address to_, uint256 tokenId_, uint256 slot_, uint256 value_) internal virtual
+```
+
+### \_burn
+
+```solidity
+function _burn(uint256 tokenId_) internal virtual
+```
+
+### \_transfer
+
+```solidity
+function _transfer(uint256 fromTokenId_, uint256 toTokenId_, uint256 value_) internal virtual
+```
+
+### \_spendAllowance
+
+```solidity
+function _spendAllowance(address operator_, uint256 tokenId_, uint256 value_) internal virtual
+```
+
+### \_approveValue
+
+```solidity
+function _approveValue(uint256 tokenId_, address to_, uint256 value_) internal virtual
+```
+
+### \_getNewTokenId
+
+```solidity
+function _getNewTokenId(uint256 fromTokenId_) internal virtual returns (uint256)
+```
+
+### \_beforeTokenTransfer
+
+```solidity
+function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal virtual
+```
+
+\_Hook that is called before any token transfer. This includes minting
+and burning.
+
+Calling conditions:
+
+- When `from` and `to` are both non-zero, `from`'s `tokenId` will be
+  transferred to `to`.
+- When `from` is zero, `tokenId` will be minted for `to`.
+- When `to` is zero, `from`'s `tokenId` will be burned.
+- `from` cannot be the zero address.
+- `to` cannot be the zero address.
+
+To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].\_
+
+### \_afterTokenTransfer
+
+```solidity
+function _afterTokenTransfer(address from, address to, uint256 tokenId) internal virtual
+```
+
+\_Hook that is called after any transfer of tokens. This includes
+minting and burning.
+
+Calling conditions:
+
+- when `from` and `to` are both non-zero.
+- `from` and `to` are never both zero.
+
+To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].\_
+
+### \_checkOnERC3525Received
+
+```solidity
+function _checkOnERC3525Received(uint256 fromTokenId_, uint256 toTokenId_, uint256 value_, bytes data_) private returns (bool)
+```
+
+### \_beforeValueTransfer
+
+```solidity
+function _beforeValueTransfer(address from_, address to_, uint256 fromTokenId_, uint256 toTokenId_, uint256 slot_, uint256 value_) internal virtual
+```
+
+### \_afterValueTransfer
+
+```solidity
+function _afterValueTransfer(address from_, address to_, uint256 fromTokenId_, uint256 toTokenId_, uint256 slot_, uint256 value_) internal virtual
+```
+
 ## HypercertMinterV0
 
 Contains functions and events to initialize and issue a hypercertificate
 
-### \_version
+### NAME
 
 ```solidity
-uint16 _version
+string NAME
 ```
 
-Current version of the contract
+Contract name
 
 ### UPGRADER_ROLE
 
@@ -20,13 +248,21 @@ bytes32 UPGRADER_ROLE
 
 User role required in order to upgrade the contract
 
-### counter
+### \_version
 
 ```solidity
-uint256 counter
+uint16 _version
 ```
 
-Counter incremented to form the hypercertificate Id
+Current version of the contract
+
+### \_counter
+
+```solidity
+uint256 _counter
+```
+
+Counter incremented to form the hypercertificate ID
 
 ### workScopes
 
@@ -52,34 +288,30 @@ mapping(bytes32 => string) rights
 
 Mapping of id's to rights
 
-### contributorImpacts
+### \_contributorImpacts
 
 ```solidity
-mapping(address => mapping(bytes32 => bool)) contributorImpacts
+mapping(address => mapping(bytes32 => bool)) _contributorImpacts
 ```
 
-Mapping of contributor addresses to impact-scopes
-
-### impactCerts
+### \_impactCerts
 
 ```solidity
-mapping(uint256 => struct HypercertMinterV0.Claim) impactCerts
+mapping(uint256 => struct HypercertMinterV0.Claim) _impactCerts
 ```
-
-Mapping of id's to hypercertificates
 
 ### Claim
 
 ```solidity
 struct Claim {
   bytes32 claimHash;
-  address[] contributors;
-  uint256[2] workTimeframe;
-  uint256[2] impactTimeframe;
+  uint64[2] workTimeframe;
+  uint64[2] impactTimeframe;
   bytes32[] workScopes;
   bytes32[] impactScopes;
   bytes32[] rights;
-  uint256 version;
+  address[] contributors;
+  uint16 version;
   bool exists;
 }
 
@@ -88,23 +320,24 @@ struct Claim {
 ### ImpactClaimed
 
 ```solidity
-event ImpactClaimed(uint256 id, bytes32 claimHash, address[] contributors, uint256[2] workTimeframe, uint256[2] impactTimeframe, bytes32[] workScopes, bytes32[] impactScopes, bytes32[] rights, uint256 version, string uri)
+event ImpactClaimed(uint256 id, address minter, bytes32 claimHash, address[] contributors, uint64[2] workTimeframe, uint64[2] impactTimeframe, bytes32[] workScopes, bytes32[] impactScopes, bytes32[] rights, uint64 version, string uri)
 ```
 
 Emitted when an impact is claimed.
 
-| Name            | Type       | Description                                           |
-| --------------- | ---------- | ----------------------------------------------------- |
-| id              | uint256    | Id of the claimed impact.                             |
-| claimHash       | bytes32    | Hash value of the claim data.                         |
-| contributors    | address[]  | Contributors to the claimed impact.                   |
-| workTimeframe   | uint256[2] | To/from date of the work related to the claim.        |
-| impactTimeframe | uint256[2] | To/from date of the claimed impact.                   |
-| workScopes      | bytes32[]  | Id's relating to the scope of the work.               |
-| impactScopes    | bytes32[]  | Id's relating to the scope of the impact.             |
-| rights          | bytes32[]  | Id's relating to the rights applied to the hypercert. |
-| version         | uint256    | Version of the hypercert.                             |
-| uri             | string     | URI of the metadata of the hypercert.                 |
+| Name            | Type      | Description                                           |
+| --------------- | --------- | ----------------------------------------------------- |
+| id              | uint256   | Id of the claimed impact.                             |
+| minter          | address   | Address of cert minter.                               |
+| claimHash       | bytes32   | Hash value of the claim data.                         |
+| contributors    | address[] | Contributors to the claimed impact.                   |
+| workTimeframe   | uint64[2] | To/from date of the work related to the claim.        |
+| impactTimeframe | uint64[2] | To/from date of the claimed impact.                   |
+| workScopes      | bytes32[] | Id's relating to the scope of the work.               |
+| impactScopes    | bytes32[] | Id's relating to the scope of the impact.             |
+| rights          | bytes32[] | Id's relating to the rights applied to the hypercert. |
+| version         | uint64    | Version of the hypercert.                             |
+| uri             | string    | URI of the metadata of the hypercert.                 |
 
 ### ImpactScopeAdded
 
@@ -212,7 +445,7 @@ Adds a new work scope
 ### mint
 
 ```solidity
-function mint(address account, uint256 amount, bytes data) public
+function mint(address account, bytes data) public virtual
 ```
 
 Issues a new hypercertificate
@@ -220,7 +453,6 @@ Issues a new hypercertificate
 | Name    | Type    | Description                                   |
 | ------- | ------- | --------------------------------------------- |
 | account | address | Account issuing the new hypercertificate      |
-| amount  | uint256 | Amount of the new hypercertificate to mint    |
 | data    | bytes   | Data representing the parameters of the claim |
 
 ### getImpactCert
@@ -235,14 +467,14 @@ Gets the impact claim with the specified id
 | ------- | ------- | --------------- |
 | claimID | uint256 | Id of the claim |
 
-| Name | Type                           | Description             |
-| ---- | ------------------------------ | ----------------------- |
-| [0]  | struct HypercertMinterV0.Claim | The claim, if it exists |
+| Name | Type                           | Description                                        |
+| ---- | ------------------------------ | -------------------------------------------------- |
+| [0]  | struct HypercertMinterV0.Claim | The claim, if it doesn't exist with default values |
 
-### uri
+### tokenURI
 
 ```solidity
-function uri(uint256 tokenId) public view returns (string)
+function tokenURI(uint256 tokenId) public view returns (string)
 ```
 
 Auto-generated by https://docs.openzeppelin.com/contracts/4.x/wizard
@@ -260,14 +492,19 @@ _Selects which base implementation to call_
 ### version
 
 ```solidity
-function version() public pure virtual returns (uint256)
+function version() public view virtual returns (uint256)
 ```
 
-Gets the current version of the contract
+gets the current version of the contract
 
-| Name | Type    | Description             |
-| ---- | ------- | ----------------------- |
-| [0]  | uint256 | Version of the contract |
+### updateVersion
+
+```solidity
+function updateVersion() external
+```
+
+Update the contract version number
+Only allowed for member of UPGRADER_ROLE
 
 ### supportsInterface
 
@@ -295,15 +532,37 @@ upgrade authorization logic
 
 _adds onlyRole(UPGRADER_ROLE) requirement_
 
-### \_beforeTokenTransfer
+### \_authorizeAdd
 
 ```solidity
-function _beforeTokenTransfer(address operator, address from, address to, uint256[] ids, uint256[] amounts, bytes data) internal
+function _authorizeAdd(string text, mapping(bytes32 => string) map) internal view virtual returns (bytes32 id)
 ```
 
-auto-generated by https://docs.openzeppelin.com/contracts/4.x/wizard
+Pre-add validation checks
 
-_selects which base implementation to call_
+| Name | Type                               | Description                           |
+| ---- | ---------------------------------- | ------------------------------------- |
+| text | string                             | Text to be added                      |
+| map  | mapping(bytes32 &#x3D;&gt; string) | Storage mapping that will be appended |
+
+### \_authorizeMint
+
+```solidity
+function _authorizeMint(address account, struct HypercertMinterV0.Claim claim) internal view virtual
+```
+
+Pre-mint validation checks
+
+| Name    | Type                           | Description                      |
+| ------- | ------------------------------ | -------------------------------- |
+| account | address                        | Destination address for the mint |
+| claim   | struct HypercertMinterV0.Claim | Impact claim data                |
+
+### \_burn
+
+```solidity
+function _burn(uint256 tokenId) internal
+```
 
 ### \_parseData
 
@@ -370,20 +629,191 @@ Checks whether the supplied mapping contains the supplied key
 | ---- | ---- | -------------------------------------- |
 | [0]  | bool | true, if the key exists in the mapping |
 
-## HypercertMinterV1
-
-Contains functions and events to initialize and issue a hypercert
-
-### NAME
+### onERC3525Received
 
 ```solidity
-string NAME
+function onERC3525Received(address _operator, uint256 _fromTokenId, uint256 _toTokenId, uint256 _value, bytes _data) external returns (bytes4)
 ```
 
-### version
+Handle the receipt of an EIP-3525 token value.
+
+_An EIP-3525 smart contract MUST check whether this function is implemented by the recipient contract, if the
+recipient contract implements this function, the EIP-3525 contract MUST call this function after a
+value transfer (i.e. `transferFrom(uint256,uint256,uint256,bytes)`).
+MUST return 0x009ce20b (i.e. `bytes4(keccak256('onERC3525Received(address,uint256,uint256, uint256,bytes)'))`) if the transfer is accepted.
+MUST revert or return any value other than 0x009ce20b if the transfer is rejected.
+The EIP-3525 smart contract that calls this function MUST revert the transfer transaction if the return value
+is not equal to 0x009ce20b._
+
+| Name          | Type    | Description                              |
+| ------------- | ------- | ---------------------------------------- |
+| \_operator    | address | The address which triggered the transfer |
+| \_fromTokenId | uint256 | The token id to transfer value from      |
+| \_toTokenId   | uint256 | The token id to transfer value to        |
+| \_value       | uint256 | The transferred value                    |
+| \_data        | bytes   | Additional data with no specified format |
+
+| Name | Type   | Description                                                                                                      |
+| ---- | ------ | ---------------------------------------------------------------------------------------------------------------- |
+| [0]  | bytes4 | `bytes4(keccak256('onERC3525Received(address,uint256,uint256,uint256,bytes)'))` unless the transfer is rejected. |
+
+## IERC3525MetadataUpgradeable
+
+_Interfaces for any contract that wants to support query of the Uniform Resource Identifier
+(URI) for the ERC3525 contract as well as a specified slot.
+Because of the higher reliability of data stored in smart contracts compared to data stored in
+centralized systems, it is recommended that metadata, including `contractURI`, `slotURI` and
+`tokenURI`, be directly returned in JSON format, instead of being returned with a url pointing
+to any resource stored in a centralized system.
+See https://eips.ethereum.org/EIPS/eip-3525
+Note: the ERC-165 identifier for this interface is 0xe1600902._
+
+### contractURI
 
 ```solidity
-function version() public pure virtual returns (uint256)
+function contractURI() external view returns (string)
 ```
 
-gets the current version of the contract
+Returns the Uniform Resource Identifier (URI) for the current ERC3525 contract.
+
+_This function SHOULD return the URI for this contract in JSON format, starting with
+header `data:application/json;`.
+See https://eips.ethereum.org/EIPS/eip-3525 for the JSON schema for contract URI._
+
+| Name | Type   | Description                                            |
+| ---- | ------ | ------------------------------------------------------ |
+| [0]  | string | The JSON formatted URI of the current ERC3525 contract |
+
+### slotURI
+
+```solidity
+function slotURI(uint256 _slot) external view returns (string)
+```
+
+Returns the Uniform Resource Identifier (URI) for the specified slot.
+
+_This function SHOULD return the URI for `_slot` in JSON format, starting with header
+`data:application/json;`.
+See https://eips.ethereum.org/EIPS/eip-3525 for the JSON schema for slot URI._
+
+| Name | Type   | Description                       |
+| ---- | ------ | --------------------------------- |
+| [0]  | string | The JSON formatted URI of `_slot` |
+
+## IERC3525Receiver
+
+_Interface for any contract that wants to be informed by EIP-3525 contracts when receiving values from other addresses.
+Note: the EIP-165 identifier for this interface is 0x009ce20b._
+
+### onERC3525Received
+
+```solidity
+function onERC3525Received(address _operator, uint256 _fromTokenId, uint256 _toTokenId, uint256 _value, bytes _data) external returns (bytes4)
+```
+
+Handle the receipt of an EIP-3525 token value.
+
+_An EIP-3525 smart contract MUST check whether this function is implemented by the recipient contract, if the
+recipient contract implements this function, the EIP-3525 contract MUST call this function after a
+value transfer (i.e. `transferFrom(uint256,uint256,uint256,bytes)`).
+MUST return 0x009ce20b (i.e. `bytes4(keccak256('onERC3525Received(address,uint256,uint256, uint256,bytes)'))`) if the transfer is accepted.
+MUST revert or return any value other than 0x009ce20b if the transfer is rejected.
+The EIP-3525 smart contract that calls this function MUST revert the transfer transaction if the return value
+is not equal to 0x009ce20b._
+
+| Name          | Type    | Description                              |
+| ------------- | ------- | ---------------------------------------- |
+| \_operator    | address | The address which triggered the transfer |
+| \_fromTokenId | uint256 | The token id to transfer value from      |
+| \_toTokenId   | uint256 | The token id to transfer value to        |
+| \_value       | uint256 | The transferred value                    |
+| \_data        | bytes   | Additional data with no specified format |
+
+| Name | Type   | Description                                                                                                      |
+| ---- | ------ | ---------------------------------------------------------------------------------------------------------------- |
+| [0]  | bytes4 | `bytes4(keccak256('onERC3525Received(address,uint256,uint256,uint256,bytes)'))` unless the transfer is rejected. |
+
+## IERC3525Upgradeable
+
+_See https://eips.ethereum.org/EIPS/eip-3525_
+
+### ApprovalValue
+
+```solidity
+event ApprovalValue(uint256 tokenId, address destination, uint256 value)
+```
+
+@notice Emitted when the slot of a token changes
+@param tokenId Id of the token
+@param destination Receiving address
+@param value Value approved
+
+### SlotChanged
+
+```solidity
+event SlotChanged(uint256 tokenId, uint256 previousSlot, uint256 slot)
+```
+
+@notice Emitted when the slot of a token changes
+@param tokenId Id of the token
+@param previousSlot Previous slot of the token
+@param slot New slot of the token
+
+### TransferValue
+
+```solidity
+event TransferValue(uint256 fromTokenId, uint256 toTokenId, uint256 value)
+```
+
+@notice Emitted when the slot of a token changes
+@param fromTokenId Id of the source token
+@param toTokenId Id of the destination token
+@param value Value transferred
+
+### approve
+
+```solidity
+function approve(uint256 tokenId_, address to_, uint256 value_) external payable
+```
+
+### allowance
+
+```solidity
+function allowance(uint256 tokenId_, address operator_) external view returns (uint256)
+```
+
+### balanceOf
+
+```solidity
+function balanceOf(uint256 tokenId_) external view returns (uint256)
+```
+
+### valueDecimals
+
+```solidity
+function valueDecimals() external view returns (uint8)
+```
+
+### slotOf
+
+```solidity
+function slotOf(uint256 tokenId_) external view returns (uint256)
+```
+
+### slotURI
+
+```solidity
+function slotURI(uint256 slot_) external view returns (string)
+```
+
+### transferFrom
+
+```solidity
+function transferFrom(uint256 fromTokenId_, address to_, uint256 value_) external payable returns (uint256)
+```
+
+### transferFrom
+
+```solidity
+function transferFrom(uint256 fromTokenId_, uint256 toTokenId_, uint256 value_) external payable
+```

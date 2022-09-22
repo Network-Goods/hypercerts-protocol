@@ -33,9 +33,31 @@ interface IERC3525Upgradeable is IERC721EnumerableUpgradeable {
      */
     event TransferValue(uint256 fromTokenId, uint256 toTokenId, uint256 value);
 
+    function approve(
+        uint256 tokenId_,
+        address to_,
+        uint256 value_
+    ) external payable;
+
+    function allowance(uint256 tokenId_, address operator_) external view returns (uint256);
+
+    function balanceOf(uint256 tokenId_) external view returns (uint256);
+
     function valueDecimals() external view returns (uint8);
 
     function slotOf(uint256 tokenId_) external view returns (uint256);
 
     function slotURI(uint256 slot_) external view returns (string memory);
+
+    function transferFrom(
+        uint256 fromTokenId_,
+        address to_,
+        uint256 value_
+    ) external payable returns (uint256);
+
+    function transferFrom(
+        uint256 fromTokenId_,
+        uint256 toTokenId_,
+        uint256 value_
+    ) external payable;
 }

@@ -1,53 +1,30 @@
 //SPDX-License-Identifier: CC0-1.0
 pragma solidity ^0.8.0;
 
-import "./interface/IERC3525Upgradeable.sol";
-import "./interface/IERC3525MetadataUpgradeable.sol";
-import "./interface/IERC3525Receiver.sol";
+import "./interfaces/IERC3525Upgradeable.sol";
+import "./interfaces/IERC3525MetadataUpgradeable.sol";
+import "./interfaces/IERC3525Receiver.sol";
 
+import "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721BurnableUpgradeable.sol";
 
-contract ERC3525Upgradeable is
+abstract contract ERC3525Upgradeable is
     Initializable,
     ERC721EnumerableUpgradeable,
     IERC3525Upgradeable,
     IERC3525MetadataUpgradeable,
     IERC3525Receiver
 {
-    // using Address for address;
-    using Strings for uint256;
+    using AddressUpgradeable for address;
+    using StringsUpgradeable for uint256;
 
     struct ApproveData {
         address[] approvals;
         mapping(address => uint256) allowances;
     }
-
-    /**
-     *  @notice Emitted when the slot of a token changes
-     *  @param tokenId Id of the token
-     *  @param destination Receiving address
-     *  @param value Value approved
-     */
-    event ApprovalValue(uint256 tokenId, address destination, uint256 value);
-
-    /**
-     *  @notice Emitted when the slot of a token changes
-     *  @param tokenId Id of the token
-     *  @param previousSlot Previous slot of the token
-     *  @param slot New slot of the token
-     */
-    event SlotChanged(uint256 tokenId, uint256 previousSlot, uint256 slot);
-
-    /**
-     *  @notice Emitted when the slot of a token changes
-     *  @param fromTokenId Id of the source token
-     *  @param toTokenId Id of the destination token
-     *  @param value Value transferred
-     */
-    event TransferValue(uint256 fromTokenId, uint256 toTokenId, uint256 value);
 
     /// @dev tokenId => values
     mapping(uint256 => uint256) internal _values;
@@ -62,12 +39,19 @@ contract ERC3525Upgradeable is
     string private _symbol;
     uint8 private _decimals;
 
-    constructor(
-        string memory name_,
-        string memory symbol_,
-        uint8 decimals_
-    ) ERC721EnumerableUpgradeable(name_, symbol_) {
-        _decimals = decimals_;
+    // constructor(
+    //     string memory name_,
+    //     string memory symbol_,
+    //     uint8 decimals_
+    // ) ERC721EnumerableUpgradeable(name_, symbol_) {
+    //     _decimals = decimals_;
+    // }
+
+    /// @notice Contract initialization logic
+    function initialize() public virtual initializer {
+        __ERC721_init("MyToken", "MTK");
+        // __ERC721URIStorage_init();
+        // __ERC721Burnable_init();
     }
 
     function supportsInterface(bytes4 interfaceId)
@@ -101,11 +85,23 @@ contract ERC3525Upgradeable is
         string memory baseURI = _baseURI();
         return
             bytes(baseURI).length > 0
-                ? string(abi.encodePacked(baseURI, "contract/", Strings.toHexString(uint256(uint160(address(this))))))
+                ? string(
+                    abi.encodePacked(
+                        baseURI,
+                        "contract/",
+                        StringsUpgradeable.toHexString(uint256(uint160(address(this))))
+                    )
+                )
                 : "";
     }
 
-    function slotURI(uint256 slot_) public view virtual override returns (string memory) {
+    function slotURI(uint256 slot_)
+        public
+        view
+        virtual
+        override(IERC3525Upgradeable, IERC3525MetadataUpgradeable)
+        returns (string memory)
+    {
         string memory baseURI = _baseURI();
         return bytes(baseURI).length > 0 ? string(abi.encodePacked(baseURI, "slot/", slot_.toString())) : "";
     }
@@ -114,12 +110,12 @@ contract ERC3525Upgradeable is
         uint256 tokenId_,
         address to_,
         uint256 value_
-    ) external payable virtual override {
-        address owner = ERC721EnumerableUpgradeable.ownerOf(tokenId_);
+    ) external payable virtual override(IERC3525Upgradeable) {
+        address owner = ERC721Upgradeable.ownerOf(tokenId_);
         require(to_ != owner, "ERC3525: approval to current owner");
 
         require(
-            ERC721EnumerableUpgradeable._isApprovedOrOwner(_msgSender(), tokenId_),
+            ERC721Upgradeable._isApprovedOrOwner(_msgSender(), tokenId_),
             "ERC3525: approve caller is not owner nor approved for all"
         );
 
@@ -159,7 +155,7 @@ contract ERC3525Upgradeable is
         uint256 tokenId_,
         uint256 slot_
     ) private {
-        ERC721EnumerableUpgradeable._mint(to_, tokenId_);
+        ERC721Upgradeable._mint(to_, tokenId_);
         _slots[tokenId_] = slot_;
         emit SlotChanged(tokenId_, 0, slot_);
     }
@@ -184,8 +180,8 @@ contract ERC3525Upgradeable is
     }
 
     function _burn(uint256 tokenId_) internal virtual override {
-        ERC721EnumerableUpgradeable._burn(tokenId_);
-        address owner = ERC721EnumerableUpgradeable.ownerOf(tokenId_);
+        ERC721Upgradeable._burn(tokenId_);
+        address owner = ERC721Upgradeable.ownerOf(tokenId_);
         uint256 slot = _slots[tokenId_];
         uint256 value = _values[tokenId_];
 
@@ -209,8 +205,8 @@ contract ERC3525Upgradeable is
         require(_values[fromTokenId_] >= value_, "ERC3525: transfer amount exceeds balance");
         require(_slots[fromTokenId_] == _slots[toTokenId_], "ERC3535: transfer to token with different slot");
 
-        address from = ERC721EnumerableUpgradeable.ownerOf(fromTokenId_);
-        address to = ERC721EnumerableUpgradeable.ownerOf(toTokenId_);
+        address from = ERC721Upgradeable.ownerOf(fromTokenId_);
+        address to = ERC721Upgradeable.ownerOf(toTokenId_);
         _beforeValueTransfer(from, to, fromTokenId_, toTokenId_, _slots[fromTokenId_], value_);
 
         _values[fromTokenId_] -= value_;
