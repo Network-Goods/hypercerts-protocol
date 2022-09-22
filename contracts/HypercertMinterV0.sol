@@ -155,8 +155,7 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
 
         // Mint impact cert
         _safeMint(account, id, data);
-        // TODO: do we still need this; replace with something else??
-        // _setTokenURI(id, uri_);
+        _setTokenURI(id, uri_);
 
         emit ImpactClaimed(
             id,
