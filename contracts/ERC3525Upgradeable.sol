@@ -16,8 +16,7 @@ abstract contract ERC3525Upgradeable is
     ERC721EnumerableUpgradeable,
     ERC721BurnableUpgradeable,
     ERC721URIStorageUpgradeable,
-    IERC3525MetadataUpgradeable,
-    IERC3525Receiver
+    IERC3525MetadataUpgradeable
 {
     using AddressUpgradeable for address;
     using StringsUpgradeable for uint256;
