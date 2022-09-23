@@ -255,10 +255,6 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
         }
     }
 
-    function _burn(uint256 tokenId) internal override(ERC3525Upgradeable) {
-        super._burn(tokenId);
-    }
-
     /// @notice Parse bytes to Claim and URI
     /// @param data Byte data representing the claim
     /// @dev This function is overridable in order to support future schema changes
