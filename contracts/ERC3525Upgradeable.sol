@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.4;
 
-import "./interfaces/IERC3525EnumerableUpgradeable.sol";
 import "./interfaces/IERC3525MetadataUpgradeable.sol";
 import "./interfaces/IERC3525Receiver.sol";
 
@@ -17,7 +16,6 @@ abstract contract ERC3525Upgradeable is
     ERC721EnumerableUpgradeable,
     ERC721BurnableUpgradeable,
     ERC721URIStorageUpgradeable,
-    IERC3525EnumerableUpgradeable,
     IERC3525MetadataUpgradeable,
     IERC3525Receiver
 {
@@ -91,13 +89,7 @@ abstract contract ERC3525Upgradeable is
                 : "";
     }
 
-    function slotURI(uint256 slot_)
-        public
-        view
-        virtual
-        override(IERC3525Upgradeable, IERC3525MetadataUpgradeable)
-        returns (string memory)
-    {
+    function slotURI(uint256 slot_) public view virtual override(IERC3525MetadataUpgradeable) returns (string memory) {
         string memory baseURI = _baseURI();
         return bytes(baseURI).length > 0 ? string(abi.encodePacked(baseURI, "slot/", slot_.toString())) : "";
     }
