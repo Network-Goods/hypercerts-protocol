@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.4;
 
-import "./interfaces/IERC3525Upgradeable.sol";
+import "./interfaces/IERC3525EnumerableUpgradeable.sol";
 import "./interfaces/IERC3525MetadataUpgradeable.sol";
 import "./interfaces/IERC3525Receiver.sol";
 
+import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
@@ -16,7 +17,7 @@ abstract contract ERC3525Upgradeable is
     ERC721EnumerableUpgradeable,
     ERC721BurnableUpgradeable,
     ERC721URIStorageUpgradeable,
-    IERC3525Upgradeable,
+    IERC3525EnumerableUpgradeable,
     IERC3525MetadataUpgradeable,
     IERC3525Receiver
 {
@@ -41,17 +42,10 @@ abstract contract ERC3525Upgradeable is
     string private _symbol;
     uint8 private _decimals;
 
-    // constructor(
-    //     string memory name_,
-    //     string memory symbol_,
-    //     uint8 decimals_
-    // ) ERC721EnumerableUpgradeable(name_, symbol_) {
-    //     _decimals = decimals_;
-    // }
-
     /// @notice Contract initialization logic
     function initialize() public virtual initializer {
-        __ERC721_init("MyToken", "MTK");
+        // TODO: set _decimals?
+        __ERC721_init("MyToken", "MTK"); // TODO: real values for _name, _symbol?
         __ERC721Burnable_init();
         __ERC721URIStorage_init();
     }
@@ -196,10 +190,11 @@ abstract contract ERC3525Upgradeable is
     }
 
     function _burn(uint256 tokenId_) internal virtual override(ERC721URIStorageUpgradeable, ERC721Upgradeable) {
-        ERC721Upgradeable._burn(tokenId_);
         address owner = ERC721Upgradeable.ownerOf(tokenId_);
         uint256 slot = _slots[tokenId_];
         uint256 value = _values[tokenId_];
+
+        ERC721Upgradeable._burn(tokenId_);
 
         _beforeValueTransfer(owner, address(0), tokenId_, 0, slot, value);
         delete _slots[tokenId_];

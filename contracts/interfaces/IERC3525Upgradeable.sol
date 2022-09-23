@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.4;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/IERC721EnumerableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
 
 /**
  * @title ERC-3525 Semi-Fungible Token Standard
  * @dev See https://eips.ethereum.org/EIPS/eip-3525
  */
-interface IERC3525Upgradeable is IERC721EnumerableUpgradeable {
+interface IERC3525Upgradeable is IERC721Upgradeable {
     /**
      *  @notice Emitted when the slot of a token changes
      *  @param tokenId Id of the token
