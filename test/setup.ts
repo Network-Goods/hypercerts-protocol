@@ -20,7 +20,7 @@ export type HypercertCollection = {
 };
 
 export const setupTestERC3525 = deployments.createFixture(
-  async ({ deployments, getNamedAccounts, ethers }, options) => {
+  async ({ deployments, getNamedAccounts, ethers }, _options) => {
     await deployments.fixture(); // ensure you start from a fresh deployments
     const { deployer, user, anon } = await getNamedAccounts();
 
