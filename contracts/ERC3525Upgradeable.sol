@@ -11,7 +11,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721Enumer
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721BurnableUpgradeable.sol";
 
-abstract contract ERC3525Upgradeable is
+contract ERC3525Upgradeable is
     Initializable,
     ERC721EnumerableUpgradeable,
     ERC721BurnableUpgradeable,
