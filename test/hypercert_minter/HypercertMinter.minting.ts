@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect } from "chai";
+import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 
 import setupTest, { setupImpactScopes, setupWorkScopes } from "../setup";
@@ -83,7 +84,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
     expect(await minter.ownerOf(1)).to.be.eq(user.address);
     expect(await minter.ownerOf(2)).to.be.eq(user.address);
 
-    expect(await minter.tokenSupplyInSlot(1)).to.be.eq(1);
+    expect(await minter.tokenSupplyInSlot(1)).to.be.eq(2);
 
     expect(await minter.slotOf(1)).to.be.eq(1);
     expect(await minter.slotOf(2)).to.be.eq(2);
@@ -135,16 +136,20 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
     );
   });
 
-  it("allows for dynamic URIs", async function () {
+  it("allows for dynamic URIs which are consistent for all tokens in a slot", async function () {
     const { user, minter } = await setupTest();
 
-    const shortdata = await getEncodedImpactClaim({ uri: "Test 1234" });
+    const shortdata = await getEncodedImpactClaim({ uri: "Test 1234", fractions: [50, 50] });
 
     await expect(user.minter.mint(user.address, shortdata))
       .to.emit(minter, "Transfer")
-      .withArgs(ethers.constants.AddressZero, user.address, 1);
+      .withArgs(ethers.constants.AddressZero, user.address, 1)
+      .to.emit(minter, "Transfer")
+      .withArgs(ethers.constants.AddressZero, user.address, 2);
 
     expect(await user.minter.tokenURI(1)).to.be.eq("Test 1234");
+    expect(await user.minter.tokenURI(2)).to.be.eq("Test 1234");
+    expect(await user.minter.slotURI(1)).to.be.eq("Test 1234");
 
     const cid = "ipfs://QmW2WQi7j6c7UgJTarActp7tDNikE4B2qXtFCfLPdsgaTQ/cat.jpg";
 
@@ -156,9 +161,10 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
 
     await expect(user.minter.mint(user.address, dataWithIPFS))
       .to.emit(minter, "Transfer")
-      .withArgs(ethers.constants.AddressZero, user.address, 2);
+      .withArgs(ethers.constants.AddressZero, user.address, 3);
 
-    expect(await user.minter.tokenURI(2)).to.be.eq(cid);
+    expect(await user.minter.tokenURI(3)).to.be.eq(cid);
+    expect(await user.minter.slotURI(2)).to.be.eq(cid);
   });
 
   it("parses input data to create hypercert - minimal", async function () {
@@ -173,6 +179,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
       impactScopes: [] as string[],
       uri: "ipfs://test",
       version: 0,
+      fractions: [100],
     };
 
     const shortdata = await getEncodedImpactClaim(options);
@@ -194,7 +201,9 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
         options.uri,
       );
 
-    expect(await user.minter.tokenURI(1)).to.be.eq(options.uri);
+    expect(await minter.tokenURI(1)).to.be.eq(options.uri);
+    expect(await minter.slotURI(1)).to.be.eq(options.uri);
+    expect(await minter.tokenSupplyInSlot(1)).to.be.eq("100");
 
     const claim = await minter.getImpactCert(1);
 
@@ -217,6 +226,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
       workScopes: Object.keys(workScopes),
       uri: "ipfs://test",
       version: 0,
+      fractions: new Array(25).fill(50),
     };
 
     await setupImpactScopes(minter, user.minter, impactScopes);
@@ -241,7 +251,8 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
         options.uri,
       );
 
-    expect(await user.minter.tokenURI(1)).to.be.eq(options.uri);
+    expect(await minter.tokenURI(1)).to.be.eq(options.uri);
+    expect(await minter.tokenSupplyInSlot(1)).to.be.eq(BigNumber.from("50").mul("25"));
 
     const claim = await minter.getImpactCert(1);
 
@@ -267,6 +278,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
       workScopes: Object.keys(workScopes),
       uri: "ipfs://test",
       version: 0,
+      fractions: new Array(100).fill(50),
     };
 
     await setupImpactScopes(minter, user.minter, impactScopes);
@@ -276,7 +288,8 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
 
     await expect(user.minter.mint(user.address, shortdata)).to.emit(minter, "ImpactClaimed");
 
-    expect(await user.minter.tokenURI(1)).to.be.eq(options.uri);
+    expect(await minter.tokenURI(1)).to.be.eq(options.uri);
+    expect(await minter.tokenSupplyInSlot(1)).to.be.eq(BigNumber.from("50").mul("100"));
 
     const claim = await minter.getImpactCert(1);
 
@@ -303,6 +316,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
       workScopes: Object.keys(workScopes),
       uri: "cillum tempor exercitation cillum minim non proident laboris et pariatur dolore duis sit ad Lorem proident voluptate ex officia nostrud officia do esse deserunt adipisicing excepteur nostrud aliqua qui in amet deserunt laboris nostrud tempor in culpa magna ullamco aliquip enim incididunt occaecat eu officia cupidatat reprehenderit anim aliqua do do nulla sint officia eu elit tempor minim eiusmod proident minim nostrud elit occaecat Lorem irure ex sunt pariatur cupidatat eiusmod dolor ea enim velit incididunt est qui dolore dolore laboris amet aute dolore consequat velit excepteur in enim minim consequat ex nisi ut eiusmod tempor consectetur labore reprehenderit enim",
       version: 0,
+      fractions: new Array(1000).fill(50),
     };
 
     await setupImpactScopes(minter, user.minter, impactScopes);
@@ -312,7 +326,8 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
 
     await expect(user.minter.mint(user.address, shortdata)).to.emit(minter, "ImpactClaimed");
 
-    expect(await user.minter.tokenURI(1)).to.be.eq(options.uri);
+    expect(await minter.tokenURI(1)).to.be.eq(options.uri);
+    expect(await minter.tokenSupplyInSlot(1)).to.be.eq(BigNumber.from("50").mul("1000"));
 
     const claim = await minter.getImpactCert(1);
 
