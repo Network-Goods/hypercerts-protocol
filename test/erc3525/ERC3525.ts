@@ -1,7 +1,7 @@
 import { expect } from "chai";
-import { ethers } from "hardhat";
+import { ethers, getNamedAccounts } from "hardhat";
 
-import { ERC3525Upgradeable } from "../../src/types";
+import { ERC3525Upgradeable, ERC3525_Testing } from "../../src/types";
 import { ERC3525 } from "../wellKnown";
 import { shouldBehaveLikeSemiFungibleTokenMint } from "./ERC3525.mint";
 import { shouldBehaveLikeSemiFungibleTokenTransfer } from "./ERC3525.transfer";
@@ -40,14 +40,19 @@ describe("Unit tests", function () {
 
     it("supports ERC3525 metadata", async () => {
       const tokenFactory = await ethers.getContractFactory(ERC3525);
-      const tokenInstance = await tokenFactory.deploy();
+      const tokenInstance = <ERC3525_Testing>await tokenFactory.deploy();
+      const { deployer } = await getNamedAccounts();
 
       // 0xe1600902 is the ERC165 interface identifier for IERC3525Metadata
       expect(await tokenInstance.supportsInterface("0xe1600902")).to.be.true;
 
-      expect(await tokenInstance.contractURI().then((res: string) => res.includes(`data:application/json;`))).to.be
+      expect(await tokenInstance.contractURI().then((res: string) => res.startsWith(`data:application/json;`))).to.be
         .true;
-      expect(await tokenInstance.slotURI().then((res: string) => res.includes(`data:application/json;`))).to.be.true;
+      expect(await tokenInstance.slotURI(0).then((res: string) => res.startsWith(`data:application/json;`))).to.be.true;
+
+      await tokenInstance.mintValue(deployer, 1, 12345, 10000);
+      expect(await tokenInstance.tokenURI(1).then((res: string) => res.startsWith(`data:application/json;`))).to.be
+        .true;
     });
 
     shouldBehaveLikeSemiFungibleTokenMint();
