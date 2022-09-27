@@ -1,16 +1,27 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
-import setupTest, { setupRights } from "../setup";
-import { encodeClaim, getEncodedImpactClaim, newClaim } from "../utils";
-import { Rights } from "../wellKnown";
+import setupTest from "../setup";
+import { getEncodedImpactClaim } from "../utils";
 
+// TODO looping fractions
 export function shouldBehaveLikeHypercertMinterSplitAndMerge(): void {
   it("should allow fraction owner to split a cert into to new fractions - 1-to-many", async function () {
     const { user, minter } = await setupTest();
     const data = await getEncodedImpactClaim();
 
     await minter.mint(user.address, data);
+
+    await expect(user.minter.split(1, [50])).to.be.revertedWith("Hypercert: split requires more than one fraction");
+    await expect(user.minter.split(1, [100, 50])).to.be.revertedWith(
+      "Hypercert: sum of fractions higher than original value",
+    );
+    await expect(user.minter.split(1, [20, 50])).to.be.revertedWith(
+      "Hypercert: sum of fractions lower than original value",
+    );
+    await expect(user.minter.split(2, [50, 30, 10, 5, 5])).to.be.revertedWith(
+      "Hypercert: split requested for nonexistent token",
+    );
 
     await expect(user.minter.split(1, [50, 30, 10, 5, 5]))
       .to.emit(minter, "Transfer")
