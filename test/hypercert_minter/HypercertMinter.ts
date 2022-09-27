@@ -19,7 +19,7 @@ describe("Unit tests", function () {
 
       // 0xd5358140 is the ERC165 interface identifier for EIP3525
       expect(await tokenInstance.supportsInterface("0xd5358140")).to.be.true;
-      expect(await tokenInstance.name()).to.be("HypercertMinter");
+      expect(await tokenInstance.name()).to.be.eq("HypercertMinter");
 
       await expect(tokenInstance.initialize()).to.be.revertedWith("Initializable: contract is already initialized");
     });
