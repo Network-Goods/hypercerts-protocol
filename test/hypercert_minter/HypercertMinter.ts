@@ -13,12 +13,13 @@ import { shouldBehaveLikeHypercertMinterUpgrade } from "./HypercertMinter.upgrad
 
 describe("Unit tests", function () {
   describe("Hypercert Minter", function () {
-    it("is an initializable ERC721 contract", async () => {
+    it("is an initializable ERC3525 contract", async () => {
       const tokenFactory = await ethers.getContractFactory(HypercertMinter_V0);
       const tokenInstance = await tokenFactory.deploy();
 
-      // 0xd9b67a26 is the ERC165 interface identifier for EIP1155
-      expect(await tokenInstance.supportsInterface("0x80ac58cd")).to.be.true;
+      // 0xd5358140 is the ERC165 interface identifier for EIP3525
+      expect(await tokenInstance.supportsInterface("0xd5358140")).to.be.true;
+      expect(await tokenInstance.name()).to.be("HypercertMinter");
 
       await expect(tokenInstance.initialize()).to.be.revertedWith("Initializable: contract is already initialized");
     });

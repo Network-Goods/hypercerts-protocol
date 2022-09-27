@@ -11,13 +11,13 @@ describe("Unit tests", function () {
       const tokenFactory = await ethers.getContractFactory(ERC3525);
       const tokenInstance = await tokenFactory.deploy();
 
-      // 0x01ffc9a7 is the ERC165 interface identifier for EIP165
+      // 0x01ffc9a7 is the ERC165 interface identifier for EIP165 - interfaces
       expect(await tokenInstance.supportsInterface("0x01ffc9a7")).to.be.true;
 
-      // 0xd9b67a26 is the ERC165 interface identifier for EIP3525
+      // 0xd9b67a26 is the ERC165 interface identifier for EIP3525 - SFT
       expect(await tokenInstance.supportsInterface("0xd5358140")).to.be.true;
 
-      // 0x80ac58cd is the ERC165 interface identifier for EIP721
+      // 0x80ac58cd is the ERC165 interface identifier for EIP721 - backward compatible with NFT
       expect(await tokenInstance.supportsInterface("0x80ac58cd")).to.be.true;
 
       await expect(tokenInstance.initialize()).to.emit(tokenInstance, "Initialized").withArgs(1);

@@ -9,7 +9,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 /// @title Hypercertificate minting logic
 /// @notice Contains functions and events to initialize and issue a hypercertificate
 /// @author bitbeckers, mr_bluesky
-contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUpgradeable, UUPSUpgradeable {
+contract HypercertMinterV0 is ERC3525Upgradeable, AccessControlUpgradeable, UUPSUpgradeable {
     /// @notice Contract name
     string public constant NAME = "Impact hypercertificates";
     /// @notice User role required in order to upgrade the contract
