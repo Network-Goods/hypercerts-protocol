@@ -55,8 +55,8 @@ contract ERC3525Upgradeable is
         returns (bool)
     {
         return
-            interfaceId == type(IERC165Upgradeable).interfaceId ||
-            interfaceId == type(ERC721EnumerableUpgradeable).interfaceId ||
+            interfaceId == type(IERC3525MetadataUpgradeable).interfaceId ||
+            interfaceId == type(IERC3525Upgradeable).interfaceId ||
             super.supportsInterface(interfaceId);
     }
 
