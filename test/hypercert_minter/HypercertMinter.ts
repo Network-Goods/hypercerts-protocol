@@ -9,6 +9,7 @@ import {
   shouldBehaveLikeHypercertMinterAddingImpactScopes,
   shouldBehaveLikeHypercertMinterAddingWorkScopes,
 } from "./HypercertMinter.scopes";
+import { shouldBehaveLikeHypercertMinterSplitAndMerge } from "./HypercertMinter.split.merge";
 import { shouldBehaveLikeHypercertMinterUpgrade } from "./HypercertMinter.upgrade";
 
 describe("Unit tests", function () {
@@ -30,5 +31,6 @@ describe("Unit tests", function () {
     shouldBehaveLikeHypercertMinterAddingImpactScopes();
     shouldBehaveLikeHypercertMinterAddingWorkScopes();
     shouldBehaveLikeHypercertMinterAddingRights();
+    shouldBehaveLikeHypercertMinterSplitAndMerge();
   });
 });

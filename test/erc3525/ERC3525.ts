@@ -3,6 +3,8 @@ import { ethers, getNamedAccounts } from "hardhat";
 
 import { ERC3525Upgradeable, ERC3525_Testing } from "../../src/types";
 import { ERC3525 } from "../wellKnown";
+import { shouldBehaveLikeSemiFungibleTokenAllowances } from "./ERC3525.allowances";
+import { shouldBehaveLikeSemiFungibleTokenBurn } from "./ERC3525.burn";
 import { shouldBehaveLikeSemiFungibleTokenMint } from "./ERC3525.mint";
 import { shouldBehaveLikeSemiFungibleTokenTransfer } from "./ERC3525.transfer";
 
@@ -57,5 +59,7 @@ describe("Unit tests", function () {
 
     shouldBehaveLikeSemiFungibleTokenMint();
     shouldBehaveLikeSemiFungibleTokenTransfer();
+    shouldBehaveLikeSemiFungibleTokenBurn();
+    shouldBehaveLikeSemiFungibleTokenAllowances();
   });
 });
