@@ -1,6 +1,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
+import { ERC3525Upgradeable } from "../../src/types";
 import { ERC3525 } from "../wellKnown";
 import { shouldBehaveLikeSemiFungibleTokenMint } from "./ERC3525.mint";
 import { shouldBehaveLikeSemiFungibleTokenTransfer } from "./ERC3525.transfer";
@@ -26,15 +27,15 @@ describe("Unit tests", function () {
 
     it("supports enumerable slots", async () => {
       const tokenFactory = await ethers.getContractFactory(ERC3525);
-      const tokenInstance = await tokenFactory.deploy();
+      const tokenInstance = <ERC3525Upgradeable>await tokenFactory.deploy();
 
       // 0x3b741b9e is the ERC165 interface identifier for IERC3525SlotEnumerable
       expect(await tokenInstance.supportsInterface("0x3b741b9e")).to.be.true;
 
-      expect(await tokenInstance.slotCount()).to.be("0");
+      expect(await tokenInstance.slotCount()).to.eq(0);
       await expect(tokenInstance.slotByIndex(0)).to.be.reverted;
-      expect(await tokenInstance.tokenSupply(0)).to.be("0");
-      await expect(tokenInstance.tokenInSlotByIndex(0)(0)).to.be.reverted;
+      expect(await tokenInstance.tokenSupplyInSlot(0)).to.eq(0);
+      await expect(tokenInstance.tokenInSlotByIndex(0, 0)).to.be.reverted;
     });
 
     it("supports ERC3525 metadata", async () => {
