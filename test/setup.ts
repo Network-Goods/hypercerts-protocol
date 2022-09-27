@@ -1,11 +1,11 @@
 import { expect } from "chai";
 import { deployments } from "hardhat";
 
-import { ERC3525Upgradeable, HypercertMinterUpgrade, HypercertMinterV0 } from "../src/types";
+import { ERC3525_Testing, HypercertMinterUpgrade, HypercertMinterV0 } from "../src/types";
 import { ERC3525, HypercertMinter_Current, ImpactScopes, Rights, WorkScopes } from "./wellKnown";
 
 export type HypercertContract = HypercertMinterV0 | HypercertMinterUpgrade;
-export type ERC3525 = ERC3525Upgradeable;
+export type ERC3525 = ERC3525_Testing;
 
 export type AddressedHypercertMinterContract = {
   address: string;
@@ -26,6 +26,7 @@ export const setupTestERC3525 = deployments.createFixture(
 
     // Contracts
     const sft: ERC3525 = await ethers.getContract(ERC3525);
+    await sft.initialize();
 
     // Account config
     const setupAddress = async (address: string) => {
