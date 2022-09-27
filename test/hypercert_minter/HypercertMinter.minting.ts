@@ -14,65 +14,87 @@ import {
 import { Rights, WorkScopes } from "../wellKnown";
 
 export function shouldBehaveLikeHypercertMinterMinting(): void {
-  it("anybody can mint a token with supply 1 or higher - except zero-address", async function () {
+  it("anybody can mint an impact claim with 1 or more fractions - except zero-address", async function () {
     const { anon, deployer, minter, user } = await setupTest();
 
     const workScopes = Object.keys(WorkScopes);
-    const claim1 = await newClaim({ workScopes: workScopes.slice(0, 1) });
+    const claim1 = await newClaim({ workScopes: workScopes.slice(0, 1), fractions: [100] });
     const data1 = encodeClaim(claim1);
     const hash1 = await getClaimHash(claim1);
-    const claim2 = await newClaim({ workScopes: workScopes.slice(1, 2) });
-    const data2 = encodeClaim(claim2);
-    const hash2 = await getClaimHash(claim2);
-    const claim3 = await newClaim({ workScopes: workScopes.slice(2, 3) });
-    const data3 = encodeClaim(claim3);
-    const hash3 = await getClaimHash(claim3);
-    const claim4 = await newClaim();
-    const data4 = encodeClaim(claim4);
-    const hash4 = await getClaimHash(claim4);
-    const data5 = await getEncodedImpactClaim({ workTimeframe: [234567890, 123456789] });
-    const data6 = await getEncodedImpactClaim({ impactTimeframe: [1087654321, 987654321] });
-    const data7 = await getEncodedImpactClaim({ impactTimeframe: [108765432, 109999432] });
+
+    const data2 = await getEncodedImpactClaim({ workTimeframe: [234567890, 123456789] });
+    const data3 = await getEncodedImpactClaim({ impactTimeframe: [1087654321, 987654321] });
+    const data4 = await getEncodedImpactClaim({ impactTimeframe: [108765432, 109999432] });
 
     // Empty data
     await expect(deployer.minter.mint(deployer.address, "0x")).to.be.revertedWith("_parseData: input data empty");
     // Invalid workTimeframe
-    await expect(deployer.minter.mint(deployer.address, data5)).to.be.revertedWith("Mint: invalid workTimeframe");
+    await expect(deployer.minter.mint(deployer.address, data2)).to.be.revertedWith("Mint: invalid workTimeframe");
     // Invalid impactTimeframe
-    await expect(deployer.minter.mint(deployer.address, data6)).to.be.revertedWith("Mint: invalid impactTimeframe");
+    await expect(deployer.minter.mint(deployer.address, data3)).to.be.revertedWith("Mint: invalid impactTimeframe");
     // Invalid impactTimeframe
-    await expect(deployer.minter.mint(deployer.address, data7)).to.be.revertedWith(
+    await expect(deployer.minter.mint(deployer.address, data4)).to.be.revertedWith(
       "Mint: impactTimeframe prior to workTimeframe",
     );
 
-    // Supply 1, multiple users/ids
+    await expect(minter.ownerOf(1)).to.be.revertedWith("ERC721: invalid token ID");
+    await expect(minter.slotOf(1)).to.be.revertedWith("ERC3525: slot query for nonexistent token");
+    await expect(minter["balanceOf(uint256)"](1)).to.be.revertedWith("ERC3525: balance query for nonexistent token");
+
+    // Supply 100, 1 fraction, single slot
     await expect(deployer.minter.mint(deployer.address, data1))
       .to.emit(minter, "Transfer")
       .withArgs(ethers.constants.AddressZero, deployer.address, 1)
       .to.emit(minter, "SlotChanged")
-      .withArgs(1, 0, hash1);
-    expect(await user.minter.ownerOf(1)).to.be.eq(deployer.address);
-    await expect(user.minter.mint(user.address, data2))
+      .withArgs(1, 0, 1);
+
+    expect(await minter.ownerOf(1)).to.be.eq(deployer.address);
+    expect(await minter.slotOf(1)).to.be.eq(1);
+    expect(await minter.tokenSupplyInSlot(1)).to.be.eq(1);
+
+    expect(await minter["balanceOf(uint256)"](1)).to.be.eq("100");
+    expect(await minter.tokenURI(1)).to.be.eq("ipfs://mockedImpactClaim");
+    expect(await minter.slotURI(1)).to.be.eq("ipfs://mockedImpactClaim");
+
+    await expect(deployer.minter.mint(ethers.constants.AddressZero, data1)).to.be.revertedWith(
+      "Mint: mint to the zero address",
+    );
+  });
+
+  it("anybody can mint an impact claim with multiple fractions - except zero-address", async function () {
+    const { anon, deployer, minter, user } = await setupTest();
+
+    const workScopes = Object.keys(WorkScopes);
+    const claim = await newClaim({ workScopes: workScopes.slice(1, 2), fractions: [50, 50] });
+    const data = encodeClaim(claim);
+    const hash = await getClaimHash(claim);
+
+    // Supply 100, 2 fractions, single slot
+    await expect(user.minter.mint(user.address, data))
+      .to.emit(minter, "Transfer")
+      .withArgs(ethers.constants.AddressZero, user.address, 1)
       .to.emit(minter, "Transfer")
       .withArgs(ethers.constants.AddressZero, user.address, 2)
       .to.emit(minter, "SlotChanged")
-      .withArgs(2, 0, hash2);
-    expect(await user.minter.ownerOf(2)).to.be.eq(user.address);
-    await expect(anon.minter.mint(anon.address, data3))
-      .to.emit(minter, "Transfer")
-      .withArgs(ethers.constants.AddressZero, anon.address, 3)
+      .withArgs(1, 0, 1)
       .to.emit(minter, "SlotChanged")
-      .withArgs(3, 0, hash3);
-    expect(await user.minter.ownerOf(3)).to.be.eq(anon.address);
+      .withArgs(2, 0, 1);
 
-    // Supply >1
-    await expect(deployer.minter.mint(deployer.address, data4))
-      .to.emit(minter, "Transfer")
-      .withArgs(ethers.constants.AddressZero, deployer.address, 4)
-      .to.emit(minter, "SlotChanged")
-      .withArgs(4, 0, hash4);
+    expect(await minter.ownerOf(1)).to.be.eq(user.address);
+    expect(await minter.ownerOf(2)).to.be.eq(user.address);
 
-    await expect(deployer.minter.mint(ethers.constants.AddressZero, data1)).to.be.revertedWith(
+    expect(await minter.tokenSupplyInSlot(1)).to.be.eq(1);
+
+    expect(await minter.slotOf(1)).to.be.eq(1);
+    expect(await minter.slotOf(2)).to.be.eq(2);
+
+    expect(await minter.tokenInSlotByIndex(1, 0)).to.be.eq(1);
+    expect(await minter.tokenInSlotByIndex(1, 1)).to.be.eq(2);
+
+    expect(await minter["balanceOf(uint256)"](1)).to.be.eq("50");
+    expect(await minter["balanceOf(uint256)"](1)).to.be.eq("50");
+
+    await expect(deployer.minter.mint(ethers.constants.AddressZero, data)).to.be.revertedWith(
       "Mint: mint to the zero address",
     );
   });
