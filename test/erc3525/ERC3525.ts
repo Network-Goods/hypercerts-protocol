@@ -6,7 +6,7 @@ import { shouldBehaveLikeSemiFungibleTokenMint } from "./ERC3525.mint";
 import { shouldBehaveLikeSemiFungibleTokenTransfer } from "./ERC3525.transfer";
 
 describe("Unit tests", function () {
-  describe("ERC2525", function () {
+  describe("ERC3525", function () {
     it("is an initializable ERC3525 contract", async () => {
       const tokenFactory = await ethers.getContractFactory(ERC3525);
       const tokenInstance = await tokenFactory.deploy();
