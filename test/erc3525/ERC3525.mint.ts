@@ -23,7 +23,7 @@ export function shouldBehaveLikeSemiFungibleTokenMint(): void {
       await expect(sft.mintValue(user.address, 1, 0, 1_000_000)).to.be.revertedWith("ERC3525: token already minted");
 
       expect(await sft["tokenSupplyInSlot"](0)).to.be.eq("1");
-      expect(await sft["tokenInSlotByIndex"](0, 0).to.be.eq("1"));
+      expect(await sft["tokenInSlotByIndex"](0, 0)).to.be.eq("1");
       expect(await sft["balanceOf(uint256)"](1)).to.be.eq("1000000");
     });
 
@@ -42,8 +42,8 @@ export function shouldBehaveLikeSemiFungibleTokenMint(): void {
         .withArgs(0, 2, 2_000_000);
 
       expect(await sft["tokenSupplyInSlot"](0)).to.be.eq("2");
-      expect(await sft["tokenInSlotByIndex"](0, 0).to.be.eq("1"));
-      expect(await sft["tokenInSlotByIndex"](0, 1).to.be.eq("2"));
+      expect(await sft["tokenInSlotByIndex"](0, 0)).to.be.eq("1");
+      expect(await sft["tokenInSlotByIndex"](0, 1)).to.be.eq("2");
 
       expect(await sft["balanceOf(uint256)"](1)).to.be.eq("1000000");
       expect(await sft["balanceOf(uint256)"](2)).to.be.eq("2000000");
