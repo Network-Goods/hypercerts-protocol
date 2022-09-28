@@ -333,25 +333,18 @@ contract ERC3525Upgradeable is
     }
 
     function _beforeTokenTransfer(
-        address, /*from*/
-        address, /*to*/
+        address from,
+        address to,
         uint256 tokenId
     ) internal virtual override(ERC721EnumerableUpgradeable, ERC721Upgradeable) {
-        //clear approve data
+        super._beforeTokenTransfer(from, to, tokenId);
+        // clear approve data
         uint256 length = _approvedValues[tokenId].approvals.length;
         for (uint256 i = 0; i < length; i++) {
             address approval = _approvedValues[tokenId].approvals[i];
             delete _approvedValues[tokenId].allowances[approval];
         }
         delete _approvedValues[tokenId].approvals;
-    }
-
-    function _afterTokenTransfer(
-        address from,
-        address to,
-        uint256 tokenId // solhint-disable-next-line no-empty-blocks
-    ) internal virtual override {
-        // empty block
     }
 
     function _checkOnERC3525Received(
