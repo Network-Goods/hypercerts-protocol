@@ -11,15 +11,19 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 /// @author bitbeckers, mr_bluesky
 contract HypercertMinterV0 is ERC3525Upgradeable, AccessControlUpgradeable, UUPSUpgradeable {
     /// @notice Contract name
-    string public constant NAME = "Impact hypercertificates";
+    string public constant NAME = "Hypercerts";
+    /// @notice Token symbol
+    string public constant SYMBOL = "CERT";
+    /// @notice Token value decimals
+    uint8 public constant DECIMALS = 0;
     /// @notice User role required in order to upgrade the contract
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
-    /// @notice
-    uint256 public constant DEFAULT_UNITS = 10000;
     /// @notice Current version of the contract
     uint16 internal _version;
     /// @notice Counter incremented to form the hypercertificate ID
     uint256 internal _counter;
+
+    uint8 private _random;
 
     /// @notice Mapping of id's to work-scopes
     mapping(bytes32 => string) public workScopes;
@@ -38,6 +42,7 @@ contract HypercertMinterV0 is ERC3525Upgradeable, AccessControlUpgradeable, UUPS
         bytes32[] impactScopes;
         bytes32[] rights;
         address[] contributors;
+        uint8[] fractions;
         uint16 version;
         bool exists;
     }
@@ -56,6 +61,7 @@ contract HypercertMinterV0 is ERC3525Upgradeable, AccessControlUpgradeable, UUPS
     /// @param workScopes Id's relating to the scope of the work.
     /// @param impactScopes Id's relating to the scope of the impact.
     /// @param rights Id's relating to the rights applied to the hypercert.
+    /// @param fractions Units of tokens issued under the hypercert.
     /// @param version Version of the hypercert.
     /// @param uri URI of the metadata of the hypercert.
     event ImpactClaimed(
@@ -68,6 +74,7 @@ contract HypercertMinterV0 is ERC3525Upgradeable, AccessControlUpgradeable, UUPS
         bytes32[] workScopes,
         bytes32[] impactScopes,
         bytes32[] rights,
+        uint8[] fractions,
         uint64 version,
         string uri
     );
@@ -90,15 +97,9 @@ contract HypercertMinterV0 is ERC3525Upgradeable, AccessControlUpgradeable, UUPS
     /*******************
      * DEPLOY
      ******************/
-    /// @notice Contract constructor logic
-    /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor() {
-        _disableInitializers();
-    }
-
     /// @notice Contract initialization logic
     function initialize() public override initializer {
-        ERC3525Upgradeable.initialize();
+        __ERC3525_init(NAME, SYMBOL, DECIMALS);
         __AccessControl_init();
         __UUPSUpgradeable_init();
 
@@ -109,6 +110,7 @@ contract HypercertMinterV0 is ERC3525Upgradeable, AccessControlUpgradeable, UUPS
     /*******************
      * PUBLIC
      ******************/
+
     /// @notice Adds a new impact scope
     /// @param text Text representing the impact scope
     /// @return id Id of the impact scope
@@ -145,22 +147,25 @@ contract HypercertMinterV0 is ERC3525Upgradeable, AccessControlUpgradeable, UUPS
 
         _authorizeMint(account, claim);
 
-        _counter += 1;
-        uint256 tokenId = _counter;
+        uint256 slot = uint256(claim.claimHash);
 
         // Check on overlapping contributor-claims and store if success
         _storeContributorsClaims(claim.claimHash, claim.contributors);
 
         // Store impact cert
-        _impactCerts[tokenId] = claim;
+        _impactCerts[slot] = claim;
 
         // Mint impact cert
         // _safeMint(account, tokenId, data);
-        _mintValue(account, tokenId, uint256(claim.claimHash), DEFAULT_UNITS);
-        _setTokenURI(tokenId, tokenURI_);
+        for (uint256 i = 0; i < claim.fractions.length; i++) {
+            _counter += 1;
+            uint256 tokenId = _counter;
+            _mintValue(account, tokenId, slot, claim.fractions[i]);
+            _setTokenURI(tokenId, tokenURI_);
+        }
 
         emit ImpactClaimed(
-            tokenId,
+            slot,
             account,
             claim.claimHash,
             claim.contributors,
@@ -169,6 +174,7 @@ contract HypercertMinterV0 is ERC3525Upgradeable, AccessControlUpgradeable, UUPS
             claim.workScopes,
             claim.impactScopes,
             claim.rights,
+            claim.fractions,
             claim.version,
             tokenURI_
         );
@@ -270,8 +276,9 @@ contract HypercertMinterV0 is ERC3525Upgradeable, AccessControlUpgradeable, UUPS
             uint64[2] memory workTimeframe,
             uint64[2] memory impactTimeframe,
             address[] memory contributors,
-            string memory uri_
-        ) = abi.decode(data, (bytes32[], bytes32[], bytes32[], uint64[2], uint64[2], address[], string));
+            string memory uri_,
+            uint8[] memory fractions
+        ) = abi.decode(data, (bytes32[], bytes32[], bytes32[], uint64[2], uint64[2], address[], string, uint8[]));
 
         bytes32 claimHash = keccak256(abi.encode(workTimeframe, workScopes_, impactTimeframe, impactScopes_));
 
@@ -282,6 +289,7 @@ contract HypercertMinterV0 is ERC3525Upgradeable, AccessControlUpgradeable, UUPS
         claim.workScopes = workScopes_;
         claim.impactScopes = impactScopes_;
         claim.rights = rights_;
+        claim.fractions = fractions;
         claim.version = uint16(0);
         claim.exists = true;
 

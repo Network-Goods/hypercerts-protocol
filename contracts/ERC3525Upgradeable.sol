@@ -41,16 +41,21 @@ contract ERC3525Upgradeable is
     /// @dev slot => tokenId[]
     mapping(uint256 => uint256[]) internal _tokensBySlot;
 
-    string private _name;
-    string private _symbol;
+    // Token decimals
     uint8 private _decimals;
 
     /// @notice Contract initialization logic
-    function initialize() public virtual initializer {
-        // TODO: set _decimals?
-        __ERC721_init("MyToken", "MTK"); // TODO: real values for _name, _symbol?
+    function initialize() public virtual initializer {}
+
+    function __ERC3525_init(
+        string memory name_,
+        string memory symbol_,
+        uint8 decimals_
+    ) internal onlyInitializing {
         __ERC721Burnable_init();
         __ERC721URIStorage_init();
+        __ERC721_init(name_, symbol_);
+        _decimals = decimals_;
     }
 
     function supportsInterface(bytes4 interfaceId)
@@ -148,7 +153,7 @@ contract ERC3525Upgradeable is
                     ","
                     "description"
                     ":",
-                    _symbol,
+                    symbol(),
                     ","
                     "valueDecimals"
                     ":",
@@ -268,7 +273,7 @@ contract ERC3525Upgradeable is
         uint256 slot = _slots[tokenId_];
         uint256 value = _values[tokenId_];
 
-        ERC721Upgradeable._burn(tokenId_);
+        ERC721URIStorageUpgradeable._burn(tokenId_);
 
         _beforeValueTransfer(owner, address(0), tokenId_, 0, slot, value);
         delete _slots[tokenId_];

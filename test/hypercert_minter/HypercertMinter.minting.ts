@@ -16,13 +16,11 @@ import { Rights, WorkScopes } from "../wellKnown";
 
 export function shouldBehaveLikeHypercertMinterMinting(): void {
   it("anybody can mint an impact claim with 1 or more fractions - except zero-address", async function () {
-    const { anon, deployer, minter, user } = await setupTest();
+    const { deployer, minter } = await setupTest();
 
     const workScopes = Object.keys(WorkScopes);
     const claim1 = await newClaim({ workScopes: workScopes.slice(0, 1), fractions: [100] });
     const data1 = encodeClaim(claim1);
-    const hash1 = await getClaimHash(claim1);
-
     const data2 = await getEncodedImpactClaim({ workTimeframe: [234567890, 123456789] });
     const data3 = await getEncodedImpactClaim({ impactTimeframe: [1087654321, 987654321] });
     const data4 = await getEncodedImpactClaim({ impactTimeframe: [108765432, 109999432] });
@@ -63,12 +61,11 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
   });
 
   it("anybody can mint an impact claim with multiple fractions - except zero-address", async function () {
-    const { anon, deployer, minter, user } = await setupTest();
+    const { deployer, minter, user } = await setupTest();
 
     const workScopes = Object.keys(WorkScopes);
     const claim = await newClaim({ workScopes: workScopes.slice(1, 2), fractions: [50, 50] });
     const data = encodeClaim(claim);
-    const hash = await getClaimHash(claim);
 
     // Supply 100, 2 fractions, single slot
     await expect(user.minter.mint(user.address, data))
@@ -197,6 +194,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
         options.workScopes,
         options.impactScopes,
         options.rights,
+        options.fractions,
         options.version,
         options.uri,
       );
@@ -247,6 +245,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
         options.workScopes,
         options.impactScopes,
         options.rights,
+        options.fractions,
         options.version,
         options.uri,
       );

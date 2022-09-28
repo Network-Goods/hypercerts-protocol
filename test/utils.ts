@@ -39,7 +39,7 @@ export const newClaim = async (claim?: Partial<Claim>) => {
 export const getEncodedImpactClaim = async (claim?: Partial<Claim>) => encodeClaim(await newClaim(claim));
 
 export const encodeClaim = (c: Claim) => {
-  const types = ["uint256[]", "uint256[]", "uint256[]", "uint64[2]", "uint64[2]", "address[]", "string", "uint256[]"];
+  const types = ["uint256[]", "uint256[]", "uint256[]", "uint64[2]", "uint64[2]", "address[]", "string", "uint8[]"];
   const values = [
     c.rights,
     c.workScopes,

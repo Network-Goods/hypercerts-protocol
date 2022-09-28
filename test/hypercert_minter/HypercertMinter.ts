@@ -1,6 +1,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
+import { HypercertMinterV0 } from "../../src/types";
 import { HypercertMinter_V0 } from "../wellKnown";
 import { shouldBehaveLikeHypercertMinterBurning } from "./HypercertMinter.burning";
 import { shouldBehaveLikeHypercertMinterMinting } from "./HypercertMinter.minting";
@@ -16,11 +17,15 @@ describe("Unit tests", function () {
   describe("Hypercert Minter", function () {
     it("is an initializable ERC3525 contract", async () => {
       const tokenFactory = await ethers.getContractFactory(HypercertMinter_V0);
-      const tokenInstance = await tokenFactory.deploy();
+      const tokenInstance = <HypercertMinterV0>await tokenFactory.deploy();
+
+      await expect(tokenInstance.initialize()).to.emit(tokenInstance, "Initialized").withArgs(1);
 
       // 0xd5358140 is the ERC165 interface identifier for EIP3525
       expect(await tokenInstance.supportsInterface("0xd5358140")).to.be.true;
-      expect(await tokenInstance.name()).to.be.eq("HypercertMinter");
+      expect(await tokenInstance.name()).to.be.eq("Hypercerts");
+      expect(await tokenInstance.symbol()).to.be.eq("CERT");
+      expect(await tokenInstance.valueDecimals()).to.be.eq(0);
 
       await expect(tokenInstance.initialize()).to.be.revertedWith("Initializable: contract is already initialized");
     });
