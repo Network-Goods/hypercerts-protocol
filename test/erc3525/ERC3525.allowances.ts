@@ -32,10 +32,10 @@ export function shouldBehaveLikeSemiFungibleTokenAllowances(): void {
       expect(await sft.getApproved(1)).to.be.eq(ethers.constants.AddressZero);
 
       await expect(sft["approve(uint256,address,uint256)"](1, anon.address, 500_000)).to.be.revertedWith(
-        "ERC3525: approve caller is not token owner nor approved for all",
+        "ERC3525: approve caller is not owner nor approved for all",
       );
       await expect(user.sft["approve(uint256,address,uint256)"](1, user.address, 500_000)).to.be.revertedWith(
-        "ERC721: approval to current owner",
+        "ERC3525: approval to current owner",
       );
 
       await expect(user.sft["approve(uint256,address,uint256)"](1, anon.address, 500_000))
