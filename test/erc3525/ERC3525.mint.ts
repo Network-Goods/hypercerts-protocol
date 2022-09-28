@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 import { setupTestERC3525 } from "../setup";
 
 export function shouldBehaveLikeSemiFungibleTokenMint(): void {
-  describe("ERC3525 allows for mintin on specific slots with values", () => {
+  describe("ERC3525 allows for minting on specific slots with values", () => {
     it("allows for minting a single token in a slot with a given value", async function () {
       const { sft, user } = await setupTestERC3525();
 
