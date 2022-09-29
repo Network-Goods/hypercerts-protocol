@@ -54,13 +54,25 @@ export function shouldBehaveLikeHypercertMinterUpgrade(): void {
     await setupWorkScopes(proxyWithUser);
     await proxyWithUser.mint(user, data);
 
-    expect(await proxyWithUser.tokenURI(1)).to.include("data:application/json;", "ipfs://mockedImpactClaim");
-    expect(await proxyWithUser.slotURI(1)).to.include("data:application/json;", "ipfs://mockedImpactClaim");
+    const tokenURI = await proxyWithUser.tokenURI(1);
+
+    console.log(tokenURI);
+
+    expect(await proxyWithUser.tokenURI(1))
+      .to.include("data:application/json;")
+      .to.include("ipfs://mockedImpactClaim");
+    expect(await proxyWithUser.slotURI(1))
+      .to.include("data:application/json;")
+      .to.include("ipfs://mockedImpactClaim");
 
     const upgrade = await upgrades.upgradeProxy(proxy, UpgradeFactory, { call: "updateVersion" });
 
-    expect(await upgrade.tokenURI(1)).to.include("data:application/json;", "ipfs://mockedImpactClaim");
-    expect(await upgrade.slotURI(1)).to.include("data:application/json;", "ipfs://mockedImpactClaim");
+    expect(await upgrade.tokenURI(1))
+      .to.include("data:application/json;")
+      .to.include("ipfs://mockedImpactClaim");
+    expect(await upgrade.slotURI(1))
+      .to.include("data:application/json;")
+      .to.include("ipfs://mockedImpactClaim");
 
     const upgradeWithUser = <HypercertMinterUpgrade>(
       await ethers.getContractAt(HypercertMinter_Upgrade, upgrade.address, user)
