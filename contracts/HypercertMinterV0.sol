@@ -6,6 +6,8 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
+import "hardhat/console.sol";
+
 /// @title Hypercertificate minting logic
 /// @notice Contains functions and events to initialize and issue a hypercertificate
 /// @author bitbeckers, mr_bluesky
@@ -168,6 +170,7 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
         // _safeMint(account, tokenId, data);
         uint256 l = claim.fractions.length;
         for (uint256 i = 0; i < l; i++) {
+            console.log("Minting: ", _tokenId);
             _tokenId++;
             _mintValue(account, _tokenId, _slot, claim.fractions[i]);
             _setTokenURI(_tokenId, tokenURI_);

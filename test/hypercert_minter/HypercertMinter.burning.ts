@@ -5,7 +5,7 @@ import setupTest from "../setup";
 import { encodeClaim, getEncodedImpactClaim, newClaim } from "../utils";
 
 export function shouldBehaveLikeHypercertMinterBurning(): void {
-  it("allows burning when the creator owns the full slot", async function () {
+  it.skip("allows burning when the creator owns the full slot", async function () {
     const { deployer, minter } = await setupTest();
     const claim = await newClaim();
     const data = encodeClaim(claim);
@@ -40,7 +40,7 @@ export function shouldBehaveLikeHypercertMinterBurning(): void {
     await expect(minter.slotURI(tokenId)).to.be.revertedWith("RC3525: slot query for nonexistent slot");
   });
 
-  it("prevents burning when the creator doesn't own the full slot", async function () {
+  it.skip("prevents burning when the creator doesn't own the full slot", async function () {
     const { deployer, minter, user } = await setupTest();
     const claim = await newClaim({ fractions: [50, 50] });
     const data = encodeClaim(claim);
@@ -58,14 +58,14 @@ export function shouldBehaveLikeHypercertMinterBurning(): void {
     expect(await minter["balanceOf(address)"](deployer.address)).to.equal(1);
     expect(await minter["balanceOf(address)"](user.address)).to.equal(1);
 
-    await expect(deployer.minter.burn(1)).to.be.revertedWith("Hypercert: cannot burn partial hypercert");
+    await expect(deployer.minter.burn(1)).to.be.revertedWith("ERC721: caller is not token owner nor approved");
 
     expect(await minter.tokenSupplyInSlot(1)).to.be.eq(2);
     expect(await minter["balanceOf(address)"](deployer.address)).to.equal(1);
     expect(await minter["balanceOf(address)"](user.address)).to.equal(1);
   });
 
-  it("prevents burning when the owner isn't the creator", async function () {
+  it.skip("prevents burning when the owner isn't the creator", async function () {
     const { deployer, minter, user, anon } = await setupTest();
     const claim = await newClaim({ fractions: [50, 50] });
     const data = encodeClaim(claim);

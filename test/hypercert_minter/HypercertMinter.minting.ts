@@ -84,7 +84,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
     expect(await minter.tokenSupplyInSlot(1)).to.be.eq(2);
 
     expect(await minter.slotOf(1)).to.be.eq(1);
-    expect(await minter.slotOf(2)).to.be.eq(2);
+    expect(await minter.slotOf(2)).to.be.eq(1);
 
     expect(await minter.tokenInSlotByIndex(1, 0)).to.be.eq(1);
     expect(await minter.tokenInSlotByIndex(1, 1)).to.be.eq(2);
@@ -308,10 +308,10 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
     const { user, minter } = await setupTest();
 
     const contributors: string[] = [];
-    Array.from({ length: 100 }).forEach(() => contributors.push(faker.finance.ethereumAddress()));
+    Array.from({ length: 25 }).forEach(() => contributors.push(faker.finance.ethereumAddress()));
 
-    const impactScopes = randomScopes(500);
-    const workScopes = randomScopes(500);
+    const impactScopes = randomScopes(250);
+    const workScopes = randomScopes(250);
     const options = {
       rights: Object.keys(Rights),
       workTimeframe: [1, 2],
@@ -319,9 +319,10 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
       contributors,
       impactScopes: Object.keys(impactScopes),
       workScopes: Object.keys(workScopes),
-      uri: "cillum tempor exercitation cillum minim non proident laboris et pariatur dolore duis sit ad Lorem proident voluptate ex officia nostrud officia do esse deserunt adipisicing excepteur nostrud aliqua qui in amet deserunt laboris nostrud tempor in culpa magna ullamco aliquip enim incididunt occaecat eu officia cupidatat reprehenderit anim aliqua do do nulla sint officia eu elit tempor minim eiusmod proident minim nostrud elit occaecat Lorem irure ex sunt pariatur cupidatat eiusmod dolor ea enim velit incididunt est qui dolore dolore laboris amet aute dolore consequat velit excepteur in enim minim consequat ex nisi ut eiusmod tempor consectetur labore reprehenderit enim",
+      // uri: "cillum tempor exercitation cillum minim non proident laboris et pariatur dolore duis sit ad Lorem proident voluptate ex officia nostrud officia do esse deserunt adipisicing excepteur nostrud aliqua qui in amet deserunt laboris nostrud tempor in culpa magna ullamco aliquip enim incididunt occaecat eu officia cupidatat reprehenderit anim aliqua do do nulla sint officia eu elit tempor minim eiusmod proident minim nostrud elit occaecat Lorem irure ex sunt pariatur cupidatat eiusmod dolor ea enim velit incididunt est qui dolore dolore laboris amet aute dolore consequat velit excepteur in enim minim consequat ex nisi ut eiusmod tempor consectetur labore reprehenderit enim",
+      uri: "cillum tempor exercitation cillum minim non proident laboris et pariatur dolore duis sit ad Lorem proident voluptate ex officia nostrud officia do esse deserunt adipisicing excepteur nostrud aliqua qui in amet deserunt laboris nostrud tempor in culpa",
       version: 0,
-      fractions: new Array(1000).fill(50),
+      fractions: new Array(100).fill(50),
     };
 
     await setupImpactScopes(minter, user.minter, impactScopes);
@@ -331,9 +332,9 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
 
     await expect(user.minter.mint(user.address, shortdata)).to.emit(minter, "ImpactClaimed");
 
-    expect(await minter.tokenSupplyInSlot(1)).to.be.eq(1000);
+    expect(await minter.tokenSupplyInSlot(1)).to.be.eq(100);
     expect(await minter.tokenURI(1)).to.include("data:application/json;", options.uri);
-    expect(await minter.tokenURI(1000)).to.include("data:application/json;", options.uri);
+    expect(await minter.tokenURI(100)).to.include("data:application/json;", options.uri);
     expect(await minter.slotURI(1)).to.include("data:application/json;", options.uri);
 
     const claim = await minter.getImpactCert(1);
