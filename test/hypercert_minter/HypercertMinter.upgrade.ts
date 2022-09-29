@@ -54,7 +54,7 @@ export function shouldBehaveLikeHypercertMinterUpgrade(): void {
     await setupWorkScopes(proxyWithUser);
     await proxyWithUser.mint(user, data);
 
-    expect(await proxyWithUser.tokenURI(1)).to.include("data:application/json;", "ipfs://mockedImpactClaim");
+    expect(await proxyWithUser.tokenURI(1)).to.contain("data:application/json;", "ipfs://mockedImpactClaim");
     expect(await proxyWithUser.slotURI(1)).to.include("data:application/json;", "ipfs://mockedImpactClaim");
 
     const upgrade = await upgrades.upgradeProxy(proxy, UpgradeFactory, { call: "updateVersion" });

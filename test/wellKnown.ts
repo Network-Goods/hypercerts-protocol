@@ -8,6 +8,7 @@ export const HypercertMinter_Upgrade = "HypercertMinterUpgrade";
 export const HypercertMinter_Current = HypercertMinter_V0;
 
 export const ERC3525 = "ERC3525_Testing";
+export const Hypercert_SVG = "HypercertSVG";
 
 export const UPGRADER_ROLE = ethers.utils.id("UPGRADER_ROLE");
 

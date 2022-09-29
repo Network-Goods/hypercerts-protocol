@@ -46,6 +46,31 @@ export const setupTestERC3525 = deployments.createFixture(
   },
 );
 
+export const setupTestSVG = deployments.createFixture(async ({ deployments, getNamedAccounts, ethers }, _options) => {
+  await deployments.fixture(); // ensure you start from a fresh deployments
+  const { deployer, user, anon } = await getNamedAccounts();
+
+  // Contracts
+  const sft: HypercertSVG = await ethers.getContract(Hypercert_SVG);
+  await sft.initialize();
+
+  // Account config
+  const setupAddress = async (address: string) => {
+    return {
+      address: address,
+      sft: <HypercertSVG>await ethers.getContract(Hypercert_SVG, address),
+    };
+  };
+
+  // Struct
+  return {
+    sft,
+    deployer: await setupAddress(deployer),
+    user: await setupAddress(user),
+    anon: await setupAddress(anon),
+  };
+});
+
 const setupTest = deployments.createFixture<
   HypercertCollection,
   {

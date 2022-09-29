@@ -170,7 +170,6 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
         // _safeMint(account, tokenId, data);
         uint256 l = claim.fractions.length;
         for (uint256 i = 0; i < l; i++) {
-            console.log("Minting: ", _tokenId);
             _tokenId++;
             _mintValue(account, _tokenId, _slot, claim.fractions[i]);
             _setTokenURI(_tokenId, tokenURI_);

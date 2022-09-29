@@ -1639,6 +1639,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin": ^5.38.0
     "@typescript-eslint/parser": ^5.38.0
     chai: ^4.3.6
+    chai-string: ^1.5.0
     commitizen: ^4.2.5
     cross-env: ^7.0.3
     cz-conventional-changelog: ^3.3.0
@@ -4271,6 +4272,15 @@ __metadata:
   dependencies:
     nofilter: ^3.1.0
   checksum: a90338435dc7b45cc01461af979e3bb6ddd4f2a08584c437586039cd5f2235014c06e49d664295debbfb3514d87b2f06728092ab6aa6175e2e85e9cd7dc0c1fd
+  languageName: node
+  linkType: hard
+
+"chai-string@npm:^1.5.0":
+  version: 1.5.0
+  resolution: "chai-string@npm:1.5.0"
+  peerDependencies:
+    chai: ^4.1.2
+  checksum: d443bb416f6d4dd3395442f459af197aff93f2546dcb5bce6313badf505aa828615117f0eadc99e97ec518b7d2df387b538c81c647e6daf5c386d5bafa212e8f
   languageName: node
   linkType: hard
 
