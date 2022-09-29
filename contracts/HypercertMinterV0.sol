@@ -2,6 +2,7 @@
 pragma solidity ^0.8.4;
 
 import "./ERC3525Upgradeable.sol";
+import "./utils/ArraysUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
@@ -12,6 +13,8 @@ import "hardhat/console.sol";
 /// @notice Contains functions and events to initialize and issue a hypercertificate
 /// @author bitbeckers, mr_bluesky
 contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUpgradeable, UUPSUpgradeable {
+    using ArraysUpgradeable for uint8[];
+
     /// @notice Contract name
     string public constant NAME = "Hypercerts";
     /// @notice Token symbol
@@ -44,7 +47,7 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
         bytes32[] impactScopes;
         bytes32[] rights;
         address[] contributors;
-        uint8[] fractions;
+        uint256 totalUnits;
         uint16 version;
         bool exists;
     }
@@ -154,7 +157,7 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
     /// @param data Data representing the parameters of the claim
     function mint(address account, bytes memory data) public virtual {
         // Parse data to get Claim
-        (Claim memory claim, string memory claimURI_) = _parseData(data);
+        (Claim memory claim, string memory claimURI, uint8[] memory fractions) = _parseData(data);
 
         _authorizeMint(account, claim);
 
@@ -164,12 +167,12 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
         _slot++;
         // Store impact cert
         _impactCerts[_slot] = claim;
-        _setSlotURI(_slot, claimURI_);
+        _setSlotURI(_slot, claimURI);
 
         // Mint impact cert
-        uint256 l = claim.fractions.length;
+        uint256 l = fractions.length;
         for (uint256 i = 0; i < l; i++) {
-            _mintValue(account, ++_tokenId, _slot, claim.fractions[i]);
+            _mintValue(account, ++_tokenId, _slot, fractions[i]);
         }
 
         emit ImpactClaimed(
@@ -182,9 +185,9 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
             claim.workScopes,
             claim.impactScopes,
             claim.rights,
-            claim.fractions,
+            fractions,
             claim.version,
-            claimURI_
+            claimURI
         );
     }
 
@@ -282,7 +285,16 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
     /// @dev This function is overridable in order to support future schema changes
     /// @return claim The parsed Claim struct
     /// @return Claim metadata URI
-    function _parseData(bytes memory data) internal pure virtual returns (Claim memory claim, string memory) {
+    function _parseData(bytes memory data)
+        internal
+        pure
+        virtual
+        returns (
+            Claim memory claim,
+            string memory,
+            uint8[] memory
+        )
+    {
         require(data.length > 0, "_parseData: input data empty");
 
         (
@@ -305,11 +317,11 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
         claim.workScopes = workScopes_;
         claim.impactScopes = impactScopes_;
         claim.rights = rights_;
-        claim.fractions = fractions;
+        claim.totalUnits = fractions.getSum();
         claim.version = uint16(0);
         claim.exists = true;
 
-        return (claim, uri_);
+        return (claim, uri_, fractions);
     }
 
     /// @notice Stores contributor claims in the `contributorImpacts` mapping; guards against overlapping claims
