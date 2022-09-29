@@ -13,17 +13,17 @@ contract HypercertMinterV0 is ERC3525Upgradeable, AccessControlUpgradeable, UUPS
     /// @notice Contract name
     string public constant NAME = "Hypercerts";
     /// @notice Token symbol
-    string public constant SYMBOL = "CERT";
+    string public constant SYMBOL = "HCRT";
     /// @notice Token value decimals
     uint8 public constant DECIMALS = 0;
     /// @notice User role required in order to upgrade the contract
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
     /// @notice Current version of the contract
     uint16 internal _version;
-    /// @notice Counter incremented to form the hypercertificate ID
-    uint256 internal _counter;
-
-    uint8 private _random;
+    /// @notice Counter incremented and used for the next token ID
+    uint256 internal _tokenId;
+    /// @notice Counter incremented and used for the next slot
+    uint256 internal _slot;
 
     /// @notice Mapping of id's to work-scopes
     mapping(bytes32 => string) public workScopes;
@@ -97,6 +97,13 @@ contract HypercertMinterV0 is ERC3525Upgradeable, AccessControlUpgradeable, UUPS
     /*******************
      * DEPLOY
      ******************/
+
+    /// @notice Contract constructor logic
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
     /// @notice Contract initialization logic
     function initialize() public override initializer {
         __ERC3525_init(NAME, SYMBOL, DECIMALS);
@@ -147,25 +154,24 @@ contract HypercertMinterV0 is ERC3525Upgradeable, AccessControlUpgradeable, UUPS
 
         _authorizeMint(account, claim);
 
-        uint256 slot = uint256(claim.claimHash);
-
         // Check on overlapping contributor-claims and store if success
         _storeContributorsClaims(claim.claimHash, claim.contributors);
 
+        _slot++;
         // Store impact cert
-        _impactCerts[slot] = claim;
+        _impactCerts[_slot] = claim;
 
         // Mint impact cert
         // _safeMint(account, tokenId, data);
-        for (uint256 i = 0; i < claim.fractions.length; i++) {
-            _counter += 1;
-            uint256 tokenId = _counter;
-            _mintValue(account, tokenId, slot, claim.fractions[i]);
-            _setTokenURI(tokenId, tokenURI_);
+        uint256 l = claim.fractions.length;
+        for (uint256 i = 0; i < l; i++) {
+            _tokenId++;
+            _mintValue(account, _tokenId, _slot, claim.fractions[i]);
+            _setTokenURI(_tokenId, tokenURI_);
         }
 
         emit ImpactClaimed(
-            slot,
+            _slot,
             account,
             claim.claimHash,
             claim.contributors,
