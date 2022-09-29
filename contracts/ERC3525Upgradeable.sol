@@ -16,7 +16,6 @@ contract ERC3525Upgradeable is
     Initializable,
     ERC721EnumerableUpgradeable,
     ERC721BurnableUpgradeable,
-    ERC721URIStorageUpgradeable,
     IERC3525MetadataUpgradeable,
     IERC3525SlotEnumerableUpgradeable
 {
@@ -37,6 +36,8 @@ contract ERC3525Upgradeable is
     /// @dev tokenId => slot
     mapping(uint256 => uint256) internal _slots;
     uint256[] internal _slotArray;
+    /// @dev slot => URI
+    mapping(uint256 => string) private _slotURIs;
 
     /// @dev slot => tokenId[]
     mapping(uint256 => uint256[]) internal _tokensBySlot;
@@ -178,7 +179,7 @@ contract ERC3525Upgradeable is
     function tokenURI(uint256 tokenID_)
         public
         view
-        override(ERC721URIStorageUpgradeable, ERC721Upgradeable, IERC721MetadataUpgradeable)
+        override(ERC721Upgradeable, IERC721MetadataUpgradeable)
         returns (string memory)
     {
         return
@@ -261,12 +262,12 @@ contract ERC3525Upgradeable is
         emit TransferValue(0, tokenId_, value_);
     }
 
-    function _burn(uint256 tokenId_) internal virtual override(ERC721URIStorageUpgradeable, ERC721Upgradeable) {
+    function _burn(uint256 tokenId_) internal virtual override(ERC721Upgradeable) {
         address owner = ERC721Upgradeable.ownerOf(tokenId_);
         uint256 slot = _slots[tokenId_];
         uint256 value = _values[tokenId_];
 
-        ERC721URIStorageUpgradeable._burn(tokenId_);
+        ERC721Upgradeable._burn(tokenId_);
 
         _beforeValueTransfer(owner, address(0), tokenId_, 0, slot, value);
         delete _slots[tokenId_];
@@ -298,6 +299,13 @@ contract ERC3525Upgradeable is
         _afterValueTransfer(from, to, fromTokenId_, toTokenId_, _slots[fromTokenId_], value_);
 
         emit TransferValue(fromTokenId_, toTokenId_, value_);
+    }
+
+    /**
+     * @dev Sets `_slotURI` as the slotURI of `slot`.
+     */
+    function _setSlotURI(uint256 slot, string memory _slotURI) internal virtual {
+        _slotURIs[slot] = _slotURI;
     }
 
     function _spendAllowance(

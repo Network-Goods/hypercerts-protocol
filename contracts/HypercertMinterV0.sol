@@ -110,7 +110,6 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
     function initialize() public override initializer {
         __ERC3525_init(DECIMALS);
         __ERC721_init(NAME, SYMBOL);
-        __ERC721URIStorage_init();
         __ERC721Burnable_init();
         __AccessControl_init();
         __UUPSUpgradeable_init();
@@ -155,7 +154,7 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
     /// @param data Data representing the parameters of the claim
     function mint(address account, bytes memory data) public virtual {
         // Parse data to get Claim
-        (Claim memory claim, string memory tokenURI_) = _parseData(data);
+        (Claim memory claim, string memory claimURI_) = _parseData(data);
 
         _authorizeMint(account, claim);
 
@@ -165,15 +164,12 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
         _slot++;
         // Store impact cert
         _impactCerts[_slot] = claim;
+        _setSlotURI(_slot, claimURI_);
 
         // Mint impact cert
-        // _safeMint(account, tokenId, data);
         uint256 l = claim.fractions.length;
         for (uint256 i = 0; i < l; i++) {
-            console.log("Minting: ", _tokenId);
-            _tokenId++;
-            _mintValue(account, _tokenId, _slot, claim.fractions[i]);
-            _setTokenURI(_tokenId, tokenURI_);
+            _mintValue(account, ++_tokenId, _slot, claim.fractions[i]);
         }
 
         emit ImpactClaimed(
@@ -188,7 +184,7 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
             claim.rights,
             claim.fractions,
             claim.version,
-            tokenURI_
+            claimURI_
         );
     }
 
