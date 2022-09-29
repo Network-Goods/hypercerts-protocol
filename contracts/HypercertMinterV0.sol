@@ -9,7 +9,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 /// @title Hypercertificate minting logic
 /// @notice Contains functions and events to initialize and issue a hypercertificate
 /// @author bitbeckers, mr_bluesky
-contract HypercertMinterV0 is ERC3525Upgradeable, AccessControlUpgradeable, UUPSUpgradeable {
+contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUpgradeable, UUPSUpgradeable {
     /// @notice Contract name
     string public constant NAME = "Hypercerts";
     /// @notice Token symbol
@@ -106,7 +106,10 @@ contract HypercertMinterV0 is ERC3525Upgradeable, AccessControlUpgradeable, UUPS
 
     /// @notice Contract initialization logic
     function initialize() public override initializer {
-        __ERC3525_init(NAME, SYMBOL, DECIMALS);
+        __ERC3525_init(DECIMALS);
+        __ERC721_init(NAME, SYMBOL);
+        __ERC721URIStorage_init();
+        __ERC721Burnable_init();
         __AccessControl_init();
         __UUPSUpgradeable_init();
 
@@ -214,6 +217,14 @@ contract HypercertMinterV0 is ERC3525Upgradeable, AccessControlUpgradeable, UUPS
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
+    }
+
+    function name() public pure override(ERC721Upgradeable, IERC721MetadataUpgradeable) returns (string memory) {
+        return NAME;
+    }
+
+    function symbol() public pure override(ERC721Upgradeable, IERC721MetadataUpgradeable) returns (string memory) {
+        return SYMBOL;
     }
 
     /*******************

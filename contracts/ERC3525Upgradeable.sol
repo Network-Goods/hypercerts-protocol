@@ -47,14 +47,7 @@ contract ERC3525Upgradeable is
     /// @notice Contract initialization logic
     function initialize() public virtual initializer {}
 
-    function __ERC3525_init(
-        string memory name_,
-        string memory symbol_,
-        uint8 decimals_
-    ) internal onlyInitializing {
-        __ERC721Burnable_init();
-        __ERC721URIStorage_init();
-        __ERC721_init(name_, symbol_);
+    function __ERC3525_init(uint8 decimals_) internal onlyInitializing {
         _decimals = decimals_;
     }
 
