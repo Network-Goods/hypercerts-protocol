@@ -229,6 +229,15 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
         return SYMBOL;
     }
 
+    function getHash(
+        uint64[2] memory workTimeframe_,
+        bytes32[] memory workScopes_,
+        uint64[2] memory impactTimeframe_,
+        bytes32[] memory impactScopes_
+    ) public pure virtual returns (bytes32) {
+        return keccak256(abi.encode(workTimeframe_, workScopes_, impactTimeframe_, impactScopes_));
+    }
+
     /*******************
      * INTERNAL
      ******************/
@@ -308,7 +317,7 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
             uint8[] memory fractions
         ) = abi.decode(data, (bytes32[], bytes32[], bytes32[], uint64[2], uint64[2], address[], string, uint8[]));
 
-        bytes32 claimHash = keccak256(abi.encode(workTimeframe, workScopes_, impactTimeframe, impactScopes_));
+        bytes32 claimHash = getHash(workTimeframe, workScopes_, impactTimeframe, impactScopes_);
 
         claim.claimHash = claimHash;
         claim.contributors = contributors;
