@@ -21,6 +21,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
     const workScopes = Object.keys(WorkScopes);
     const claim1 = await newClaim({ workScopes: workScopes.slice(0, 1), fractions: [100] });
     const data1 = encodeClaim(claim1);
+    const hash = await getClaimHash(claim1);
     const data2 = await getEncodedImpactClaim({ workTimeframe: [234567890, 123456789] });
     const data3 = await getEncodedImpactClaim({ impactTimeframe: [1087654321, 987654321] });
     const data4 = await getEncodedImpactClaim({ impactTimeframe: [108765432, 109999432] });
@@ -45,7 +46,22 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
       .to.emit(minter, "Transfer")
       .withArgs(ethers.constants.AddressZero, deployer.address, 1)
       .to.emit(minter, "SlotChanged")
-      .withArgs(1, 0, 1);
+      .withArgs(1, 0, 1)
+      .to.emit(minter, "ImpactClaimed")
+      .withArgs(
+        1,
+        deployer.address,
+        hash,
+        claim1.contributors,
+        claim1.workTimeframe,
+        claim1.impactTimeframe,
+        claim1.workScopes,
+        claim1.impactScopes,
+        claim1.rights,
+        claim1.fractions,
+        claim1.version,
+        claim1.uri,
+      );
 
     expect(await minter.ownerOf(1)).to.be.eq(deployer.address);
     expect(await minter.slotOf(1)).to.be.eq(1);
