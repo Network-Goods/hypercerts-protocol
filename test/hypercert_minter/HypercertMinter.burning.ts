@@ -18,7 +18,8 @@ export function shouldBehaveLikeHypercertMinterBurning(): void {
     expect(await minter.ownerOf(tokenId)).to.be.eq(deployer.address);
     expect(await minter.slotOf(1)).to.be.eq(1);
     expect(await minter.tokenSupplyInSlot(1)).to.be.eq(1);
-    expect(await minter.tokenURI(1)).to.be.eq("ipfs://mockedImpactClaim");
+    expect(await minter.tokenURI(1)).to.include("data:application/json;");
+    expect(await minter.slotURI(1)).to.include("data:application/json;");
 
     await expect(deployer.minter.burn(tokenId))
       .to.emit(minter, "Transfer")
@@ -36,6 +37,7 @@ export function shouldBehaveLikeHypercertMinterBurning(): void {
     await expect(minter.slotOf(tokenId)).to.be.revertedWith("ERC3525: slot query for nonexistent token");
     expect(await minter.tokenSupplyInSlot(1)).to.be.eq(0);
     await expect(minter.tokenURI(tokenId)).to.be.revertedWith("ERC721: invalid token ID");
+    await expect(minter.slotURI(tokenId)).to.be.revertedWith("RC3525: slot query for nonexistent slot");
   });
 
   it("prevents burning when the creator doesn't own the full slot", async function () {

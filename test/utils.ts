@@ -99,3 +99,7 @@ export const compareClaimAgainstInput = async (claim: HypercertMinterV0.ClaimStr
   expect(claim.impactTimeframe.map(timestamp => timestamp.toNumber())).to.be.eql(options.impactTimeframe);
   expect(claim.impactScopes).to.be.eql(options.impactScopes);
 };
+
+//TODO check URI strings
+
+//TODO check SVG strings
