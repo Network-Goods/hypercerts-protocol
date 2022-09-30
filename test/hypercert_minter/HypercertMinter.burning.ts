@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 
 import setupTest from "../setup";
-import { encodeClaim, getEncodedImpactClaim, newClaim } from "../utils";
+import { encodeClaim, newClaim } from "../utils";
 
 export function shouldBehaveLikeHypercertMinterBurning(): void {
   it.skip("allows burning when the creator owns the full slot", async function () {
@@ -66,7 +66,7 @@ export function shouldBehaveLikeHypercertMinterBurning(): void {
   });
 
   it.skip("prevents burning when the owner isn't the creator", async function () {
-    const { deployer, minter, user, anon } = await setupTest();
+    const { deployer, minter, anon } = await setupTest();
     const claim = await newClaim({ fractions: [50, 50] });
     const data = encodeClaim(claim);
 

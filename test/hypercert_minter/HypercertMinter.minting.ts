@@ -6,7 +6,6 @@ import setupTest, { setupImpactScopes, setupWorkScopes } from "../setup";
 import {
   compareClaimAgainstInput,
   encodeClaim,
-  getClaimHash,
   getClaimSlotID,
   getEncodedImpactClaim,
   newClaim,
@@ -21,7 +20,6 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
     const workScopes = Object.keys(WorkScopes);
     const claim1 = await newClaim({ workScopes: workScopes.slice(0, 1), fractions: [100] });
     const data1 = encodeClaim(claim1);
-    const hash = await getClaimHash(claim1);
     const claimID = await getClaimSlotID(claim1);
     const data2 = await getEncodedImpactClaim({ workTimeframe: [234567890, 123456789] });
     const data3 = await getEncodedImpactClaim({ impactTimeframe: [1087654321, 987654321] });
@@ -199,7 +197,6 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
 
     const claim = await newClaim(options);
     const shortdata = await getEncodedImpactClaim(claim);
-    const hash = await getClaimHash(claim);
     const claimID = await getClaimSlotID(claim);
 
     await expect(user.minter.mint(user.address, shortdata))
@@ -245,7 +242,6 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
 
     const claim = await newClaim(options);
     const shortdata = await getEncodedImpactClaim(claim);
-    const hash = await getClaimHash(claim);
     const claimID = await getClaimSlotID(claim);
 
     await expect(user.minter.mint(user.address, shortdata))
@@ -297,7 +293,6 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
 
     const claim = await newClaim(options);
     const shortdata = await getEncodedImpactClaim(claim);
-    const hash = await getClaimHash(claim);
     const claimID = await getClaimSlotID(claim);
 
     await expect(user.minter.mint(user.address, shortdata)).to.emit(minter, "ImpactClaimed");
@@ -349,7 +344,6 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
 
     const claim = await newClaim(options);
     const shortdata = await getEncodedImpactClaim(claim);
-    const hash = await getClaimHash(claim);
     const claimID = await getClaimSlotID(claim);
 
     await expect(user.minter.mint(user.address, shortdata)).to.emit(minter, "ImpactClaimed");
