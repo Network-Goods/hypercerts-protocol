@@ -23,7 +23,7 @@ library HypercertMetadata {
         uint256 totalUnits;
         string name;
         string description;
-        string URI;
+        string uri;
     }
 
     function slotURI(ClaimData memory claim) public pure returns (string memory) {
@@ -91,7 +91,7 @@ library HypercertMetadata {
                     ",",
                     _propertyString("units", "Units issued across all tokens with this slot.", claim.fractions, false),
                     ",",
-                    _propertyString("external_link", "URI of additional data related to the claim.", claim.URI, false)
+                    _propertyString("external_link", "URI of additional data related to the claim.", claim.uri, false)
                 )
             );
     }
@@ -129,7 +129,7 @@ library HypercertMetadata {
                     ",",
                     _propertyString("fraction", "Fraction issued to this token.", balance / claim.totalUnits, false),
                     ",",
-                    _propertyString("external_link", "URI of additional data related to the claim.", claim.URI, false)
+                    _propertyString("external_link", "URI of additional data related to the claim.", claim.uri, false)
                 )
             );
     }

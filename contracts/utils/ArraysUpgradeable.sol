@@ -28,9 +28,9 @@ library ArraysUpgradeable {
     }
 
     function toString(uint256[] memory array) internal pure returns (string memory) {
-        uint256 l = array.length;
+        uint256 len = array.length;
         string memory result;
-        for (uint256 i = 1; i < l; i++) {
+        for (uint256 i = 1; i < len; i++) {
             string memory s = array[i].toString();
             if (bytes(result).length == 0) result = s;
             else result = string(abi.encodePacked(result, ",", s));
@@ -40,9 +40,9 @@ library ArraysUpgradeable {
     }
 
     function toString(bytes32[] memory array) internal pure returns (string memory) {
-        uint256 l = array.length;
+        uint256 len = array.length;
         string memory result;
-        for (uint256 i = 1; i < l; i++) {
+        for (uint256 i = 1; i < len; i++) {
             bytes memory b = abi.encodePacked(array[i]);
             if (b.length == 0) continue;
             string memory s = string(abi.encodePacked('"', string(b), '"'));

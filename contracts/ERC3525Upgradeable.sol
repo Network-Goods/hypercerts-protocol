@@ -44,8 +44,12 @@ abstract contract ERC3525Upgradeable is
     uint8 private _decimals;
 
     /// @notice Contract initialization logic
-    function initialize() public virtual initializer {}
+    // solhint-disable-next-line no-empty-blocks
+    function initialize() public virtual initializer {
+        // empty block
+    }
 
+    // solhint-disable-next-line func-name-mixedcase
     function __ERC3525_init(uint8 decimals_) internal onlyInitializing {
         _decimals = decimals_;
     }

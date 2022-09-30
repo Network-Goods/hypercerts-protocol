@@ -48,7 +48,7 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
         bool exists;
         string name;
         string description;
-        string URI;
+        string uri;
     }
 
     /*******************
@@ -146,8 +146,8 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
         _impactCerts[slot] = claim;
 
         // Mint impact cert
-        uint256 l = fractions.length;
-        for (uint256 i = 0; i < l; i++) {
+        uint256 len = fractions.length;
+        for (uint256 i = 0; i < len; i++) {
             uint256 tokenID = _getNewTokenId(0);
             _mintValue(account, tokenID, slot, fractions[i]);
         }
@@ -338,7 +338,7 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
         claim.exists = true;
         claim.name = name_;
         claim.description = description_;
-        claim.URI = uri_;
+        claim.uri = uri_;
 
         return (claim, fractions);
     }
@@ -383,7 +383,7 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
         data.totalUnits = claim.totalUnits;
         data.name = claim.name;
         data.description = claim.description;
-        data.URI = claim.URI;
+        data.uri = claim.uri;
 
         return data;
     }

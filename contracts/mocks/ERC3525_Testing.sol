@@ -6,6 +6,7 @@ import "../ERC3525Upgradeable.sol";
 /**
  * @dev Mock implementation of ERC3525 to expose private mutative functions
  */
+// solhint-disable-next-line contract-name-camelcase
 contract ERC3525_Testing is ERC3525Upgradeable {
     function mintValue(
         address to_,
