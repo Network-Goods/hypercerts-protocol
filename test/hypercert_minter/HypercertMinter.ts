@@ -16,11 +16,7 @@ import { shouldBehaveLikeHypercertMinterUpgrade } from "./HypercertMinter.upgrad
 describe("Unit tests", function () {
   describe("Hypercert Minter", function () {
     it("is an initializable ERC3525 contract", async () => {
-      const HypercertMetadataFactory = await ethers.getContractFactory("HypercertMetadata");
-      const HypercertMetadata = await HypercertMetadataFactory.deploy();
-      const tokenFactory = await ethers.getContractFactory(HypercertMinter_V0, {
-        libraries: { HypercertMetadata: HypercertMetadata.address },
-      });
+      const tokenFactory = await ethers.getContractFactory(HypercertMinter_V0);
       const tokenInstance = <HypercertMinterV0>await tokenFactory.deploy();
 
       // 0xd5358140 is the ERC165 interface identifier for EIP3525

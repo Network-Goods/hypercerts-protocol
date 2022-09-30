@@ -3,7 +3,6 @@ pragma solidity ^0.8.4;
 
 import "./ERC3525Upgradeable.sol";
 import "./utils/ArraysUpgradeable.sol";
-import "./utils/HypercertMetadata.sol";
 import "./utils/StringsExtensions.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
@@ -206,18 +205,12 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
         return
             string(
                 abi.encodePacked(
-                    "data:application/json;{"
-                    "name"
-                    ":",
+                    "data:application/json;{",
+                    '"name":',
                     name(),
                     ","
-                    "description"
-                    ":",
+                    '"symbol":',
                     symbol(),
-                    ","
-                    "valueDecimals"
-                    ":",
-                    valueDecimals(),
                     "}"
                 )
             );
@@ -225,7 +218,22 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
 
     function slotURI(uint256 slot_) public view override returns (string memory) {
         Claim storage claim = _impactCerts[slot_];
-        return HypercertMetadata.slotURI(_toClaimData(claim, slot_, tokenFractions(slot_)));
+        // return HypercertMetadata.slotURI(_toClaimData(claim, slot_, tokenFractions(slot_)));
+        return
+            string(
+                abi.encodePacked(
+                    "data:application/json;{"
+                    '"name":',
+                    claim.name,
+                    ","
+                    '"description":',
+                    claim.description,
+                    ",",
+                    '"uri":',
+                    claim.URI,
+                    "}"
+                )
+            );
     }
 
     function tokenURI(uint256 tokenID_)
@@ -235,11 +243,13 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
         returns (string memory)
     {
         uint256 slot = slotOf(tokenID_);
-        Claim storage claim = _impactCerts[slot];
-        uint256[] memory fractions = new uint256[](1);
-        fractions[0] = balanceOf(tokenID_);
+        // Claim storage claim = _impactCerts[slot];
+        // uint256[] memory fractions = new uint256[](1);
+        // fractions[0] = balanceOf(tokenID_);
 
-        return HypercertMetadata.tokenURI(_toClaimData(claim, slot, fractions), balanceOf(tokenID_));
+        // return HypercertMetadata.tokenURI(_toClaimData(claim, slot, fractions), balanceOf(tokenID_));
+
+        return slotURI(slot);
     }
 
     /*******************
@@ -359,22 +369,22 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
         return (bytes(map[key]).length > 0);
     }
 
-    function _toClaimData(
-        Claim storage claim,
-        uint256 id,
-        uint256[] memory fractions
-    ) internal view returns (HypercertMetadata.ClaimData memory) {
-        HypercertMetadata.ClaimData memory data;
-        data.id = id;
-        data.workTimeframe = claim.workTimeframe;
-        data.impactTimeframe = claim.impactTimeframe;
-        data.workScopes = claim.workScopes;
-        data.impactScopes = claim.impactScopes;
-        data.fractions = fractions;
-        data.totalUnits = claim.totalUnits;
-        data.name = claim.name;
-        data.description = claim.description;
-        data.URI = claim.URI;
-        return data;
-    }
+    // function _toClaimData(
+    //     Claim storage claim,
+    //     uint256 id,
+    //     uint256[] memory fractions
+    // ) internal view returns (Claim memory) {
+    //     HypercertMetadata.ClaimData memory data;
+    //     data.id = id;
+    //     data.workTimeframe = claim.workTimeframe;
+    //     data.impactTimeframe = claim.impactTimeframe;
+    //     data.workScopes = claim.workScopes;
+    //     data.impactScopes = claim.impactScopes;
+    //     data.fractions = fractions;
+    //     data.totalUnits = claim.totalUnits;
+    //     data.name = claim.name;
+    //     data.description = claim.description;
+    //     data.URI = claim.URI;
+    //     return data;
+    // }
 }

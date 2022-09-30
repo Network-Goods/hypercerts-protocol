@@ -3,7 +3,7 @@ import { ethers, getNamedAccounts, upgrades } from "hardhat";
 
 import { HypercertMinterUpgrade, HypercertMinterV0 } from "../../src/types";
 import setupTest, { setupImpactScopes, setupRights, setupWorkScopes } from "../setup";
-import { getEncodedImpactClaim } from "../utils";
+import { getClaimHash, getClaimSlotID, getEncodedImpactClaim, newClaim } from "../utils";
 import { HypercertMinter_Upgrade, HypercertMinter_V0, UPGRADER_ROLE } from "../wellKnown";
 
 export function shouldBehaveLikeHypercertMinterUpgrade(): void {
@@ -41,7 +41,9 @@ export function shouldBehaveLikeHypercertMinterUpgrade(): void {
 
   it("retains state of minted tokens", async function () {
     const { user } = await getNamedAccounts();
-    const data = await getEncodedImpactClaim();
+    const claim = await newClaim();
+    const data = await getEncodedImpactClaim(claim);
+    const claimID = await getClaimSlotID(claim);
     const HypercertMinterV0Factory = await ethers.getContractFactory(HypercertMinter_V0);
     const UpgradeFactory = await ethers.getContractFactory(HypercertMinter_Upgrade);
 
@@ -61,7 +63,7 @@ export function shouldBehaveLikeHypercertMinterUpgrade(): void {
     expect(await proxyWithUser.tokenURI(1))
       .to.include("data:application/json;")
       .to.include("ipfs://mockedImpactClaim");
-    expect(await proxyWithUser.slotURI(1))
+    expect(await proxyWithUser.slotURI(claimID))
       .to.include("data:application/json;")
       .to.include("ipfs://mockedImpactClaim");
 
@@ -70,7 +72,7 @@ export function shouldBehaveLikeHypercertMinterUpgrade(): void {
     expect(await upgrade.tokenURI(1))
       .to.include("data:application/json;")
       .to.include("ipfs://mockedImpactClaim");
-    expect(await upgrade.slotURI(1))
+    expect(await upgrade.slotURI(claimID))
       .to.include("data:application/json;")
       .to.include("ipfs://mockedImpactClaim");
 

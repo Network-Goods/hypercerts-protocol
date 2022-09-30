@@ -1,5 +1,6 @@
 import { ParamType } from "@ethersproject/abi";
 import { expect } from "chai";
+import { BigNumber } from "ethers";
 import { ethers, getNamedAccounts } from "hardhat";
 
 import { HypercertMinterV0 } from "../src/types";
@@ -77,6 +78,10 @@ export const getClaimHash = async (claim: Claim) => {
   const values = [workTimeframe, workScopes, impactTimeframe, impactScopes];
 
   return hash256(types, values);
+};
+
+export const getClaimSlotID = async (claim: Claim) => {
+  return BigNumber.from(await getClaimHash(claim));
 };
 
 export const encode = (
