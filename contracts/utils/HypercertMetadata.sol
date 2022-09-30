@@ -225,7 +225,7 @@ library HypercertMetadata {
     function _propertyString(
         string memory name_,
         string memory description_,
-        bytes32[] memory array_,
+        bytes32[] memory, /*array_*/
         bool isIntrinsic_
     ) private pure returns (string memory) {
         return
