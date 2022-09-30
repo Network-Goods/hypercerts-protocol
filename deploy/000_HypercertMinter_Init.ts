@@ -12,9 +12,14 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       console.log("Already deployed HypercertMinterV0");
     }
   } catch {
-    const HypercertMinter = await ethers.getContractFactory("HypercertMinterV0");
+    const HypercertMetadataFactory = await ethers.getContractFactory("HypercertMetadata");
+    const HypercertMetadata = await HypercertMetadataFactory.deploy();
+    const HypercertMinter = await ethers.getContractFactory("HypercertMinterV0", {
+      libraries: { HypercertMetadata: HypercertMetadata.address },
+    });
     const proxy = await upgrades.deployProxy(HypercertMinter, {
       kind: "uups",
+      unsafeAllow: ["external-library-linking"],
     });
     console.log("Deployed HypercertMinterV0 + Proxy: " + proxy.address);
 

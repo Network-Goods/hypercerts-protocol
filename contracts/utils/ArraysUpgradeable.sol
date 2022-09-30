@@ -2,10 +2,14 @@
 
 pragma solidity ^0.8.4;
 
+import "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
+
 /**
  * @dev Collection of functions related to array types.
  */
 library ArraysUpgradeable {
+    using StringsUpgradeable for uint256;
+
     /**
      * @dev calculate the sum of the elements of an array
      */
@@ -20,26 +24,32 @@ library ArraysUpgradeable {
     }
 
     function toString(uint64[2] memory array) internal pure returns (string memory) {
-        return string(abi.encode("[", array[0], ",", array[1], "]"));
+        return string(abi.encodePacked("[", uint256(array[0]).toString(), ",", uint256(array[1]).toString(), "]"));
     }
 
     function toString(uint256[] memory array) internal pure returns (string memory) {
         uint256 l = array.length;
-        string[] memory strings = new string[](l * 2 - 1);
-        for (uint256 i = 0; i < l; i++) {
-            strings[2 * i] = string(abi.encode(array[i]));
-            if (i + 1 < l) strings[2 * i + 1] = ",";
+        string memory result;
+        for (uint256 i = 1; i < l; i++) {
+            string memory s = array[i].toString();
+            if (bytes(result).length == 0) result = s;
+            else result = string(abi.encodePacked(result, ",", s));
         }
-        return string(abi.encode("[", strings, "]"));
+
+        return string(abi.encodePacked("[", result, "]"));
     }
 
     function toString(bytes32[] memory array) internal pure returns (string memory) {
         uint256 l = array.length;
-        string[] memory strings = new string[](l * 2 - 1);
-        for (uint256 i = 0; i < l; i++) {
-            strings[2 * i] = string(abi.encode(array[i]));
-            if (i + 1 < l) strings[2 * i + 1] = ",";
+        string memory result;
+        for (uint256 i = 1; i < l; i++) {
+            bytes memory b = abi.encodePacked(array[i]);
+            if (b.length == 0) continue;
+            string memory s = string(abi.encodePacked('"', string(b), '"'));
+            if (bytes(result).length == 0) result = s;
+            else result = string(abi.encodePacked(result, ",", s));
         }
-        return string(abi.encode("[", strings, "]"));
+
+        return string(abi.encodePacked("[", result, "]"));
     }
 }
