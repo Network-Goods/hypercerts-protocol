@@ -163,16 +163,12 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
 
     const cid = "ipfs://QmW2WQi7j6c7UgJTarActp7tDNikE4B2qXtFCfLPdsgaTQ/cat.jpg";
 
-    const workScopes = Object.keys(WorkScopes);
-    const claim2 = await newClaim({ workScopes: workScopes, uri: cid, fractions: [50, 50] });
+    const claim2 = await newClaim({ ...claim, workTimeframe: [12345678, 87654321], uri: cid, fractions: [50, 50] });
     const claimID2 = await getClaimSlotID(claim2);
 
-    const dataWithIPFS = await getEncodedImpactClaim({
-      workScopes: [workScopes[0], workScopes[1]],
-      uri: cid,
-    });
+    const data2 = await getEncodedImpactClaim(claim2);
 
-    await expect(user.minter.mint(user.address, dataWithIPFS))
+    await expect(user.minter.mint(user.address, data2))
       .to.emit(minter, "Transfer")
       .withArgs(ethers.constants.AddressZero, user.address, 3);
 
