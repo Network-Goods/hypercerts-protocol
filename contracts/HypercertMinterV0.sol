@@ -3,6 +3,9 @@ pragma solidity ^0.8.4;
 
 import "./ERC3525Upgradeable.sol";
 import "./utils/ArraysUpgradeable.sol";
+import "./utils/HypercertMetadata.sol";
+import "./utils/HypercertTypes.sol";
+import "./utils/StringsExtensions.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
@@ -25,10 +28,6 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
     /// @notice Current version of the contract
     uint16 internal _version;
-    /// @notice Counter incremented and used for the next token ID
-    uint256 internal _tokenId;
-    /// @notice Counter incremented and used for the next slot
-    uint256 internal _slot;
 
     /// @notice Mapping of id's to work-scopes
     mapping(bytes32 => string) public workScopes;
@@ -37,20 +36,7 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
     /// @notice Mapping of id's to rights
     mapping(bytes32 => string) public rights;
     mapping(address => mapping(bytes32 => bool)) internal _contributorImpacts;
-    mapping(uint256 => Claim) internal _impactCerts;
-
-    struct Claim {
-        bytes32 claimHash;
-        uint64[2] workTimeframe;
-        uint64[2] impactTimeframe;
-        bytes32[] workScopes;
-        bytes32[] impactScopes;
-        bytes32[] rights;
-        address[] contributors;
-        uint256 totalUnits;
-        uint16 version;
-        bool exists;
-    }
+    mapping(uint256 => HypercertTypes.Claim) internal _impactCerts;
 
     /*******************
      * EVENTS
@@ -157,26 +143,26 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
     /// @param data Data representing the parameters of the claim
     function mint(address account, bytes memory data) public virtual {
         // Parse data to get Claim
-        (Claim memory claim, string memory claimURI, uint8[] memory fractions) = _parseData(data);
+        (HypercertTypes.Claim memory claim, uint8[] memory fractions) = _parseData(data);
 
         _authorizeMint(account, claim);
 
         // Check on overlapping contributor-claims and store if success
         _storeContributorsClaims(claim.claimHash, claim.contributors);
 
-        _slot++;
+        uint256 slot = uint256(claim.claimHash);
         // Store impact cert
-        _impactCerts[_slot] = claim;
-        _setSlotURI(_slot, claimURI);
+        _impactCerts[slot] = claim;
 
         // Mint impact cert
         uint256 l = fractions.length;
         for (uint256 i = 0; i < l; i++) {
-            _mintValue(account, ++_tokenId, _slot, fractions[i]);
+            uint256 tokenID = _getNewTokenId(0);
+            _mintValue(account, tokenID, slot, fractions[i]);
         }
 
         emit ImpactClaimed(
-            _slot,
+            slot,
             account,
             claim.claimHash,
             claim.contributors,
@@ -187,14 +173,14 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
             claim.rights,
             fractions,
             claim.version,
-            claimURI
+            claim.URI
         );
     }
 
     /// @notice Gets the impact claim with the specified id
     /// @param claimID Id of the claim
     /// @return The claim, if it doesn't exist with default values
-    function getImpactCert(uint256 claimID) public view returns (Claim memory) {
+    function getImpactCert(uint256 claimID) public view returns (HypercertTypes.Claim memory) {
         return _impactCerts[claimID];
     }
 
@@ -238,6 +224,44 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
         return keccak256(abi.encode(workTimeframe_, workScopes_, impactTimeframe_, impactScopes_));
     }
 
+    function contractURI() public view virtual override returns (string memory) {
+        return
+            string(
+                abi.encodePacked(
+                    "data:application/json;{"
+                    "name"
+                    ":",
+                    name(),
+                    ","
+                    "description"
+                    ":",
+                    symbol(),
+                    ","
+                    "valueDecimals"
+                    ":",
+                    valueDecimals(),
+                    "}"
+                )
+            );
+    }
+
+    function slotURI(uint256 slot_) public view override returns (string memory) {
+        HypercertTypes.Claim memory claim = _impactCerts[slot_];
+        uint256[] memory fractions = tokenFractions(slot_);
+        return HypercertMetadata.slotURI(claim, fractions);
+    }
+
+    function tokenURI(uint256 tokenID_)
+        public
+        view
+        override(ERC721Upgradeable, IERC721MetadataUpgradeable)
+        returns (string memory)
+    {
+        uint256 slot = slotOf(tokenID_);
+        HypercertTypes.Claim memory claim = _impactCerts[slot];
+        return HypercertMetadata.tokenURI(claim, balanceOf(tokenID_));
+    }
+
     /*******************
      * INTERNAL
      ******************/
@@ -272,7 +296,7 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
     /// @notice Pre-mint validation checks
     /// @param account Destination address for the mint
     /// @param claim Impact claim data
-    function _authorizeMint(address account, Claim memory claim) internal view virtual {
+    function _authorizeMint(address account, HypercertTypes.Claim memory claim) internal view virtual {
         require(account != address(0), "Mint: mint to the zero address");
         require(claim.workTimeframe[0] <= claim.workTimeframe[1], "Mint: invalid workTimeframe");
         require(claim.impactTimeframe[0] <= claim.impactTimeframe[1], "Mint: invalid impactTimeframe");
@@ -298,11 +322,7 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
         internal
         pure
         virtual
-        returns (
-            Claim memory claim,
-            string memory,
-            uint8[] memory
-        )
+        returns (HypercertTypes.Claim memory claim, uint8[] memory)
     {
         require(data.length > 0, "_parseData: input data empty");
 
@@ -313,9 +333,14 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
             uint64[2] memory workTimeframe,
             uint64[2] memory impactTimeframe,
             address[] memory contributors,
+            string memory name_,
+            string memory description_,
             string memory uri_,
             uint8[] memory fractions
-        ) = abi.decode(data, (bytes32[], bytes32[], bytes32[], uint64[2], uint64[2], address[], string, uint8[]));
+        ) = abi.decode(
+                data,
+                (bytes32[], bytes32[], bytes32[], uint64[2], uint64[2], address[], string, string, string, uint8[])
+            );
 
         bytes32 claimHash = getHash(workTimeframe, workScopes_, impactTimeframe, impactScopes_);
 
@@ -329,8 +354,11 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
         claim.totalUnits = fractions.getSum();
         claim.version = uint16(0);
         claim.exists = true;
+        claim.name = name_;
+        claim.description = description_;
+        claim.URI = uri_;
 
-        return (claim, uri_, fractions);
+        return (claim, fractions);
     }
 
     /// @notice Stores contributor claims in the `contributorImpacts` mapping; guards against overlapping claims

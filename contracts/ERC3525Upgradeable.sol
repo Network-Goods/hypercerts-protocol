@@ -12,7 +12,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721Enumer
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721BurnableUpgradeable.sol";
 
-contract ERC3525Upgradeable is
+abstract contract ERC3525Upgradeable is
     Initializable,
     ERC721EnumerableUpgradeable,
     ERC721BurnableUpgradeable,
@@ -36,8 +36,6 @@ contract ERC3525Upgradeable is
     /// @dev tokenId => slot
     mapping(uint256 => uint256) internal _slots;
     uint256[] internal _slotArray;
-    /// @dev slot => URI
-    mapping(uint256 => string) private _slotURIs;
 
     /// @dev slot => tokenId[]
     mapping(uint256 => uint256[]) internal _tokensBySlot;
@@ -136,73 +134,14 @@ contract ERC3525Upgradeable is
         return _tokensBySlot[_slot][_index];
     }
 
-    function contractURI() public view virtual override returns (string memory) {
-        return
-            string(
-                abi.encodePacked(
-                    "data:application/json;{"
-                    "name"
-                    ":",
-                    name(),
-                    ","
-                    "description"
-                    ":",
-                    symbol(),
-                    ","
-                    "valueDecimals"
-                    ":",
-                    valueDecimals(),
-                    "}"
-                )
-            );
-    }
-
-    function slotURI(
-        uint256 /*slot_*/
-    ) public pure override returns (string memory) {
-        return
-            string(
-                abi.encodePacked(
-                    "data:application/json;{"
-                    "name"
-                    ":"
-                    "Slot Type A"
-                    ","
-                    "description"
-                    ":"
-                    "Slot Type A description"
-                    "}"
-                )
-            );
-    }
-
-    function tokenURI(uint256 tokenID_)
-        public
-        view
-        override(ERC721Upgradeable, IERC721MetadataUpgradeable)
-        returns (string memory)
-    {
-        return
-            string(
-                abi.encodePacked(
-                    "data:application/json;{"
-                    "name"
-                    ":"
-                    "Asset Type A"
-                    ","
-                    "description"
-                    ":"
-                    "Asset Type A description"
-                    ","
-                    "balance",
-                    balanceOf(tokenID_),
-                    ","
-                    "slot"
-                    ":",
-                    slotOf(tokenID_),
-                    "}"
-                )
-            );
+    function tokenFractions(uint256 _slot) internal view virtual returns (uint256[] memory) {
+        uint256 tokenSupply = _tokensBySlot[_slot].length;
+        uint256[] memory fractions = new uint256[](tokenSupply);
+        for (uint256 i = 0; i < 25 && i < tokenSupply; i++) {
+            uint256 tokenID = _tokensBySlot[_slot][i];
+            fractions[i] = balanceOf(tokenID);
+        }
+        return fractions;
     }
 
     function transferFrom(
@@ -299,13 +238,6 @@ contract ERC3525Upgradeable is
         _afterValueTransfer(from, to, fromTokenId_, toTokenId_, _slots[fromTokenId_], value_);
 
         emit TransferValue(fromTokenId_, toTokenId_, value_);
-    }
-
-    /**
-     * @dev Sets `_slotURI` as the slotURI of `slot`.
-     */
-    function _setSlotURI(uint256 slot, string memory _slotURI) internal virtual {
-        _slotURIs[slot] = _slotURI;
     }
 
     function _spendAllowance(

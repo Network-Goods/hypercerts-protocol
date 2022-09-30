@@ -43,4 +43,74 @@ contract ERC3525_Testing is ERC3525Upgradeable {
     ) public {
         _approveValue(tokenId_, to_, value_);
     }
+
+    function contractURI() public view virtual override returns (string memory) {
+        return
+            string(
+                abi.encodePacked(
+                    "data:application/json;{"
+                    "name"
+                    ":",
+                    name(),
+                    ","
+                    "description"
+                    ":",
+                    symbol(),
+                    ","
+                    "valueDecimals"
+                    ":",
+                    valueDecimals(),
+                    "}"
+                )
+            );
+    }
+
+    function slotURI(
+        uint256 /*slot_*/
+    ) public view virtual override returns (string memory) {
+        return
+            string(
+                abi.encodePacked(
+                    "data:application/json;{"
+                    "name"
+                    ":"
+                    "Slot Type A"
+                    ","
+                    "description"
+                    ":"
+                    "Slot Type A description"
+                    "}"
+                )
+            );
+    }
+
+    function tokenURI(uint256 tokenID_)
+        public
+        view
+        virtual
+        override(ERC721Upgradeable, IERC721MetadataUpgradeable)
+        returns (string memory)
+    {
+        return
+            string(
+                abi.encodePacked(
+                    "data:application/json;{"
+                    "name"
+                    ":"
+                    "Asset Type A"
+                    ","
+                    "description"
+                    ":"
+                    "Asset Type A description"
+                    ","
+                    "balance",
+                    balanceOf(tokenID_),
+                    ","
+                    "slot"
+                    ":",
+                    slotOf(tokenID_),
+                    "}"
+                )
+            );
+    }
 }
