@@ -246,7 +246,7 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
     }
 
     function slotURI(uint256 slot_) public view override returns (string memory) {
-        HypercertTypes.Claim memory claim = _impactCerts[slot_];
+        HypercertTypes.Claim storage claim = _impactCerts[slot_];
         uint256[] memory fractions = tokenFractions(slot_);
         return HypercertMetadata.slotURI(claim, fractions);
     }
@@ -258,7 +258,7 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
         returns (string memory)
     {
         uint256 slot = slotOf(tokenID_);
-        HypercertTypes.Claim memory claim = _impactCerts[slot];
+        HypercertTypes.Claim storage claim = _impactCerts[slot];
         return HypercertMetadata.tokenURI(claim, balanceOf(tokenID_));
     }
 
