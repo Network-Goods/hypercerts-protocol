@@ -12,6 +12,8 @@ export type Claim = {
   contributors: string[];
   workScopes: string[];
   impactScopes: string[];
+  name: string;
+  description: string;
   uri: string;
   version: number;
   fractions: number[];
@@ -30,6 +32,8 @@ export const newClaim = async (claim?: Partial<Claim>) => {
     contributors: claim?.contributors || (await getNamedAccountsAsArray()),
     workScopes: claim?.workScopes || Object.keys(WorkScopes),
     impactScopes: claim?.impactScopes || Object.keys(ImpactScopes),
+    name: claim?.name || "Impact Claim 1",
+    description: claim?.description || "Impact Claim 1 description",
     uri: claim?.uri || "ipfs://mockedImpactClaim",
     version: claim?.version || 0,
     fractions: claim?.fractions || [100],
@@ -39,7 +43,18 @@ export const newClaim = async (claim?: Partial<Claim>) => {
 export const getEncodedImpactClaim = async (claim?: Partial<Claim>) => encodeClaim(await newClaim(claim));
 
 export const encodeClaim = (c: Claim) => {
-  const types = ["uint256[]", "uint256[]", "uint256[]", "uint64[2]", "uint64[2]", "address[]", "string", "uint8[]"];
+  const types = [
+    "uint256[]",
+    "uint256[]",
+    "uint256[]",
+    "uint64[2]",
+    "uint64[2]",
+    "address[]",
+    "string",
+    "string",
+    "string",
+    "uint8[]",
+  ];
   const values = [
     c.rights,
     c.workScopes,
@@ -47,6 +62,8 @@ export const encodeClaim = (c: Claim) => {
     c.workTimeframe,
     c.impactTimeframe,
     c.contributors,
+    c.name,
+    c.description,
     c.uri,
     c.fractions,
   ];

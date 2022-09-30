@@ -4,13 +4,10 @@ pragma solidity ^0.8.4;
 import "./ERC3525Upgradeable.sol";
 import "./utils/ArraysUpgradeable.sol";
 import "./utils/HypercertMetadata.sol";
-import "./utils/HypercertTypes.sol";
 import "./utils/StringsExtensions.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-
-import "hardhat/console.sol";
 
 /// @title Hypercertificate minting logic
 /// @notice Contains functions and events to initialize and issue a hypercertificate
@@ -36,7 +33,23 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
     /// @notice Mapping of id's to rights
     mapping(bytes32 => string) public rights;
     mapping(address => mapping(bytes32 => bool)) internal _contributorImpacts;
-    mapping(uint256 => HypercertTypes.Claim) internal _impactCerts;
+    mapping(uint256 => Claim) internal _impactCerts;
+
+    struct Claim {
+        bytes32 claimHash;
+        uint64[2] workTimeframe;
+        uint64[2] impactTimeframe;
+        bytes32[] workScopes;
+        bytes32[] impactScopes;
+        bytes32[] rights;
+        address[] contributors;
+        uint256 totalUnits;
+        uint16 version;
+        bool exists;
+        string name;
+        string description;
+        string URI;
+    }
 
     /*******************
      * EVENTS
@@ -45,30 +58,8 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
     /// @notice Emitted when an impact is claimed.
     /// @param id Id of the claimed impact.
     /// @param minter Address of cert minter.
-    /// @param claimHash Hash value of the claim data.
-    /// @param contributors Contributors to the claimed impact.
-    /// @param workTimeframe To/from date of the work related to the claim.
-    /// @param impactTimeframe To/from date of the claimed impact.
-    /// @param workScopes Id's relating to the scope of the work.
-    /// @param impactScopes Id's relating to the scope of the impact.
-    /// @param rights Id's relating to the rights applied to the hypercert.
     /// @param fractions Units of tokens issued under the hypercert.
-    /// @param version Version of the hypercert.
-    /// @param uri URI of the metadata of the hypercert.
-    event ImpactClaimed(
-        uint256 id,
-        address minter,
-        bytes32 claimHash,
-        address[] contributors,
-        uint64[2] workTimeframe,
-        uint64[2] impactTimeframe,
-        bytes32[] workScopes,
-        bytes32[] impactScopes,
-        bytes32[] rights,
-        uint8[] fractions,
-        uint64 version,
-        string uri
-    );
+    event ImpactClaimed(uint256 id, address minter, uint8[] fractions);
 
     /// @notice Emitted when a new impact scope is added.
     /// @param id Id of the impact scope.
@@ -143,7 +134,7 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
     /// @param data Data representing the parameters of the claim
     function mint(address account, bytes memory data) public virtual {
         // Parse data to get Claim
-        (HypercertTypes.Claim memory claim, uint8[] memory fractions) = _parseData(data);
+        (Claim memory claim, uint8[] memory fractions) = _parseData(data);
 
         _authorizeMint(account, claim);
 
@@ -161,26 +152,13 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
             _mintValue(account, tokenID, slot, fractions[i]);
         }
 
-        emit ImpactClaimed(
-            slot,
-            account,
-            claim.claimHash,
-            claim.contributors,
-            claim.workTimeframe,
-            claim.impactTimeframe,
-            claim.workScopes,
-            claim.impactScopes,
-            claim.rights,
-            fractions,
-            claim.version,
-            claim.URI
-        );
+        emit ImpactClaimed(slot, account, fractions);
     }
 
     /// @notice Gets the impact claim with the specified id
     /// @param claimID Id of the claim
     /// @return The claim, if it doesn't exist with default values
-    function getImpactCert(uint256 claimID) public view returns (HypercertTypes.Claim memory) {
+    function getImpactCert(uint256 claimID) public view returns (Claim memory) {
         return _impactCerts[claimID];
     }
 
@@ -246,9 +224,8 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
     }
 
     function slotURI(uint256 slot_) public view override returns (string memory) {
-        HypercertTypes.Claim storage claim = _impactCerts[slot_];
-        uint256[] memory fractions = tokenFractions(slot_);
-        return HypercertMetadata.slotURI(claim, fractions);
+        Claim storage claim = _impactCerts[slot_];
+        return HypercertMetadata.slotURI(_toClaimData(claim, slot_, tokenFractions(slot_)));
     }
 
     function tokenURI(uint256 tokenID_)
@@ -258,8 +235,11 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
         returns (string memory)
     {
         uint256 slot = slotOf(tokenID_);
-        HypercertTypes.Claim storage claim = _impactCerts[slot];
-        return HypercertMetadata.tokenURI(claim, balanceOf(tokenID_));
+        Claim storage claim = _impactCerts[slot];
+        uint256[] memory fractions = new uint256[](1);
+        fractions[0] = balanceOf(tokenID_);
+
+        return HypercertMetadata.tokenURI(_toClaimData(claim, slot, fractions), balanceOf(tokenID_));
     }
 
     /*******************
@@ -296,7 +276,7 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
     /// @notice Pre-mint validation checks
     /// @param account Destination address for the mint
     /// @param claim Impact claim data
-    function _authorizeMint(address account, HypercertTypes.Claim memory claim) internal view virtual {
+    function _authorizeMint(address account, Claim memory claim) internal view virtual {
         require(account != address(0), "Mint: mint to the zero address");
         require(claim.workTimeframe[0] <= claim.workTimeframe[1], "Mint: invalid workTimeframe");
         require(claim.impactTimeframe[0] <= claim.impactTimeframe[1], "Mint: invalid impactTimeframe");
@@ -318,12 +298,7 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
     /// @dev This function is overridable in order to support future schema changes
     /// @return claim The parsed Claim struct
     /// @return Claim metadata URI
-    function _parseData(bytes memory data)
-        internal
-        pure
-        virtual
-        returns (HypercertTypes.Claim memory claim, uint8[] memory)
-    {
+    function _parseData(bytes memory data) internal pure virtual returns (Claim memory claim, uint8[] memory) {
         require(data.length > 0, "_parseData: input data empty");
 
         (
@@ -342,9 +317,7 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
                 (bytes32[], bytes32[], bytes32[], uint64[2], uint64[2], address[], string, string, string, uint8[])
             );
 
-        bytes32 claimHash = getHash(workTimeframe, workScopes_, impactTimeframe, impactScopes_);
-
-        claim.claimHash = claimHash;
+        claim.claimHash = getHash(workTimeframe, workScopes_, impactTimeframe, impactScopes_);
         claim.contributors = contributors;
         claim.workTimeframe = workTimeframe;
         claim.impactTimeframe = impactTimeframe;
@@ -384,5 +357,24 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
     /// @return true, if the key exists in the mapping
     function _hasKey(mapping(bytes32 => string) storage map, bytes32 key) internal view returns (bool) {
         return (bytes(map[key]).length > 0);
+    }
+
+    function _toClaimData(
+        Claim storage claim,
+        uint256 id,
+        uint256[] memory fractions
+    ) internal view returns (HypercertMetadata.ClaimData memory) {
+        HypercertMetadata.ClaimData memory data;
+        data.id = id;
+        data.workTimeframe = claim.workTimeframe;
+        data.impactTimeframe = claim.impactTimeframe;
+        data.workScopes = claim.workScopes;
+        data.impactScopes = claim.impactScopes;
+        data.fractions = fractions;
+        data.totalUnits = claim.totalUnits;
+        data.name = claim.name;
+        data.description = claim.description;
+        data.URI = claim.URI;
+        return data;
     }
 }
