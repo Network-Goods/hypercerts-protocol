@@ -54,10 +54,6 @@ abstract contract ERC3525Upgradeable is
             super.supportsInterface(interfaceId);
     }
 
-    function valueDecimals() public view virtual override returns (uint8) {
-        return 0;
-    }
-
     function balanceOf(uint256 tokenId_) public view virtual override returns (uint256) {
         require(_exists(tokenId_), "ERC3525: balance query for nonexistent token");
         return _values[tokenId_];

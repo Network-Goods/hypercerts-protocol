@@ -52,7 +52,7 @@ contract ERC3525_Testing is ERC3525Upgradeable {
 
     function slotURI(
         uint256 /*slot_*/
-    ) public view virtual override returns (string memory) {
+    ) public pure override returns (string memory) {
         return
             string(
                 abi.encodePacked(
@@ -72,7 +72,6 @@ contract ERC3525_Testing is ERC3525Upgradeable {
     function tokenURI(uint256 tokenID_)
         public
         view
-        virtual
         override(ERC721Upgradeable, IERC721MetadataUpgradeable)
         returns (string memory)
     {
@@ -97,5 +96,9 @@ contract ERC3525_Testing is ERC3525Upgradeable {
                     "}"
                 )
             );
+    }
+
+    function valueDecimals() public pure override returns (uint8) {
+        return 0;
     }
 }

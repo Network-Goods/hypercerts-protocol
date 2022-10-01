@@ -19,6 +19,8 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
     string public constant NAME = "Hypercerts";
     /// @notice Token symbol
     string public constant SYMBOL = "HCRT";
+    /// @notice Token value decimals
+    uint8 public constant DECIMALS = 0;
     /// @notice User role required in order to upgrade the contract
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
     /// @notice Current version of the contract
@@ -90,7 +92,6 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
     function initialize(IHypercertMetadata metadata) public initializer {
         _metadata = metadata;
 
-        __ERC721_init(NAME, SYMBOL);
         __ERC721Burnable_init();
         __AccessControl_init();
         __UUPSUpgradeable_init();
@@ -192,6 +193,10 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
 
     function symbol() public pure override(ERC721Upgradeable, IERC721MetadataUpgradeable) returns (string memory) {
         return SYMBOL;
+    }
+
+    function valueDecimals() public view virtual override returns (uint8) {
+        return DECIMALS;
     }
 
     function getHash(
@@ -341,8 +346,8 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
         data.id = id;
         data.workTimeframe = claim.workTimeframe;
         data.impactTimeframe = claim.impactTimeframe;
-        // data.workScopes = _mapToValues(claim.workScopes, workScopes);
-        // data.impactScopes = _mapToValues(claim.impactScopes, impactScopes);
+        data.workScopes = _mapToValues(claim.workScopes, workScopes);
+        data.impactScopes = _mapToValues(claim.impactScopes, impactScopes);
         data.fractions = fractions;
         data.totalUnits = claim.totalUnits;
         data.name = claim.name;
