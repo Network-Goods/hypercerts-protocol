@@ -14,7 +14,7 @@ contract HypercertMetadataV0 is IHypercertMetadata {
     using StringsExtensions for bool;
     using StringsUpgradeable for uint256;
 
-    function slotURI(ClaimData calldata claim) external pure returns (string memory) {
+    function slotURI(ClaimData calldata claim) external pure virtual returns (string memory) {
         return
             string(
                 abi.encodePacked(
@@ -29,7 +29,7 @@ contract HypercertMetadataV0 is IHypercertMetadata {
             );
     }
 
-    function tokenURI(ClaimData calldata claim, uint256 balance) external pure returns (string memory) {
+    function tokenURI(ClaimData calldata claim, uint256 balance) external pure virtual returns (string memory) {
         return
             string(
                 abi.encodePacked(
@@ -48,7 +48,7 @@ contract HypercertMetadataV0 is IHypercertMetadata {
             );
     }
 
-    function _slotProperties(ClaimData memory claim) private pure returns (string memory) {
+    function _slotProperties(ClaimData memory claim) internal pure virtual returns (string memory) {
         return
             string(
                 abi.encodePacked(
@@ -84,7 +84,7 @@ contract HypercertMetadataV0 is IHypercertMetadata {
             );
     }
 
-    function _tokenProperties(ClaimData memory claim, uint256 balance) private pure returns (string memory) {
+    function _tokenProperties(ClaimData memory claim, uint256 balance) internal pure virtual returns (string memory) {
         return
             string(
                 abi.encodePacked(
@@ -127,7 +127,7 @@ contract HypercertMetadataV0 is IHypercertMetadata {
         string memory description_,
         string memory value_,
         bool isIntrinsic_
-    ) private pure returns (string memory) {
+    ) internal pure virtual returns (string memory) {
         return
             string(
                 abi.encodePacked(
@@ -149,7 +149,7 @@ contract HypercertMetadataV0 is IHypercertMetadata {
         string memory description_,
         uint256 value_,
         bool isIntrinsic_
-    ) private pure returns (string memory) {
+    ) internal pure virtual returns (string memory) {
         return
             string(
                 abi.encodePacked(
@@ -171,7 +171,7 @@ contract HypercertMetadataV0 is IHypercertMetadata {
         string memory description_,
         uint256[] memory array_,
         bool isIntrinsic_
-    ) private pure returns (string memory) {
+    ) internal pure virtual returns (string memory) {
         return
             string(
                 abi.encodePacked(
@@ -193,7 +193,7 @@ contract HypercertMetadataV0 is IHypercertMetadata {
         string memory description_,
         uint64[2] memory array_,
         bool isIntrinsic_
-    ) private pure returns (string memory) {
+    ) internal pure virtual returns (string memory) {
         return
             string(
                 abi.encodePacked(
@@ -215,7 +215,7 @@ contract HypercertMetadataV0 is IHypercertMetadata {
         string memory description_,
         string[] memory array_,
         bool isIntrinsic_
-    ) private pure returns (string memory) {
+    ) internal pure virtual returns (string memory) {
         return
             string(
                 abi.encodePacked(
