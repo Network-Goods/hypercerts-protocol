@@ -1,32 +1,20 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.4;
 
-import "./ArraysUpgradeable.sol";
-import "./StringsExtensions.sol";
+import "./interfaces/IHypercertMetadata.sol";
+import "./utils/ArraysUpgradeable.sol";
+import "./utils/StringsExtensions.sol";
 import "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
 
 /// @dev Hypercertificate metadata creation logic
-library HypercertMetadata {
+contract HypercertMetadataV0 is IHypercertMetadata {
     using ArraysUpgradeable for uint64[2];
     using ArraysUpgradeable for uint256[];
-    using ArraysUpgradeable for bytes32[];
+    using ArraysUpgradeable for string[];
     using StringsExtensions for bool;
     using StringsUpgradeable for uint256;
 
-    struct ClaimData {
-        uint256 id;
-        uint64[2] workTimeframe;
-        uint64[2] impactTimeframe;
-        bytes32[] workScopes;
-        bytes32[] impactScopes;
-        uint256[] fractions;
-        uint256 totalUnits;
-        string name;
-        string description;
-        string uri;
-    }
-
-    function slotURI(ClaimData memory claim) public pure returns (string memory) {
+    function slotURI(ClaimData calldata claim) external pure returns (string memory) {
         return
             string(
                 abi.encodePacked(
@@ -41,7 +29,7 @@ library HypercertMetadata {
             );
     }
 
-    function tokenURI(ClaimData memory claim, uint256 balance) public pure returns (string memory) {
+    function tokenURI(ClaimData calldata claim, uint256 balance) external pure returns (string memory) {
         return
             string(
                 abi.encodePacked(
@@ -192,7 +180,7 @@ library HypercertMetadata {
                     '","description":"',
                     description_,
                     '","value":"',
-                    array_.toString(),
+                    array_.toCsv(),
                     '","is_intrinsic":"',
                     isIntrinsic_.toString(),
                     '"}'
@@ -225,7 +213,7 @@ library HypercertMetadata {
     function _propertyString(
         string memory name_,
         string memory description_,
-        bytes32[] memory, /*array_*/
+        string[] memory array_,
         bool isIntrinsic_
     ) private pure returns (string memory) {
         return
@@ -236,7 +224,7 @@ library HypercertMetadata {
                     '","description":"',
                     description_,
                     '","value":"',
-                    //array_.toString(),
+                    array_.toCsv(),
                     '","is_intrinsic":"',
                     isIntrinsic_.toString(),
                     '"}'

@@ -40,20 +40,6 @@ abstract contract ERC3525Upgradeable is
     /// @dev slot => tokenId[]
     mapping(uint256 => uint256[]) internal _tokensBySlot;
 
-    // Token decimals
-    uint8 private _decimals;
-
-    /// @notice Contract initialization logic
-    // solhint-disable-next-line no-empty-blocks
-    function initialize() public virtual initializer {
-        // empty block
-    }
-
-    // solhint-disable-next-line func-name-mixedcase
-    function __ERC3525_init(uint8 decimals_) internal onlyInitializing {
-        _decimals = decimals_;
-    }
-
     function supportsInterface(bytes4 interfaceId)
         public
         view
@@ -69,7 +55,7 @@ abstract contract ERC3525Upgradeable is
     }
 
     function valueDecimals() public view virtual override returns (uint8) {
-        return _decimals;
+        return 0;
     }
 
     function balanceOf(uint256 tokenId_) public view virtual override returns (uint256) {
@@ -171,6 +157,25 @@ abstract contract ERC3525Upgradeable is
 
         _transfer(fromTokenId_, toTokenId_, value_);
     }
+
+    function contractURI() public view virtual override returns (string memory) {
+        return
+            string(
+                abi.encodePacked(
+                    "data:application/json;{",
+                    '"name":',
+                    name(),
+                    ","
+                    '"symbol":',
+                    symbol(),
+                    "}"
+                )
+            );
+    }
+
+    /*******************
+     * INTERNAL
+     ******************/
 
     function _mint(
         address to_,

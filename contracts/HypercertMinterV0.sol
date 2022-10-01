@@ -2,8 +2,8 @@
 pragma solidity ^0.8.4;
 
 import "./ERC3525Upgradeable.sol";
+import "./interfaces/IHypercertMetadata.sol";
 import "./utils/ArraysUpgradeable.sol";
-import "./utils/HypercertMetadata.sol";
 import "./utils/StringsExtensions.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
@@ -19,12 +19,12 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
     string public constant NAME = "Hypercerts";
     /// @notice Token symbol
     string public constant SYMBOL = "HCRT";
-    /// @notice Token value decimals
-    uint8 public constant DECIMALS = 0;
     /// @notice User role required in order to upgrade the contract
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
     /// @notice Current version of the contract
     uint16 internal _version;
+    /// @notice Hypercert metadata contract
+    IHypercertMetadata internal _metadata;
 
     /// @notice Mapping of id's to work-scopes
     mapping(bytes32 => string) public workScopes;
@@ -87,8 +87,9 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
     }
 
     /// @notice Contract initialization logic
-    function initialize() public override initializer {
-        __ERC3525_init(DECIMALS);
+    function initialize(IHypercertMetadata metadata) public initializer {
+        _metadata = metadata;
+
         __ERC721_init(NAME, SYMBOL);
         __ERC721Burnable_init();
         __AccessControl_init();
@@ -202,39 +203,9 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
         return keccak256(abi.encode(workTimeframe_, workScopes_, impactTimeframe_, impactScopes_));
     }
 
-    function contractURI() public view virtual override returns (string memory) {
-        return
-            string(
-                abi.encodePacked(
-                    "data:application/json;{",
-                    '"name":',
-                    name(),
-                    ","
-                    '"symbol":',
-                    symbol(),
-                    "}"
-                )
-            );
-    }
-
     function slotURI(uint256 slot_) public view override returns (string memory) {
         Claim storage claim = _impactCerts[slot_];
-        return HypercertMetadata.slotURI(_toClaimData(claim, slot_, tokenFractions(slot_)));
-        // return
-        //     string(
-        //         abi.encodePacked(
-        //             "data:application/json;{"
-        //             '"name":',
-        //             claim.name,
-        //             ","
-        //             '"description":',
-        //             claim.description,
-        //             ",",
-        //             '"uri":',
-        //             claim.URI,
-        //             "}"
-        //         )
-        //     );
+        return _metadata.slotURI(_toClaimData(claim, slot_, tokenFractions(slot_)));
     }
 
     function tokenURI(uint256 tokenID_)
@@ -248,7 +219,7 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
         uint256[] memory fractions = new uint256[](1);
         fractions[0] = balanceOf(tokenID_);
 
-        return HypercertMetadata.tokenURI(_toClaimData(claim, slot, fractions), balanceOf(tokenID_));
+        return _metadata.tokenURI(_toClaimData(claim, slot, fractions), balanceOf(tokenID_));
     }
 
     /*******************
@@ -353,13 +324,6 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
         }
     }
 
-    /// @notice Hash the specified string value
-    /// @param value string to hash
-    /// @return a keccak256 hash-code
-    function _hash(string memory value) internal pure returns (bytes32) {
-        return keccak256(abi.encode(value));
-    }
-
     /// @notice Checks whether the supplied mapping contains the supplied key
     /// @param map mapping to search
     /// @param key key to search
@@ -372,13 +336,13 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
         Claim storage claim,
         uint256 id,
         uint256[] memory fractions
-    ) internal view returns (HypercertMetadata.ClaimData memory) {
-        HypercertMetadata.ClaimData memory data;
+    ) internal view returns (ClaimData memory) {
+        ClaimData memory data;
         data.id = id;
         data.workTimeframe = claim.workTimeframe;
         data.impactTimeframe = claim.impactTimeframe;
-        data.workScopes = claim.workScopes;
-        data.impactScopes = claim.impactScopes;
+        // data.workScopes = _mapToValues(claim.workScopes, workScopes);
+        // data.impactScopes = _mapToValues(claim.impactScopes, impactScopes);
         data.fractions = fractions;
         data.totalUnits = claim.totalUnits;
         data.name = claim.name;
@@ -386,5 +350,19 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
         data.uri = claim.uri;
 
         return data;
+    }
+
+    /// @dev use keys to look up values in the supplied mapping
+    function _mapToValues(bytes32[] memory keys, mapping(bytes32 => string) storage map)
+        internal
+        view
+        returns (string[] memory)
+    {
+        uint256 len = keys.length;
+        string[] memory values = new string[](len);
+        for (uint256 i = 0; i < len; i++) {
+            values[i] = map[keys[i]];
+        }
+        return values;
     }
 }

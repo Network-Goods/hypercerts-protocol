@@ -4,7 +4,7 @@ import { ethers, getNamedAccounts, upgrades } from "hardhat";
 import { HypercertMinterUpgrade, HypercertMinterV0 } from "../../src/types";
 import setupTest, { setupImpactScopes, setupRights, setupWorkScopes } from "../setup";
 import { getClaimSlotID, getEncodedImpactClaim, newClaim } from "../utils";
-import { HypercertMinter_Upgrade, HypercertMinter_V0, UPGRADER_ROLE } from "../wellKnown";
+import { HypercertMetadata_V0, HypercertMinter_Upgrade, HypercertMinter_V0, UPGRADER_ROLE } from "../wellKnown";
 
 export function shouldBehaveLikeHypercertMinterUpgrade(): void {
   it("supports upgrader role", async function () {
@@ -25,26 +25,20 @@ export function shouldBehaveLikeHypercertMinterUpgrade(): void {
   });
 
   it("updates version number on update", async function () {
-    const HypercertMetadataFactory = await ethers.getContractFactory("HypercertMetadata");
+    const HypercertMetadataFactory = await ethers.getContractFactory(HypercertMetadata_V0);
     const HypercertMetadata = await HypercertMetadataFactory.deploy();
-    const HypercertMinterV0Factory = await ethers.getContractFactory(HypercertMinter_V0, {
-      libraries: { HypercertMetadata: HypercertMetadata.address },
-    });
+    const HypercertMinterV0Factory = await ethers.getContractFactory(HypercertMinter_V0);
 
-    const UpgradeFactory = await ethers.getContractFactory(HypercertMinter_Upgrade, {
-      libraries: { HypercertMetadata: HypercertMetadata.address },
-    });
+    const UpgradeFactory = await ethers.getContractFactory(HypercertMinter_Upgrade);
 
-    const proxy = await upgrades.deployProxy(HypercertMinterV0Factory, {
+    const proxy = await upgrades.deployProxy(HypercertMinterV0Factory, [HypercertMetadata.address], {
       kind: "uups",
-      unsafeAllow: ["external-library-linking"],
     });
 
     expect(await proxy.version()).to.be.eq(0);
 
     const upgrade = await upgrades.upgradeProxy(proxy, UpgradeFactory, {
       call: "updateVersion",
-      unsafeAllow: ["external-library-linking"],
     });
 
     expect(await proxy.version()).to.be.eq(1);
@@ -56,18 +50,13 @@ export function shouldBehaveLikeHypercertMinterUpgrade(): void {
     const claim = await newClaim();
     const data = await getEncodedImpactClaim(claim);
     const claimID = await getClaimSlotID(claim);
-    const HypercertMetadataFactory = await ethers.getContractFactory("HypercertMetadata");
+    const HypercertMetadataFactory = await ethers.getContractFactory(HypercertMetadata_V0);
     const HypercertMetadata = await HypercertMetadataFactory.deploy();
-    const HypercertMinterV0Factory = await ethers.getContractFactory(HypercertMinter_V0, {
-      libraries: { HypercertMetadata: HypercertMetadata.address },
-    });
-    const UpgradeFactory = await ethers.getContractFactory(HypercertMinter_Upgrade, {
-      libraries: { HypercertMetadata: HypercertMetadata.address },
-    });
+    const HypercertMinterV0Factory = await ethers.getContractFactory(HypercertMinter_V0);
+    const UpgradeFactory = await ethers.getContractFactory(HypercertMinter_Upgrade);
 
-    const proxy = await upgrades.deployProxy(HypercertMinterV0Factory, {
+    const proxy = await upgrades.deployProxy(HypercertMinterV0Factory, [HypercertMetadata.address], {
       kind: "uups",
-      unsafeAllow: ["external-library-linking"],
     });
     expect(await proxy.version()).to.be.eq(0);
 
@@ -90,7 +79,6 @@ export function shouldBehaveLikeHypercertMinterUpgrade(): void {
 
     const upgrade = await upgrades.upgradeProxy(proxy, UpgradeFactory, {
       call: "updateVersion",
-      unsafeAllow: ["external-library-linking"],
     });
 
     expect(await upgrade.tokenURI(1))

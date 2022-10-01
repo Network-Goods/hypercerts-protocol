@@ -8,6 +8,11 @@ import "../ERC3525Upgradeable.sol";
  */
 // solhint-disable-next-line contract-name-camelcase
 contract ERC3525_Testing is ERC3525Upgradeable {
+    // solhint-disable-next-line no-empty-blocks
+    function initialize() public initializer {
+        // empty block
+    }
+
     function mintValue(
         address to_,
         uint256 tokenId_,
@@ -43,27 +48,6 @@ contract ERC3525_Testing is ERC3525Upgradeable {
         uint256 value_
     ) public {
         _approveValue(tokenId_, to_, value_);
-    }
-
-    function contractURI() public view virtual override returns (string memory) {
-        return
-            string(
-                abi.encodePacked(
-                    "data:application/json;{"
-                    "name"
-                    ":",
-                    name(),
-                    ","
-                    "description"
-                    ":",
-                    symbol(),
-                    ","
-                    "valueDecimals"
-                    ":",
-                    valueDecimals(),
-                    "}"
-                )
-            );
     }
 
     function slotURI(
