@@ -8,7 +8,9 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployer } = await getNamedAccounts();
   const HypercertSVG = await get("HypercertSVG");
 
-  await deploy("HypercertMetadata", { from: deployer, args: [HypercertSVG.address] });
+  const meta = await deploy("HypercertMetadata", { from: deployer, args: [HypercertSVG.address] });
+
+  console.log("Deployed metadata generator: " + meta.address);
 };
 
 export default deploy;

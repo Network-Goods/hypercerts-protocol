@@ -86,8 +86,8 @@ const config: HardhatUserConfig = {
       chainId: chainIds.hardhat,
       saveDeployments: true,
     },
-    goerli: getChainConfig("goerli"),
-    mainnet: getChainConfig("mainnet"),
+    goerli: { ...getChainConfig("goerli"), tags: ["staging"] },
+    mainnet: { ...getChainConfig("mainnet"), tags: ["production"] },
   },
   paths: {
     artifacts: "./artifacts",
