@@ -18,7 +18,6 @@ export type Claim = {
   uri: string;
   version: number;
   fractions: number[];
-  fractions: number[];
 };
 
 export const newClaim = async (claim?: Partial<Claim>) => {
@@ -109,7 +108,7 @@ export const randomScopes = (limit?: number) => {
   return toHashMap(scopes);
 };
 
-export const compareClaimAgainstInput = async (claim: HypercertMinterV0.ClaimStructOutput, options: Claim) => {
+export const compareClaimAgainstInput = async (claim: HypercertMinter.ClaimStructOutput, options: Claim) => {
   expect(claim.rights).to.be.eql(options.rights);
   expect(claim.version).to.be.eq(options.version);
 

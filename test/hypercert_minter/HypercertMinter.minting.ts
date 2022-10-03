@@ -186,7 +186,6 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
       uri: "ipfs://QmW2WQi7j6c7UgJTarActp7tDNikE4B2qXtFCfLPdsgaTQ/",
       version: 0,
       fractions: [100],
-      fractions: [100],
     };
 
     const claim = await newClaim(options);
@@ -228,7 +227,6 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
       workScopes: Object.keys(workScopes),
       uri: "ipfs://QmW2WQi7j6c7UgJTarActp7tDNikE4B2qXtFCfLPdsgaTQ/",
       version: 0,
-      fractions: new Array(25).fill(50),
       fractions: new Array(25).fill(50),
     };
 
@@ -280,7 +278,6 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
       workScopes: Object.keys(workScopes),
       uri: "ipfs://test",
       version: 0,
-      fractions: new Array(100).fill(50),
       fractions: new Array(100).fill(50),
     };
 

@@ -36,6 +36,5 @@ describe("Unit tests", function () {
     shouldBehaveLikeHypercertMinterAddingWorkScopes();
     shouldBehaveLikeHypercertMinterAddingRights();
     shouldBehaveLikeHypercertMinterSplitAndMerge();
-    shouldBehaveLikeHypercertMinterSplitAndMerge();
   });
 });
