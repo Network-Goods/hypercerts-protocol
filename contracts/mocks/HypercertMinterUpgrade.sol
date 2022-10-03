@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.4;
 
-import "../HypercertMinterV0.sol";
+import "../HypercertMinter.sol";
 
-contract HypercertMinterUpgrade is HypercertMinterV0 {
+contract HypercertMinterUpgrade is HypercertMinter {
     event Split(uint256 fromID, uint256[] toID);
 
     /// @notice Contract constructor logic

@@ -2,16 +2,25 @@
 pragma solidity ^0.8.4;
 
 import "./ERC3525Upgradeable.sol";
+import "./interfaces/IHypercertMetadata.sol";
+import "./utils/ArraysUpgradeable.sol";
+import "./utils/StringsExtensions.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-import "hardhat/console.sol";
+error EmptyInput();
+error DuplicateScope();
+error InvalidScope();
+error InvalidTimeframe(uint64 from, uint64 to);
+error ConflictingClaim();
 
 /// @title Hypercertificate minting logic
 /// @notice Contains functions and events to initialize and issue a hypercertificate
 /// @author bitbeckers, mr_bluesky
-contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUpgradeable, UUPSUpgradeable {
+contract HypercertMinter is Initializable, ERC3525Upgradeable, AccessControlUpgradeable, UUPSUpgradeable {
+    using ArraysUpgradeable for uint8[];
+
     /// @notice Contract name
     string public constant NAME = "Hypercerts";
     /// @notice Token symbol
@@ -22,10 +31,8 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
     /// @notice Current version of the contract
     uint16 internal _version;
-    /// @notice Counter incremented and used for the next token ID
-    uint256 internal _tokenId;
-    /// @notice Counter incremented and used for the next slot
-    uint256 internal _slot;
+    /// @notice Hypercert metadata contract
+    address internal _metadata;
 
     /// @notice Mapping of id's to work-scopes
     mapping(bytes32 => string) public workScopes;
@@ -44,9 +51,12 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
         bytes32[] impactScopes;
         bytes32[] rights;
         address[] contributors;
-        uint8[] fractions;
+        uint256 totalUnits;
         uint16 version;
         bool exists;
+        string name;
+        string description;
+        string uri;
     }
 
     /*******************
@@ -56,30 +66,8 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
     /// @notice Emitted when an impact is claimed.
     /// @param id Id of the claimed impact.
     /// @param minter Address of cert minter.
-    /// @param claimHash Hash value of the claim data.
-    /// @param contributors Contributors to the claimed impact.
-    /// @param workTimeframe To/from date of the work related to the claim.
-    /// @param impactTimeframe To/from date of the claimed impact.
-    /// @param workScopes Id's relating to the scope of the work.
-    /// @param impactScopes Id's relating to the scope of the impact.
-    /// @param rights Id's relating to the rights applied to the hypercert.
     /// @param fractions Units of tokens issued under the hypercert.
-    /// @param version Version of the hypercert.
-    /// @param uri URI of the metadata of the hypercert.
-    event ImpactClaimed(
-        uint256 id,
-        address minter,
-        bytes32 claimHash,
-        address[] contributors,
-        uint64[2] workTimeframe,
-        uint64[2] impactTimeframe,
-        bytes32[] workScopes,
-        bytes32[] impactScopes,
-        bytes32[] rights,
-        uint8[] fractions,
-        uint64 version,
-        string uri
-    );
+    event ImpactClaimed(uint256 id, address minter, uint8[] fractions);
 
     /// @notice Emitted when a new impact scope is added.
     /// @param id Id of the impact scope.
@@ -107,10 +95,9 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
     }
 
     /// @notice Contract initialization logic
-    function initialize() public override initializer {
-        __ERC3525_init(DECIMALS);
-        __ERC721_init(NAME, SYMBOL);
-        __ERC721URIStorage_init();
+    function initialize(address metadataAddress) public initializer {
+        _metadata = metadataAddress;
+
         __ERC721Burnable_init();
         __AccessControl_init();
         __UUPSUpgradeable_init();
@@ -153,42 +140,27 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
     /// @notice Issues a new hypercertificate
     /// @param account Account issuing the new hypercertificate
     /// @param data Data representing the parameters of the claim
-    function mint(address account, bytes memory data) public virtual {
+    function mint(address account, bytes calldata data) public virtual {
         // Parse data to get Claim
-        (Claim memory claim, string memory tokenURI_) = _parseData(data);
+        (Claim memory claim, uint8[] memory fractions) = _parseData(data);
 
         _authorizeMint(account, claim);
 
         // Check on overlapping contributor-claims and store if success
         _storeContributorsClaims(claim.claimHash, claim.contributors);
 
-        _slot++;
+        uint256 slot = uint256(claim.claimHash);
         // Store impact cert
-        _impactCerts[_slot] = claim;
+        _impactCerts[slot] = claim;
 
         // Mint impact cert
-        // _safeMint(account, tokenId, data);
-        uint256 l = claim.fractions.length;
-        for (uint256 i = 0; i < l; i++) {
-            _tokenId++;
-            _mintValue(account, _tokenId, _slot, claim.fractions[i]);
-            _setTokenURI(_tokenId, tokenURI_);
+        uint256 len = fractions.length;
+        for (uint256 i = 0; i < len; i++) {
+            uint256 tokenID = _getNewTokenId(0);
+            _mintValue(account, tokenID, slot, fractions[i]);
         }
 
-        emit ImpactClaimed(
-            _slot,
-            account,
-            claim.claimHash,
-            claim.contributors,
-            claim.workTimeframe,
-            claim.impactTimeframe,
-            claim.workScopes,
-            claim.impactScopes,
-            claim.rights,
-            claim.fractions,
-            claim.version,
-            tokenURI_
-        );
+        emit ImpactClaimed(slot, account, fractions);
     }
 
     /// @notice Gets the impact claim with the specified id
@@ -229,6 +201,32 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
         return SYMBOL;
     }
 
+    function valueDecimals() public view virtual override returns (uint8) {
+        return DECIMALS;
+    }
+
+    function getHash(
+        uint64[2] memory workTimeframe_,
+        bytes32[] memory workScopes_,
+        uint64[2] memory impactTimeframe_,
+        bytes32[] memory impactScopes_
+    ) public pure virtual returns (bytes32) {
+        return keccak256(abi.encode(workTimeframe_, workScopes_, impactTimeframe_, impactScopes_));
+    }
+
+    function slotURI(uint256 slotId_) external view returns (string memory) {
+        return IHypercertMetadata(_metadata).generateSlotURI(slotId_);
+    }
+
+    function tokenURI(uint256 tokenId_)
+        public
+        view
+        override(ERC721Upgradeable, IERC721MetadataUpgradeable)
+        returns (string memory)
+    {
+        return IHypercertMetadata(_metadata).generateTokenURI(slotOf(tokenId_), tokenId_);
+    }
+
     /*******************
      * INTERNAL
      ******************/
@@ -255,38 +253,60 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
         virtual
         returns (bytes32 id)
     {
-        require(bytes(text).length > 0, "empty text");
+        if (bytes(text).length == 0) {
+            revert EmptyInput();
+        }
         id = keccak256(abi.encode(text));
-        require(!_hasKey(map, id), "already exists");
+        if (_hasKey(map, id)) {
+            revert DuplicateScope();
+        }
     }
 
     /// @notice Pre-mint validation checks
     /// @param account Destination address for the mint
     /// @param claim Impact claim data
+    /* solhint-disable code-complexity */
+
     function _authorizeMint(address account, Claim memory claim) internal view virtual {
-        require(account != address(0), "Mint: mint to the zero address");
-        require(claim.workTimeframe[0] <= claim.workTimeframe[1], "Mint: invalid workTimeframe");
-        require(claim.impactTimeframe[0] <= claim.impactTimeframe[1], "Mint: invalid impactTimeframe");
-        require(claim.workTimeframe[0] <= claim.impactTimeframe[0], "Mint: impactTimeframe prior to workTimeframe");
+        if (account == address(0)) {
+            revert ToZeroAddress();
+        }
+        if (claim.workTimeframe[0] > claim.workTimeframe[1]) {
+            revert InvalidTimeframe(claim.workTimeframe[0], claim.workTimeframe[1]);
+        }
+        if (claim.impactTimeframe[0] > claim.impactTimeframe[1]) {
+            revert InvalidTimeframe(claim.impactTimeframe[0], claim.impactTimeframe[1]);
+        }
+        if (claim.workTimeframe[0] > claim.impactTimeframe[0]) {
+            revert InvalidTimeframe(claim.workTimeframe[0], claim.impactTimeframe[0]);
+        }
 
         uint256 impactScopelength = claim.impactScopes.length;
         for (uint256 i = 0; i < impactScopelength; i++) {
-            require(_hasKey(impactScopes, claim.impactScopes[i]), "Mint: invalid impact scope");
+            if (bytes(impactScopes[claim.impactScopes[i]]).length == 0) {
+                revert InvalidScope();
+            }
         }
 
         uint256 workScopelength = claim.workScopes.length;
         for (uint256 i = 0; i < workScopelength; i++) {
-            require(_hasKey(workScopes, claim.workScopes[i]), "Mint: invalid work scope");
+            if (!_hasKey(workScopes, claim.workScopes[i])) {
+                revert InvalidScope();
+            }
         }
     }
+
+    /* solhint-enable code-complexity */
 
     /// @notice Parse bytes to Claim and URI
     /// @param data Byte data representing the claim
     /// @dev This function is overridable in order to support future schema changes
     /// @return claim The parsed Claim struct
     /// @return Claim metadata URI
-    function _parseData(bytes memory data) internal pure virtual returns (Claim memory claim, string memory) {
-        require(data.length > 0, "_parseData: input data empty");
+    function _parseData(bytes calldata data) internal pure virtual returns (Claim memory claim, uint8[] memory) {
+        if (data.length == 0) {
+            revert EmptyInput();
+        }
 
         (
             bytes32[] memory rights_,
@@ -295,24 +315,30 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
             uint64[2] memory workTimeframe,
             uint64[2] memory impactTimeframe,
             address[] memory contributors,
+            string memory name_,
+            string memory description_,
             string memory uri_,
             uint8[] memory fractions
-        ) = abi.decode(data, (bytes32[], bytes32[], bytes32[], uint64[2], uint64[2], address[], string, uint8[]));
+        ) = abi.decode(
+                data,
+                (bytes32[], bytes32[], bytes32[], uint64[2], uint64[2], address[], string, string, string, uint8[])
+            );
 
-        bytes32 claimHash = keccak256(abi.encode(workTimeframe, workScopes_, impactTimeframe, impactScopes_));
-
-        claim.claimHash = claimHash;
+        claim.claimHash = getHash(workTimeframe, workScopes_, impactTimeframe, impactScopes_);
         claim.contributors = contributors;
         claim.workTimeframe = workTimeframe;
         claim.impactTimeframe = impactTimeframe;
         claim.workScopes = workScopes_;
         claim.impactScopes = impactScopes_;
         claim.rights = rights_;
-        claim.fractions = fractions;
+        claim.totalUnits = fractions.getSum();
         claim.version = uint16(0);
         claim.exists = true;
+        claim.name = name_;
+        claim.description = description_;
+        claim.uri = uri_;
 
-        return (claim, uri_);
+        return (claim, fractions);
     }
 
     /// @notice Stores contributor claims in the `contributorImpacts` mapping; guards against overlapping claims
@@ -320,16 +346,11 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
     /// @param creators Array of addresses for contributors
     function _storeContributorsClaims(bytes32 claimHash, address[] memory creators) internal {
         for (uint256 i = 0; i < creators.length; i++) {
-            require(!_contributorImpacts[creators[i]][claimHash], "Claim: claim for creators overlapping");
+            if (_contributorImpacts[creators[i]][claimHash]) {
+                revert ConflictingClaim();
+            }
             _contributorImpacts[creators[i]][claimHash] = true;
         }
-    }
-
-    /// @notice Hash the specified string value
-    /// @param value string to hash
-    /// @return a keccak256 hash-code
-    function _hash(string memory value) internal pure returns (bytes32) {
-        return keccak256(abi.encode(value));
     }
 
     /// @notice Checks whether the supplied mapping contains the supplied key

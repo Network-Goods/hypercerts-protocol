@@ -18,7 +18,7 @@ export function shouldBehaveLikeSemiFungibleTokenBurn(): void {
       await sft.mintValue(user.address, 1, 1, 1_000_000);
       await sft.mintValue(anon.address, 2, 1, 1_000_000);
 
-      await expect(user.sft.burn(2)).to.be.revertedWith("ERC721: caller is not token owner nor approved");
+      await expect(user.sft.burn(2)).to.be.revertedWith("NotApprovedOrOwner");
     });
   });
 }

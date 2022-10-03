@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 
 import setupTest from "../setup";
-import { encodeClaim, getEncodedImpactClaim, newClaim } from "../utils";
+import { encodeClaim, newClaim } from "../utils";
 
 export function shouldBehaveLikeHypercertMinterBurning(): void {
   it.skip("allows burning when the creator owns the full slot", async function () {
@@ -33,11 +33,11 @@ export function shouldBehaveLikeHypercertMinterBurning(): void {
     await expect(minter["balanceOf(uint256)"](tokenId)).to.be.revertedWith(
       "ERC3525: balance query for nonexistent token",
     );
-    await expect(minter.ownerOf(tokenId)).to.be.revertedWith("ERC721: invalid token ID");
-    await expect(minter.slotOf(tokenId)).to.be.revertedWith("ERC3525: slot query for nonexistent token");
+    await expect(minter.ownerOf(tokenId)).to.be.revertedWith("InvalidID");
+    await expect(minter.slotOf(tokenId)).to.be.revertedWith("NonExistentToken");
     expect(await minter.tokenSupplyInSlot(1)).to.be.eq(0);
-    await expect(minter.tokenURI(tokenId)).to.be.revertedWith("ERC721: invalid token ID");
-    await expect(minter.slotURI(tokenId)).to.be.revertedWith("RC3525: slot query for nonexistent slot");
+    await expect(minter.tokenURI(tokenId)).to.be.revertedWith("InvalidID");
+    await expect(minter.slotURI(tokenId)).to.be.revertedWith("NonExistentToken");
   });
 
   it.skip("prevents burning when the creator doesn't own the full slot", async function () {
@@ -66,7 +66,7 @@ export function shouldBehaveLikeHypercertMinterBurning(): void {
   });
 
   it.skip("prevents burning when the owner isn't the creator", async function () {
-    const { deployer, minter, user, anon } = await setupTest();
+    const { deployer, minter, anon } = await setupTest();
     const claim = await newClaim({ fractions: [50, 50] });
     const data = encodeClaim(claim);
 

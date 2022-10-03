@@ -21,15 +21,15 @@ export function shouldBehaveLikeSemiFungibleTokenTransfer(): void {
     it("allows for transfering values between tokens with identical slots", async function () {
       const { sft, user } = await setupTestERC3525();
 
-      await expect(sft.transfer(1, 2, 1_234_5678)).to.be.revertedWith("ERC35255: transfer from nonexistent token");
+      await expect(sft.transfer(1, 2, 1_234_5678)).to.be.revertedWith("NonExistentToken(1)");
 
       await sft.mintValue(user.address, 1, 0, 1_000_000);
 
-      await expect(sft.transfer(1, 2, 500_000)).to.be.revertedWith("ERC35255: transfer to nonexistent token");
+      await expect(sft.transfer(1, 2, 500_000)).to.be.revertedWith("NonExistentToken(2)");
 
       await sft.mintValue(user.address, 2, 0, 2_000_000);
 
-      await expect(sft.transfer(1, 2, 8_796_543)).to.be.revertedWith("ERC3525: transfer amount exceeds balance");
+      await expect(sft.transfer(1, 2, 8_796_543)).to.be.revertedWith("InsufficientBalance(8796543, 1000000)");
 
       await expect(sft.transfer(1, 2, 500_000)).to.emit(sft, "TransferValue").withArgs(1, 2, 500_000);
 
@@ -42,7 +42,7 @@ export function shouldBehaveLikeSemiFungibleTokenTransfer(): void {
       await sft.mintValue(user.address, 1, 0, 1_000_000);
       await sft.mintValue(user.address, 2, 1, 2_000_000);
 
-      await expect(sft.transfer(1, 2, 500_000)).to.be.revertedWith("ERC3535: transfer to token with different slot");
+      await expect(sft.transfer(1, 2, 500_000)).to.be.revertedWith("SlotsMismatch(1, 2)");
 
       expect(await sft["balanceOf(uint256)"](1)).to.be.eq("1000000");
       expect(await sft["balanceOf(uint256)"](2)).to.be.eq("2000000");
@@ -55,7 +55,7 @@ export function shouldBehaveLikeSemiFungibleTokenTransfer(): void {
       expect(await sft.ownerOf(1)).to.be.eq(user.address);
       await expect(sft.ownerOf(2)).to.be.revertedWith("ERC721: invalid token ID");
       expect(await sft["balanceOf(uint256)"](1)).to.be.eq("1000000");
-      await expect(sft["balanceOf(uint256)"](2)).to.be.revertedWith("ERC3525: balance query for nonexistent token");
+      await expect(sft["balanceOf(uint256)"](2)).to.be.revertedWith(`NonExistentToken`);
 
       await expect(user.sft["transferFrom(uint256,address,uint256)"](1, anon.address, 500_000))
         .to.emit(sft, "TransferValue")
