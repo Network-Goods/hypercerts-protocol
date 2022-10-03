@@ -1,10 +1,11 @@
 import { expect } from "chai";
 import { deployments } from "hardhat";
 
-import { HypercertMinterUpgrade, HypercertMinterV0 } from "../src/types";
-import { HypercertMinter_Current, ImpactScopes, Rights, WorkScopes } from "./wellKnown";
+import { ERC3525_Testing, HypercertMinter, HypercertMinterUpgrade } from "../src/types";
+import { ERC3525, HypercertMinter_Current, ImpactScopes, Rights, WorkScopes } from "./wellKnown";
 
-export type HypercertContract = HypercertMinterV0 | HypercertMinterUpgrade;
+export type HypercertContract = HypercertMinter | HypercertMinterUpgrade;
+export type ERC3525 = ERC3525_Testing;
 
 export type AddressedHypercertMinterContract = {
   address: string;
@@ -17,6 +18,33 @@ export type HypercertCollection = {
   user: AddressedHypercertMinterContract;
   anon: AddressedHypercertMinterContract;
 };
+
+export const setupTestERC3525 = deployments.createFixture(
+  async ({ deployments, getNamedAccounts, ethers }, _options) => {
+    await deployments.fixture(); // ensure you start from a fresh deployments
+    const { deployer, user, anon } = await getNamedAccounts();
+
+    // Contracts
+    const sft: ERC3525 = await ethers.getContract(ERC3525);
+    await sft.initialize();
+
+    // Account config
+    const setupAddress = async (address: string) => {
+      return {
+        address: address,
+        sft: <ERC3525>await ethers.getContract(ERC3525, address),
+      };
+    };
+
+    // Struct
+    return {
+      sft,
+      deployer: await setupAddress(deployer),
+      user: await setupAddress(user),
+      anon: await setupAddress(anon),
+    };
+  },
+);
 
 const setupTest = deployments.createFixture<
   HypercertCollection,

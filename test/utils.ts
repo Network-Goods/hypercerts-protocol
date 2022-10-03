@@ -1,5 +1,6 @@
 import { ParamType } from "@ethersproject/abi";
 import { expect } from "chai";
+import { BigNumber } from "ethers";
 import { ethers, getNamedAccounts } from "hardhat";
 
 import { HypercertMinterV0 } from "../src/types";
@@ -12,23 +13,61 @@ export type Claim = {
   contributors: string[];
   workScopes: string[];
   impactScopes: string[];
+  name: string;
+  description: string;
   uri: string;
   version: number;
+  fractions: number[];
 };
 
-export const getEncodedImpactClaim = async (claim?: Partial<Claim>) => {
-  const { user, anon } = await getNamedAccounts();
+export const newClaim = async (claim?: Partial<Claim>) => {
+  const getNamedAccountsAsArray = async () => {
+    const { user, anon } = await getNamedAccounts();
+    return [user, anon];
+  };
 
-  const rights = claim?.rights || Object.keys(Rights);
-  const workTimeframe = claim?.workTimeframe || [123456789, 123456789];
-  const impactTimeframe = claim?.impactTimeframe || [987654321, 987654321];
-  const contributors = claim?.contributors || [user, anon];
-  const workScopes = claim?.workScopes || Object.keys(WorkScopes);
-  const impactScopes = claim?.impactScopes || Object.keys(ImpactScopes);
-  const uri = claim?.uri || "ipfs://mockedImpactClaim";
+  return {
+    rights: claim?.rights || Object.keys(Rights),
+    workTimeframe: claim?.workTimeframe || [123456789, 123456789],
+    impactTimeframe: claim?.impactTimeframe || [987654321, 987654321],
+    contributors: claim?.contributors || (await getNamedAccountsAsArray()),
+    workScopes: claim?.workScopes || Object.keys(WorkScopes),
+    impactScopes: claim?.impactScopes || Object.keys(ImpactScopes),
+    name: claim?.name || "Impact Claim 1",
+    description: claim?.description || "Impact Claim 1 description",
+    uri: claim?.uri || "ipfs://mockedImpactClaim",
+    version: claim?.version || 0,
+    fractions: claim?.fractions || [100],
+  };
+};
 
-  const types = ["uint256[]", "uint256[]", "uint256[]", "uint64[2]", "uint64[2]", "address[]", "string"];
-  const values = [rights, workScopes, impactScopes, workTimeframe, impactTimeframe, contributors, uri];
+export const getEncodedImpactClaim = async (claim?: Partial<Claim>) => encodeClaim(await newClaim(claim));
+
+export const encodeClaim = (c: Claim) => {
+  const types = [
+    "uint256[]",
+    "uint256[]",
+    "uint256[]",
+    "uint64[2]",
+    "uint64[2]",
+    "address[]",
+    "string",
+    "string",
+    "string",
+    "uint8[]",
+  ];
+  const values = [
+    c.rights,
+    c.workScopes,
+    c.impactScopes,
+    c.workTimeframe,
+    c.impactTimeframe,
+    c.contributors,
+    c.name,
+    c.description,
+    c.uri,
+    c.fractions,
+  ];
 
   return encode(types, values);
 };
@@ -39,6 +78,10 @@ export const getClaimHash = async (claim: Claim) => {
   const values = [workTimeframe, workScopes, impactTimeframe, impactScopes];
 
   return hash256(types, values);
+};
+
+export const getClaimSlotID = async (claim: Claim) => {
+  return BigNumber.from(await getClaimHash(claim));
 };
 
 export const encode = (
@@ -78,3 +121,7 @@ export const compareClaimAgainstInput = async (claim: HypercertMinterV0.ClaimStr
   expect(claim.impactTimeframe.map(timestamp => timestamp.toNumber())).to.be.eql(options.impactTimeframe);
   expect(claim.impactScopes).to.be.eql(options.impactScopes);
 };
+
+//TODO check URI strings
+
+//TODO check SVG strings
