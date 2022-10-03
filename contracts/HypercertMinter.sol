@@ -265,6 +265,8 @@ contract HypercertMinter is Initializable, ERC3525Upgradeable, AccessControlUpgr
     /// @notice Pre-mint validation checks
     /// @param account Destination address for the mint
     /// @param claim Impact claim data
+    /* solhint-disable code-complexity */
+
     function _authorizeMint(address account, Claim memory claim) internal view virtual {
         if (account == address(0)) {
             revert ToZeroAddress();
@@ -293,6 +295,8 @@ contract HypercertMinter is Initializable, ERC3525Upgradeable, AccessControlUpgr
             }
         }
     }
+
+    /* solhint-enable code-complexity */
 
     /// @notice Parse bytes to Claim and URI
     /// @param data Byte data representing the claim
