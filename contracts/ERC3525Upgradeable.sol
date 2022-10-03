@@ -89,7 +89,7 @@ abstract contract ERC3525Upgradeable is
             revert InvalidApproval(tokenId_, msg.sender, to_);
         }
 
-        if (ERC721Upgradeable._isApprovedOrOwner(_msgSender(), tokenId_)) {
+        if (!ERC721Upgradeable._isApprovedOrOwner(_msgSender(), tokenId_)) {
             revert NotApprovedOrOwner();
         }
 

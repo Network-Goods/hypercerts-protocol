@@ -2,11 +2,11 @@ import { ethers } from "hardhat";
 
 import { toHashMap } from "./utils";
 
-export const HypercertMetadata_V0 = "HypercertMetadataV0";
-export const HypercertMinter_V0 = "HypercertMinterV0";
+export const HypercertMetadata = "HypercertMetadata";
+export const HypercertMinter = "HypercertMinter";
 
 export const HypercertMinter_Upgrade = "HypercertMinterUpgrade";
-export const HypercertMinter_Current = HypercertMinter_V0;
+export const HypercertMinter_Current = HypercertMinter;
 
 export const ERC3525 = "ERC3525_Testing";
 

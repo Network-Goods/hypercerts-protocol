@@ -33,11 +33,11 @@ export function shouldBehaveLikeHypercertMinterBurning(): void {
     await expect(minter["balanceOf(uint256)"](tokenId)).to.be.revertedWith(
       "ERC3525: balance query for nonexistent token",
     );
-    await expect(minter.ownerOf(tokenId)).to.be.revertedWith("ERC721: invalid token ID");
-    await expect(minter.slotOf(tokenId)).to.be.revertedWith("ERC3525: slot query for nonexistent token");
+    await expect(minter.ownerOf(tokenId)).to.be.revertedWith("InvalidID");
+    await expect(minter.slotOf(tokenId)).to.be.revertedWith("NonExistentToken");
     expect(await minter.tokenSupplyInSlot(1)).to.be.eq(0);
-    await expect(minter.tokenURI(tokenId)).to.be.revertedWith("ERC721: invalid token ID");
-    await expect(minter.slotURI(tokenId)).to.be.revertedWith("RC3525: slot query for nonexistent slot");
+    await expect(minter.tokenURI(tokenId)).to.be.revertedWith("InvalidID");
+    await expect(minter.slotURI(tokenId)).to.be.revertedWith("NonExistentToken");
   });
 
   it.skip("prevents burning when the creator doesn't own the full slot", async function () {

@@ -1,10 +1,10 @@
 import { expect } from "chai";
 import { deployments } from "hardhat";
 
-import { ERC3525_Testing, HypercertMinterUpgrade, HypercertMinterV0 } from "../src/types";
+import { ERC3525_Testing, HypercertMinter, HypercertMinterUpgrade } from "../src/types";
 import { ERC3525, HypercertMinter_Current, ImpactScopes, Rights, WorkScopes } from "./wellKnown";
 
-export type HypercertContract = HypercertMinterV0 | HypercertMinterUpgrade;
+export type HypercertContract = HypercertMinter | HypercertMinterUpgrade;
 export type ERC3525 = ERC3525_Testing;
 
 export type AddressedHypercertMinterContract = {

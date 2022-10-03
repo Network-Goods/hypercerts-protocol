@@ -26,19 +26,17 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
     const data4 = await getEncodedImpactClaim({ impactTimeframe: [108765432, 109999432] });
 
     // Empty data
-    await expect(deployer.minter.mint(deployer.address, "0x")).to.be.revertedWith("_parseData: input data empty");
+    await expect(deployer.minter.mint(deployer.address, "0x")).to.be.revertedWith("EmptyInput");
     // Invalid workTimeframe
-    await expect(deployer.minter.mint(deployer.address, data2)).to.be.revertedWith("Mint: invalid workTimeframe");
+    await expect(deployer.minter.mint(deployer.address, data2)).to.be.revertedWith("InvalidTimeframe");
     // Invalid impactTimeframe
-    await expect(deployer.minter.mint(deployer.address, data3)).to.be.revertedWith("Mint: invalid impactTimeframe");
+    await expect(deployer.minter.mint(deployer.address, data3)).to.be.revertedWith("InvalidTimeframe");
     // Invalid impactTimeframe
-    await expect(deployer.minter.mint(deployer.address, data4)).to.be.revertedWith(
-      "Mint: impactTimeframe prior to workTimeframe",
-    );
+    await expect(deployer.minter.mint(deployer.address, data4)).to.be.revertedWith("InvalidTimeframe");
 
     await expect(minter.ownerOf(1)).to.be.revertedWith("ERC721: invalid token ID");
-    await expect(minter.slotOf(1)).to.be.revertedWith("ERC3525: slot query for nonexistent token");
-    await expect(minter["balanceOf(uint256)"](1)).to.be.revertedWith("ERC3525: balance query for nonexistent token");
+    await expect(minter.slotOf(1)).to.be.revertedWith("NonExistentToken");
+    await expect(minter["balanceOf(uint256)"](1)).to.be.revertedWith("NonExistentToken");
 
     // Supply 100, 1 fraction, single slot
     await expect(deployer.minter.mint(deployer.address, data1))
@@ -57,9 +55,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
     expect(await minter.tokenURI(1)).to.include("data:application/json;");
     expect(await minter.slotURI(claimID)).to.include("data:application/json;");
 
-    await expect(deployer.minter.mint(ethers.constants.AddressZero, data1)).to.be.revertedWith(
-      "Mint: mint to the zero address",
-    );
+    await expect(deployer.minter.mint(ethers.constants.AddressZero, data1)).to.be.revertedWith("ToZeroAddress");
   });
 
   it("anybody can mint an impact claim with multiple fractions - except zero-address", async function () {
@@ -95,9 +91,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
     expect(await minter["balanceOf(uint256)"](1)).to.be.eq("50");
     expect(await minter["balanceOf(uint256)"](1)).to.be.eq("50");
 
-    await expect(deployer.minter.mint(ethers.constants.AddressZero, data)).to.be.revertedWith(
-      "Mint: mint to the zero address",
-    );
+    await expect(deployer.minter.mint(ethers.constants.AddressZero, data)).to.be.revertedWith("ToZeroAddress");
   });
 
   it("an already minted claim (work, impact, creators) cannot be minted again", async function () {
@@ -109,7 +103,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
       .to.emit(minter, "Transfer")
       .withArgs(ethers.constants.AddressZero, user.address, 1);
 
-    await expect(user.minter.mint(user.address, data)).to.be.revertedWith("Claim: claim for creators overlapping");
+    await expect(user.minter.mint(user.address, data)).to.be.revertedWith("ConflictingClaim");
 
     const workScopes = Object.keys(WorkScopes);
     const otherData = await getEncodedImpactClaim({ workScopes: [workScopes[1], workScopes[2]] });
@@ -131,9 +125,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
 
     const overlappingData = await getEncodedImpactClaim({ contributors: [user.address, contributors[0]] });
 
-    await expect(user.minter.mint(user.address, overlappingData)).to.be.revertedWith(
-      "Claim: claim for creators overlapping",
-    );
+    await expect(user.minter.mint(user.address, overlappingData)).to.be.revertedWith("ConflictingClaim");
   });
 
   it("allows for dynamic URIs which are consistent for all tokens in a slot", async function () {
@@ -333,10 +325,9 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
       contributors,
       impactScopes: Object.keys(impactScopes),
       workScopes: Object.keys(workScopes),
-      // uri: "cillum tempor exercitation cillum minim non proident laboris et pariatur dolore duis sit ad Lorem proident voluptate ex officia nostrud officia do esse deserunt adipisicing excepteur nostrud aliqua qui in amet deserunt laboris nostrud tempor in culpa magna ullamco aliquip enim incididunt occaecat eu officia cupidatat reprehenderit anim aliqua do do nulla sint officia eu elit tempor minim eiusmod proident minim nostrud elit occaecat Lorem irure ex sunt pariatur cupidatat eiusmod dolor ea enim velit incididunt est qui dolore dolore laboris amet aute dolore consequat velit excepteur in enim minim consequat ex nisi ut eiusmod tempor consectetur labore reprehenderit enim",
       uri: "cillum tempor exercitation cillum minim non proident laboris et pariatur dolore duis sit ad Lorem proident voluptate ex officia nostrud officia do esse deserunt adipisicing excepteur nostrud aliqua qui in amet deserunt laboris nostrud tempor in culpa",
       version: 0,
-      fractions: new Array(100).fill(50),
+      fractions: new Array(140).fill(50),
     };
 
     await setupImpactScopes(minter, user.minter, impactScopes);
@@ -348,16 +339,22 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
 
     await expect(user.minter.mint(user.address, shortdata)).to.emit(minter, "ImpactClaimed");
 
-    expect(await minter.tokenSupplyInSlot(claimID)).to.be.eq(100);
+    expect(await minter.tokenSupplyInSlot(claimID)).to.be.eq(140);
     expect(await minter.tokenURI(1))
       .to.include("data:application/json;")
-      .to.include(options.uri);
-    expect(await minter.tokenURI(100))
+      .to.include(options.uri)
+      .to.include(options.name)
+      .to.include(options.description);
+    expect(await minter.tokenURI(125))
       .to.include("data:application/json;")
-      .to.include(options.uri);
+      .to.include(options.uri)
+      .to.include(options.name)
+      .to.include(options.description);
     expect(await minter.slotURI(claimID))
       .to.include("data:application/json;")
-      .to.include(options.uri);
+      .to.include(options.uri)
+      .to.include(options.name)
+      .to.include(options.description);
 
     const hypercert = await minter.getImpactCert(claimID);
 

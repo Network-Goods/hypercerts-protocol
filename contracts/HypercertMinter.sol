@@ -18,7 +18,7 @@ error ConflictingClaim();
 /// @title Hypercertificate minting logic
 /// @notice Contains functions and events to initialize and issue a hypercertificate
 /// @author bitbeckers, mr_bluesky
-contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUpgradeable, UUPSUpgradeable {
+contract HypercertMinter is Initializable, ERC3525Upgradeable, AccessControlUpgradeable, UUPSUpgradeable {
     using ArraysUpgradeable for uint8[];
 
     /// @notice Contract name
@@ -224,7 +224,7 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
         override(ERC721Upgradeable, IERC721MetadataUpgradeable)
         returns (string memory)
     {
-        return IHypercertMetadata(_metadata).generateSlotURI(slotOf(tokenId_), tokenId_);
+        return IHypercertMetadata(_metadata).generateTokenURI(slotOf(tokenId_), tokenId_);
     }
 
     /*******************
@@ -355,39 +355,5 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
     /// @return true, if the key exists in the mapping
     function _hasKey(mapping(bytes32 => string) storage map, bytes32 key) internal view returns (bool) {
         return (bytes(map[key]).length > 0);
-    }
-
-    // function _toClaimData(
-    //     Claim storage claim,
-    //     uint256 id,
-    //     uint256[] memory fractions
-    // ) internal view returns (ClaimData memory) {
-    //     ClaimData memory data;
-    //     data.id = id;
-    //     data.workTimeframe = claim.workTimeframe;
-    //     data.impactTimeframe = claim.impactTimeframe;
-    //     data.workScopes = _mapToValues(claim.workScopes, workScopes);
-    //     data.impactScopes = _mapToValues(claim.impactScopes, impactScopes);
-    //     data.fractions = fractions;
-    //     data.totalUnits = claim.totalUnits;
-    //     data.name = claim.name;
-    //     data.description = claim.description;
-    //     data.uri = claim.uri;
-
-    //     return data;
-    // }
-
-    /// @dev use keys to look up values in the supplied mapping
-    function _mapToValues(bytes32[] memory keys, mapping(bytes32 => string) storage map)
-        internal
-        view
-        returns (string[] memory)
-    {
-        uint256 len = keys.length;
-        string[] memory values = new string[](len);
-        for (uint256 i = 0; i < len; i++) {
-            values[i] = map[keys[i]];
-        }
-        return values;
     }
 }

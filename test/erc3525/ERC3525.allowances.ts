@@ -11,6 +11,7 @@ export function shouldBehaveLikeSemiFungibleTokenAllowances(): void {
       await sft.mintValue(user.address, 1, 1, 1_000_000);
       expect(await sft.getApproved(1)).to.be.eq(ethers.constants.AddressZero);
 
+      // OpenZeppelin errors
       await expect(sft["approve(address,uint256)"](anon.address, 1)).to.be.revertedWith(
         "ERC721: approve caller is not token owner nor approved for all",
       );
@@ -31,11 +32,12 @@ export function shouldBehaveLikeSemiFungibleTokenAllowances(): void {
       await sft.mintValue(user.address, 1, 1, 1_000_000);
       expect(await sft.getApproved(1)).to.be.eq(ethers.constants.AddressZero);
 
+      // Custom errors
       await expect(sft["approve(uint256,address,uint256)"](1, anon.address, 500_000)).to.be.revertedWith(
-        "ERC3525: approve caller is not owner nor approved for all",
+        "NotApprovedOrOwner",
       );
       await expect(user.sft["approve(uint256,address,uint256)"](1, user.address, 500_000)).to.be.revertedWith(
-        "ERC3525: approval to current owner",
+        `InvalidApproval(1, "${user.address}", "${user.address}")`,
       );
 
       await expect(user.sft["approve(uint256,address,uint256)"](1, anon.address, 500_000))
