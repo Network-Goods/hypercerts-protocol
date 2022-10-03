@@ -12,6 +12,17 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721Enumer
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721BurnableUpgradeable.sol";
 
+error NonExistentToken(uint256 tokenId);
+error NonExistentSlot(uint256 slotId);
+error InsufficientBalance(uint256 transferAmount, uint256 balance);
+error InsufficientAllowance(uint256 transferAmount, uint256 allowance);
+error ToZeroAddress();
+error InvalidID(uint256 tokenId);
+error AlreadyMinted(uint256 tokenId);
+error SlotsMismatch(uint256 fromTokenId, uint256 toTokenId);
+error InvalidApproval(uint256 tokenId, address from, address to);
+error NotApprovedOrOwner();
+
 abstract contract ERC3525Upgradeable is
     Initializable,
     ERC721EnumerableUpgradeable,
@@ -55,12 +66,16 @@ abstract contract ERC3525Upgradeable is
     }
 
     function balanceOf(uint256 tokenId_) public view virtual override returns (uint256) {
-        require(_exists(tokenId_), "ERC3525: balance query for nonexistent token");
+        if (!_exists(tokenId_)) {
+            revert NonExistentToken(tokenId_);
+        }
         return _values[tokenId_];
     }
 
     function slotOf(uint256 tokenId_) public view virtual override returns (uint256) {
-        require(_exists(tokenId_), "ERC3525: slot query for nonexistent token");
+        if (!_exists(tokenId_)) {
+            revert NonExistentToken(tokenId_);
+        }
         return _slots[tokenId_];
     }
 
@@ -70,12 +85,13 @@ abstract contract ERC3525Upgradeable is
         uint256 value_
     ) external payable virtual override(IERC3525Upgradeable) {
         address owner = ERC721Upgradeable.ownerOf(tokenId_);
-        require(to_ != owner, "ERC3525: approval to current owner");
+        if (to_ == owner) {
+            revert InvalidApproval(tokenId_, msg.sender, to_);
+        }
 
-        require(
-            ERC721Upgradeable._isApprovedOrOwner(_msgSender(), tokenId_),
-            "ERC3525: approve caller is not owner nor approved for all"
-        );
+        if (ERC721Upgradeable._isApprovedOrOwner(_msgSender(), tokenId_)) {
+            revert NotApprovedOrOwner();
+        }
 
         _approveValue(tokenId_, to_, value_);
     }
@@ -124,8 +140,7 @@ abstract contract ERC3525Upgradeable is
         uint256 tokenSupply = _tokensBySlot[_slot].length;
         uint256[] memory fractions = new uint256[](tokenSupply);
         for (uint256 i = 0; i < 25 && i < tokenSupply; i++) {
-            uint256 tokenID = _tokensBySlot[_slot][i];
-            fractions[i] = balanceOf(tokenID);
+            fractions[i] = balanceOf(_tokensBySlot[_slot][i]);
         }
         return fractions;
     }
@@ -134,14 +149,12 @@ abstract contract ERC3525Upgradeable is
         uint256 fromTokenId_,
         address to_,
         uint256 value_
-    ) public payable virtual override returns (uint256) {
+    ) public payable virtual override returns (uint256 newTokenId) {
         _spendAllowance(_msgSender(), fromTokenId_, value_);
 
-        uint256 newTokenId = _getNewTokenId(fromTokenId_);
+        newTokenId = _getNewTokenId(fromTokenId_);
         _mint(to_, newTokenId, _slots[fromTokenId_]);
         _transfer(fromTokenId_, newTokenId, value_);
-
-        return newTokenId;
     }
 
     function transferFrom(
@@ -193,9 +206,15 @@ abstract contract ERC3525Upgradeable is
         uint256 slot_,
         uint256 value_
     ) internal virtual {
-        require(to_ != address(0), "ERC3525: mint to the zero address");
-        require(tokenId_ != 0, "ERC3525: cannot mint zero tokenId");
-        require(!_exists(tokenId_), "ERC3525: token already minted");
+        if (to_ == address(0)) {
+            revert ToZeroAddress();
+        }
+        if (tokenId_ == 0) {
+            revert InvalidID(tokenId_);
+        }
+        if (_exists(tokenId_)) {
+            revert AlreadyMinted(tokenId_);
+        }
 
         _mint(to_, tokenId_, slot_);
 
@@ -227,11 +246,20 @@ abstract contract ERC3525Upgradeable is
         uint256 toTokenId_,
         uint256 value_
     ) internal virtual {
-        require(_exists(fromTokenId_), "ERC35255: transfer from nonexistent token");
-        require(_exists(toTokenId_), "ERC35255: transfer to nonexistent token");
+        if (!_exists(fromTokenId_)) {
+            revert NonExistentToken(fromTokenId_);
+        }
+        if (!_exists(toTokenId_)) {
+            revert NonExistentToken(toTokenId_);
+        }
 
-        require(_values[fromTokenId_] >= value_, "ERC3525: transfer amount exceeds balance");
-        require(_slots[fromTokenId_] == _slots[toTokenId_], "ERC3535: transfer to token with different slot");
+        if (value_ >= _values[fromTokenId_]) {
+            revert InsufficientBalance(value_, _values[fromTokenId_]);
+        }
+
+        if (_slots[fromTokenId_] != _slots[toTokenId_]) {
+            revert SlotsMismatch(fromTokenId_, toTokenId_);
+        }
 
         address from = ERC721Upgradeable.ownerOf(fromTokenId_);
         address to = ERC721Upgradeable.ownerOf(toTokenId_);
@@ -252,7 +280,9 @@ abstract contract ERC3525Upgradeable is
     ) internal virtual {
         uint256 currentAllowance = ERC3525Upgradeable.allowance(tokenId_, operator_);
         if (!_isApprovedOrOwner(operator_, tokenId_) && currentAllowance != type(uint256).max) {
-            require(currentAllowance >= value_, "ERC3525: insufficient allowance");
+            if (currentAllowance < value_) {
+                revert InsufficientAllowance(value_, currentAllowance);
+            }
             _approveValue(tokenId_, operator_, currentAllowance - value_);
         }
     }

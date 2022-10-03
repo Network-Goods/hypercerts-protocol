@@ -9,6 +9,12 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
+error EmptyInput();
+error DuplicateScope();
+error InvalidScope();
+error InvalidTimeframe(uint64 from, uint64 to);
+error ConflictingClaim();
+
 /// @title Hypercertificate minting logic
 /// @notice Contains functions and events to initialize and issue a hypercertificate
 /// @author bitbeckers, mr_bluesky
@@ -26,7 +32,7 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
     /// @notice Current version of the contract
     uint16 internal _version;
     /// @notice Hypercert metadata contract
-    IHypercertMetadata internal _metadata;
+    address internal _metadata;
 
     /// @notice Mapping of id's to work-scopes
     mapping(bytes32 => string) public workScopes;
@@ -89,8 +95,8 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
     }
 
     /// @notice Contract initialization logic
-    function initialize(IHypercertMetadata metadata) public initializer {
-        _metadata = metadata;
+    function initialize(address metadataAddress) public initializer {
+        _metadata = metadataAddress;
 
         __ERC721Burnable_init();
         __AccessControl_init();
@@ -134,7 +140,7 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
     /// @notice Issues a new hypercertificate
     /// @param account Account issuing the new hypercertificate
     /// @param data Data representing the parameters of the claim
-    function mint(address account, bytes memory data) public virtual {
+    function mint(address account, bytes calldata data) public virtual {
         // Parse data to get Claim
         (Claim memory claim, uint8[] memory fractions) = _parseData(data);
 
@@ -208,23 +214,17 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
         return keccak256(abi.encode(workTimeframe_, workScopes_, impactTimeframe_, impactScopes_));
     }
 
-    function slotURI(uint256 slot_) public view override returns (string memory) {
-        Claim storage claim = _impactCerts[slot_];
-        return _metadata.slotURI(_toClaimData(claim, slot_, tokenFractions(slot_)));
+    function slotURI(uint256 slotId_) external view returns (string memory) {
+        return IHypercertMetadata(_metadata).generateSlotURI(slotId_);
     }
 
-    function tokenURI(uint256 tokenID_)
+    function tokenURI(uint256 tokenId_)
         public
         view
         override(ERC721Upgradeable, IERC721MetadataUpgradeable)
         returns (string memory)
     {
-        uint256 slot = slotOf(tokenID_);
-        Claim storage claim = _impactCerts[slot];
-        uint256[] memory fractions = new uint256[](1);
-        fractions[0] = balanceOf(tokenID_);
-
-        return _metadata.tokenURI(_toClaimData(claim, slot, fractions), balanceOf(tokenID_));
+        return IHypercertMetadata(_metadata).generateSlotURI(slotOf(tokenId_), tokenId_);
     }
 
     /*******************
@@ -253,28 +253,44 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
         virtual
         returns (bytes32 id)
     {
-        require(bytes(text).length > 0, "empty text");
+        if (bytes(text).length == 0) {
+            revert EmptyInput();
+        }
         id = keccak256(abi.encode(text));
-        require(!_hasKey(map, id), "already exists");
+        if (_hasKey(map, id)) {
+            revert DuplicateScope();
+        }
     }
 
     /// @notice Pre-mint validation checks
     /// @param account Destination address for the mint
     /// @param claim Impact claim data
     function _authorizeMint(address account, Claim memory claim) internal view virtual {
-        require(account != address(0), "Mint: mint to the zero address");
-        require(claim.workTimeframe[0] <= claim.workTimeframe[1], "Mint: invalid workTimeframe");
-        require(claim.impactTimeframe[0] <= claim.impactTimeframe[1], "Mint: invalid impactTimeframe");
-        require(claim.workTimeframe[0] <= claim.impactTimeframe[0], "Mint: impactTimeframe prior to workTimeframe");
+        if (account == address(0)) {
+            revert ToZeroAddress();
+        }
+        if (claim.workTimeframe[0] > claim.workTimeframe[1]) {
+            revert InvalidTimeframe(claim.workTimeframe[0], claim.workTimeframe[1]);
+        }
+        if (claim.impactTimeframe[0] > claim.impactTimeframe[1]) {
+            revert InvalidTimeframe(claim.impactTimeframe[0], claim.impactTimeframe[1]);
+        }
+        if (claim.workTimeframe[0] > claim.impactTimeframe[0]) {
+            revert InvalidTimeframe(claim.workTimeframe[0], claim.impactTimeframe[0]);
+        }
 
         uint256 impactScopelength = claim.impactScopes.length;
         for (uint256 i = 0; i < impactScopelength; i++) {
-            require(_hasKey(impactScopes, claim.impactScopes[i]), "Mint: invalid impact scope");
+            if (bytes(impactScopes[claim.impactScopes[i]]).length == 0) {
+                revert InvalidScope();
+            }
         }
 
         uint256 workScopelength = claim.workScopes.length;
         for (uint256 i = 0; i < workScopelength; i++) {
-            require(_hasKey(workScopes, claim.workScopes[i]), "Mint: invalid work scope");
+            if (!_hasKey(workScopes, claim.workScopes[i])) {
+                revert InvalidScope();
+            }
         }
     }
 
@@ -283,8 +299,10 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
     /// @dev This function is overridable in order to support future schema changes
     /// @return claim The parsed Claim struct
     /// @return Claim metadata URI
-    function _parseData(bytes memory data) internal pure virtual returns (Claim memory claim, uint8[] memory) {
-        require(data.length > 0, "_parseData: input data empty");
+    function _parseData(bytes calldata data) internal pure virtual returns (Claim memory claim, uint8[] memory) {
+        if (data.length == 0) {
+            revert EmptyInput();
+        }
 
         (
             bytes32[] memory rights_,
@@ -324,7 +342,9 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
     /// @param creators Array of addresses for contributors
     function _storeContributorsClaims(bytes32 claimHash, address[] memory creators) internal {
         for (uint256 i = 0; i < creators.length; i++) {
-            require(!_contributorImpacts[creators[i]][claimHash], "Claim: claim for creators overlapping");
+            if (_contributorImpacts[creators[i]][claimHash]) {
+                revert ConflictingClaim();
+            }
             _contributorImpacts[creators[i]][claimHash] = true;
         }
     }
@@ -337,25 +357,25 @@ contract HypercertMinterV0 is Initializable, ERC3525Upgradeable, AccessControlUp
         return (bytes(map[key]).length > 0);
     }
 
-    function _toClaimData(
-        Claim storage claim,
-        uint256 id,
-        uint256[] memory fractions
-    ) internal view returns (ClaimData memory) {
-        ClaimData memory data;
-        data.id = id;
-        data.workTimeframe = claim.workTimeframe;
-        data.impactTimeframe = claim.impactTimeframe;
-        data.workScopes = _mapToValues(claim.workScopes, workScopes);
-        data.impactScopes = _mapToValues(claim.impactScopes, impactScopes);
-        data.fractions = fractions;
-        data.totalUnits = claim.totalUnits;
-        data.name = claim.name;
-        data.description = claim.description;
-        data.uri = claim.uri;
+    // function _toClaimData(
+    //     Claim storage claim,
+    //     uint256 id,
+    //     uint256[] memory fractions
+    // ) internal view returns (ClaimData memory) {
+    //     ClaimData memory data;
+    //     data.id = id;
+    //     data.workTimeframe = claim.workTimeframe;
+    //     data.impactTimeframe = claim.impactTimeframe;
+    //     data.workScopes = _mapToValues(claim.workScopes, workScopes);
+    //     data.impactScopes = _mapToValues(claim.impactScopes, impactScopes);
+    //     data.fractions = fractions;
+    //     data.totalUnits = claim.totalUnits;
+    //     data.name = claim.name;
+    //     data.description = claim.description;
+    //     data.uri = claim.uri;
 
-        return data;
-    }
+    //     return data;
+    // }
 
     /// @dev use keys to look up values in the supplied mapping
     function _mapToValues(bytes32[] memory keys, mapping(bytes32 => string) storage map)
