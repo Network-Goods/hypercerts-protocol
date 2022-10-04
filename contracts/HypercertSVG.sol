@@ -5,6 +5,7 @@ pragma solidity ^0.8.14;
 
 import "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
 import "./lib/DateTime.sol";
+import "hardhat/console.sol";
 
 contract HypercertSVG {
     using StringsUpgradeable for uint256;
@@ -20,10 +21,37 @@ contract HypercertSVG {
 
     /// @dev voucher => claimType => background colors
     mapping(address => mapping(uint8 => string[])) public certBgColors;
+    mapping(uint256 => string) background;
+    uint256 backgroundCounter = 0;
+
+    event BackgroundAdded(uint256 id);
 
     constructor() {}
 
-    function generateSVG(
+    function addBackground(string memory svgString) external returns (uint256 id) {
+        id = backgroundCounter;
+        background[id] = svgString;
+        emit BackgroundAdded(id);
+        backgroundCounter += 1;
+    }
+
+    function generateSvgHypercert(
+        string memory name,
+        string memory description,
+        uint64[2] memory workTimeframe,
+        uint64[2] memory impactTimeframe,
+        uint256 totalUnits
+    ) external view virtual returns (string memory) {
+        SVGParams memory svgParams;
+        svgParams.name = name;
+        svgParams.description = description;
+        svgParams.workTimeframe = workTimeframe;
+        svgParams.impactTimeframe = impactTimeframe;
+        svgParams.totalUnits = totalUnits;
+        return _generateHypercert(svgParams);
+    }
+
+    function generateSvgFraction(
         string memory name,
         string memory description,
         uint64[2] memory workTimeframe,
@@ -38,17 +66,37 @@ contract HypercertSVG {
         svgParams.impactTimeframe = impactTimeframe;
         svgParams.units = units;
         svgParams.totalUnits = totalUnits;
-        return _generateSVG(svgParams);
+        return _generateHypercertFraction(svgParams);
     }
 
-    function _generateSVG(SVGParams memory params) internal view virtual returns (string memory) {
+    function _generateHypercert(SVGParams memory params) internal view virtual returns (string memory) {
         return
             string(
                 abi.encodePacked(
-                    '<svg width="550" height="850" viewBox="0 0 550 850" ',
-                    'xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">',
-                    '<g font-family="SpaceMono-Bold">',
+                    '<svg width="550" height="850" viewBox="0 0 550 850" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">',
+                    _generateFontLoader(),
+                    _generateBackgroundColor(),
                     _generateBackground(),
+                    '<g font-family="SpaceMono-Bold">',
+                    _generateHeader(params),
+                    _generateName(params),
+                    _generateImpactScope(params),
+                    _generateFooter(params),
+                    "</g>",
+                    "</svg>"
+                )
+            );
+    }
+
+    function _generateHypercertFraction(SVGParams memory params) internal view virtual returns (string memory) {
+        return
+            string(
+                abi.encodePacked(
+                    '<svg width="550" height="850" viewBox="0 0 550 850" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">',
+                    _generateFontLoader(),
+                    _generateBackgroundColor(),
+                    _generateBackground(),
+                    '<g font-family="SpaceMono-Bold">',
                     _generateHeader(params),
                     _generateName(params),
                     _generateImpactScope(params),
@@ -56,6 +104,20 @@ contract HypercertSVG {
                     _generateFooter(params),
                     "</g>",
                     "</svg>"
+                )
+            );
+    }
+
+    // function _generateBackground() internal view virtual returns (string memory) {
+    //     return string.concat('<g id="graphic-color">', string(abi.encodePacked(background[0])), "</g>");
+    // }
+    function _generateBackgroundColor() internal pure returns (string memory) {
+        return
+            string(
+                abi.encodePacked(
+                    '<g id="background-color">',
+                    '<rect id="background-color-2" data-name="background-color" x=".5" y="0" width="550" height="850" rx="32" ry="32"/>',
+                    "</g>"
                 )
             );
     }
@@ -134,9 +196,7 @@ contract HypercertSVG {
                         abi.encodePacked(yearFrom.toString(), "-", monthFrom.toString(), "-", dayFrom.toString()),
                         " > ",
                         abi.encodePacked(yearTo.toString(), "-", monthTo.toString(), "-", dayTo.toString()),
-                        "</tspan>",
-                        "</text>",
-                        "</g>"
+                        "</tspan></text></g>"
                     )
                 )
             );
@@ -151,12 +211,22 @@ contract HypercertSVG {
                         '<text id="scope-title-color" transform="translate(156.35 343.77)" style="fill: #ffce43; font-family: SpaceMono-Bold, Space Mono; ">',
                         '<tspan x="0" y="0">',
                         params.name,
-                        "</tspan>",
-                        "</text>"
+                        "</tspan></text>"
                     ),
                     "</g>"
                 )
             );
+    }
+
+    function _generateFontLoader() internal pure virtual returns (string memory) {
+        return
+            string.concat(
+                "<style>",
+                '@import url("https://fonts.googleapis.com/css?family=Inter:200,300,400,500,600,700,800,900");',
+                '@import url("https://fonts.googleapis.com/css?family=Space+Mono:400,400i,700,700i");',
+                "</style>"
+            );
+        // return "@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700;800;900%26family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700%26display=swap')";
     }
 
     function _generateImpactScope(SVGParams memory params) internal pure virtual returns (string memory) {
@@ -164,14 +234,10 @@ contract HypercertSVG {
             string(
                 abi.encodePacked(
                     '<g id="scope-category-color" text-rendering="optimizeSpeed" font-size="15" fill="white">',
-                    abi.encodePacked(
-                        '<text transform="translate(156.35 500)" style="font-family: Inter-Regular, Inter; font-size: 15px;">',
-                        '<tspan x="0" y="0"> ',
-                        params.description,
-                        "</tspan>"
-                        "</text>"
-                    ),
-                    "</g>"
+                    '<text transform="translate(156.35 500)" style="font-family: Inter-Regular, Inter; font-size: 15px;">',
+                    '<tspan x="0" y="0">',
+                    params.description,
+                    "</tspan></text></g>"
                 )
             );
     }
@@ -181,16 +247,23 @@ contract HypercertSVG {
             string(
                 abi.encodePacked(
                     '<g id="scope-category-color" text-rendering="optimizeSpeed" font-size="30">',
-                    abi.encodePacked(
-                        '<text id="fractiom-color" transform="translate(156.35 568.03)" style="fill: #ffce43; font-family: SpaceMono-Bold, SpaceMono">'
-                        '<tspan x="0" y="0">',
-                        params.units.toString(),
-                        " / ",
-                        params.totalUnits.toString(),
-                        "</tspan>"
-                        "</text>"
-                    ),
-                    "</g>"
+                    '<text id="fractiom-color" transform="translate(156.35 568.03)" style="fill: #ffce43; font-family: SpaceMono-Bold, Space Mono">'
+                    '<tspan x="0" y="0">',
+                    abi.encodePacked(params.units.toString(), " / ", params.totalUnits.toString()),
+                    "</tspan></text></g>"
+                )
+            );
+    }
+
+    function _generateTotalUnits(SVGParams memory params) internal pure virtual returns (string memory) {
+        return
+            string(
+                abi.encodePacked(
+                    '<g id="scope-category-color" text-rendering="optimizeSpeed" font-size="30">',
+                    '<text id="fractiom-color" transform="translate(156.35 568.03)" style="fill: #ffce43; font-family: SpaceMono-Bold, Space Mono">'
+                    '<tspan x="0" y="0">',
+                    params.totalUnits.toString(),
+                    "</tspan></text></g>"
                 )
             );
     }
@@ -202,16 +275,12 @@ contract HypercertSVG {
             string(
                 abi.encodePacked(
                     '<g id="divider-color" text-rendering="optimizeSpeed" font-size="10" fill="#ffce43">',
-                    abi.encodePacked(
-                        '<text id="impact-period-color" transform="translate(134.75 765)" style="font-family: Inter-Regular, Inter; font-size: 15px;">',
-                        '<tspan x="0" y="0" style="letter-spacing: -.05em;">Impact Period: ',
-                        abi.encodePacked(yearFrom.toString(), "-", monthFrom.toString(), "-", dayFrom.toString()),
-                        " > ",
-                        abi.encodePacked(yearTo.toString(), "-", monthTo.toString(), "-", dayTo.toString()),
-                        "</tspan>"
-                    ),
-                    "</text>",
-                    "</g>"
+                    '<text id="impact-period-color" transform="translate(134.75 765)" style="font-family: Inter-Regular, Inter; font-size: 15px;">',
+                    '<tspan x="0" y="0" style="letter-spacing: -.05em;">Impact Period: ',
+                    abi.encodePacked(yearFrom.toString(), "-", monthFrom.toString(), "-", dayFrom.toString()),
+                    " > ",
+                    abi.encodePacked(yearTo.toString(), "-", monthTo.toString(), "-", dayTo.toString()),
+                    "</tspan></text></g>"
                 )
             );
     }

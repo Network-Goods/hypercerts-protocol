@@ -2,15 +2,20 @@
   "manifestVersion": "3.2",
   "proxies": [
     {
-      "address": "0x10Bd50f86C9e64d4FE75BEc8fd37CD84CA0C2e33",
-      "txHash": "0xa95908ca38c65784e59481114e56bb3a0ffbfab63680e7f884ccfa6126194b9f",
+      "address": "0x81eF83E26a19C0532a0DF80D84525bfCaCF2E4C4",
+      "txHash": "0xe95ef83e02df0e19efeda922223440a2a2c8cbe0f4313b8de0a358f8a82aff1d",
+      "kind": "uups"
+    },
+    {
+      "address": "0xc9997Bf3D85ef279C2671Fccc4E7Fa4ef092450B",
+      "txHash": "0xf748acefab2da60fd88b0df444cb0a3b80c81f7197d84c731ff640ffeacb90e4",
       "kind": "uups"
     }
   ],
   "impls": {
     "a7b6a8183c9a633a65123bcc66353f3f955e03789a6b8660478a5755132288da": {
-      "address": "0xa74DE85a3F11B1981dA98481E040F8A6fEa44bE2",
-      "txHash": "0x3be0ccc7d370a3f2dacf898549c401d90ee1c9cb1bac34bd374e62e993ee14b3",
+      "address": "0x8e9222b23d019423AF39fD5139617F9a75c441E9",
+      "txHash": "0xa287ce264dfc9e6f5d907f0e54d5d2cac8825bd48fe6f95b23e93623e7709e0f",
       "layout": {
         "storage": [
           {
@@ -274,7 +279,7 @@
             "label": "_impactCerts",
             "offset": 0,
             "slot": "411",
-            "type": "t_mapping(t_uint256,t_struct(Claim)5304_storage)",
+            "type": "t_mapping(t_uint256,t_struct(Claim)4542_storage)",
             "contract": "HypercertMinter",
             "src": "contracts/HypercertMinter.sol:44"
           }
@@ -368,7 +373,7 @@
             "label": "mapping(uint256 => struct ERC3525Upgradeable.ApproveData)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint256,t_struct(Claim)5304_storage)": {
+          "t_mapping(t_uint256,t_struct(Claim)4542_storage)": {
             "label": "mapping(uint256 => struct HypercertMinter.Claim)",
             "numberOfBytes": "32"
           },
@@ -398,7 +403,7 @@
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(Claim)5304_storage": {
+          "t_struct(Claim)4542_storage": {
             "label": "struct HypercertMinter.Claim",
             "members": [
               {

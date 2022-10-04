@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.12;
+pragma solidity ^0.8.14;
 
 import "./interfaces/IHypercertMetadata.sol";
 import "./utils/ArraysUpgradeable.sol";
 import "./utils/StringsExtensions.sol";
 import "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/Base64Upgradeable.sol";
 
 interface IHypercertMinter {
     struct Claim {
@@ -35,7 +36,15 @@ interface IHypercertMinter {
 }
 
 interface IHypercertSVG {
-    function generateSVG(
+    function generateSvgHypercert(
+        string memory name,
+        string memory description,
+        uint64[2] memory workTimeframe,
+        uint64[2] memory impactTimeframe,
+        uint256 totalUnits
+    ) external view returns (string memory);
+
+    function generateSvgFraction(
         string memory name,
         string memory description,
         uint64[2] memory workTimeframe,
@@ -61,18 +70,27 @@ contract HypercertMetadata is IHypercertMetadata {
 
     function generateTokenURI(uint256 slotId, uint256 tokenId) external view virtual returns (string memory) {
         IHypercertMinter.Claim memory claim = IHypercertMinter(msg.sender).getImpactCert(slotId);
+        uint256 units = IHypercertMinter(msg.sender).balanceOf(tokenId);
+
         return
             string(
                 abi.encodePacked(
-                    'data:application/json;{"name":"',
-                    claim.name,
-                    '","description":"',
-                    claim.description,
-                    '","properties":[',
-                    _slotProperties(claim),
-                    ",",
-                    _tokenProperties(claim, tokenId),
-                    "]}"
+                    "data:application/json;base64,",
+                    Base64Upgradeable.encode(
+                        abi.encodePacked(
+                            '{"name":"',
+                            claim.name,
+                            '","description":"',
+                            claim.description,
+                            '","image":"',
+                            _generateImageStringFraction(claim, units),
+                            '","properties":{',
+                            _slotProperties(claim),
+                            ",",
+                            _tokenProperties(claim, units),
+                            "}}"
+                        )
+                    )
                 )
             );
     }
@@ -82,13 +100,20 @@ contract HypercertMetadata is IHypercertMetadata {
         return
             string(
                 abi.encodePacked(
-                    'data:application/json;{"name":"',
-                    claim.name,
-                    '","description":"',
-                    claim.description,
-                    '","properties":[',
-                    _slotProperties(claim),
-                    "]}"
+                    "data:application/json;base64,",
+                    Base64Upgradeable.encode(
+                        abi.encodePacked(
+                            '{"name":"',
+                            claim.name,
+                            '","description":"',
+                            claim.description,
+                            '","image":"',
+                            _generateImageStringHypercert(claim),
+                            '","properties":{',
+                            _slotProperties(claim),
+                            "}}"
+                        )
+                    )
                 )
             );
     }
@@ -129,38 +154,60 @@ contract HypercertMetadata is IHypercertMetadata {
             );
     }
 
-    function _tokenProperties(IHypercertMinter.Claim memory claim, uint256 tokenId)
+    function _tokenProperties(IHypercertMinter.Claim memory claim, uint256 units)
         internal
         view
         virtual
         returns (string memory)
     {
-        uint256 units = IHypercertMinter(msg.sender).balanceOf(tokenId);
         return
             string(
                 abi.encodePacked(
                     _propertyString("units", "Units issued to this token.", units, false),
                     ",",
-                    _propertyString("fraction", "Fraction issued to this token.", units / claim.totalUnits, false),
-                    ",",
-                    _generateImageString(claim, units)
+                    _propertyString("fraction", "Fraction issued to this token.", units / claim.totalUnits, false)
                 )
             );
     }
 
-    function _generateImageString(IHypercertMinter.Claim memory claim, uint256 units)
+    function _generateImageStringFraction(IHypercertMinter.Claim memory claim, uint256 units)
         internal
         view
         returns (string memory)
     {
         return
-            IHypercertSVG(svgGenerator).generateSVG(
-                claim.name,
-                claim.description,
-                claim.workTimeframe,
-                claim.impactTimeframe,
-                units,
-                claim.totalUnits
+            string.concat(
+                "data:image/svg+xml;base64,",
+                Base64Upgradeable.encode(
+                    bytes(
+                        IHypercertSVG(svgGenerator).generateSvgFraction(
+                            claim.name,
+                            claim.description,
+                            claim.workTimeframe,
+                            claim.impactTimeframe,
+                            units,
+                            claim.totalUnits
+                        )
+                    )
+                )
+            );
+    }
+
+    function _generateImageStringHypercert(IHypercertMinter.Claim memory claim) internal view returns (string memory) {
+        return
+            string.concat(
+                "data:image/svg+xml;base64,",
+                Base64Upgradeable.encode(
+                    bytes(
+                        IHypercertSVG(svgGenerator).generateSvgHypercert(
+                            claim.name,
+                            claim.description,
+                            claim.workTimeframe,
+                            claim.impactTimeframe,
+                            claim.totalUnits
+                        )
+                    )
+                )
             );
     }
 
@@ -306,11 +353,9 @@ contract HypercertMetadata is IHypercertMetadata {
         return
             string(
                 abi.encodePacked(
-                    '{"name":"work_scopes","description":""The scopes of work of the claim."","value":',
+                    '{"name":"work_scopes","description":"The scopes of work of the claim.","value":[',
                     values.toCsv(),
-                    ',"is_intrinsic":"',
-                    true,
-                    '"}'
+                    '],"is_intrinsic":"true"}'
                 )
             );
     }
@@ -318,18 +363,21 @@ contract HypercertMetadata is IHypercertMetadata {
     /// @dev use keys to look up values in the supplied mapping
     function _mapImpactScopesIdsToValues(bytes32[] memory keys) internal view returns (string memory) {
         uint256 len = keys.length;
-        string[] memory values = new string[](len);
-        for (uint256 i = 0; i < len; i++) {
-            values[i] = IHypercertMinter(msg.sender).impactScopes(keys[i]);
+        string[] memory vals;
+        if (len > 0) {
+            string[] memory values = new string[](len);
+            for (uint256 i = 0; i < len; i++) {
+                values[i] = IHypercertMinter(msg.sender).impactScopes(keys[i]);
+            }
+            vals = values;
         }
+
         return
             string(
                 abi.encodePacked(
-                    '{"name":"impact_scopes","description":"The scopes of impact of the claim.","value":',
-                    values.toCsv(),
-                    ',"is_intrinsic":"',
-                    true,
-                    '"}'
+                    '{"name":"impact_scopes","description":"The scopes of impact of the claim.","value":[',
+                    vals.toCsv(),
+                    '],"is_intrinsic":"true"}'
                 )
             );
     }
@@ -344,11 +392,9 @@ contract HypercertMetadata is IHypercertMetadata {
         return
             string(
                 abi.encodePacked(
-                    '{"name":"rights","description":"Rights associated with owning the hypercert (fractions)","value":',
+                    '{"name":"rights","description":"Rights associated with owning the hypercert (fractions)","value":[',
                     values.toCsv(),
-                    ',"is_intrinsic":"',
-                    true,
-                    '"}'
+                    '],"is_intrinsic":"true"}'
                 )
             );
     }

@@ -20,7 +20,7 @@ describe("Unit tests", function () {
         totalUnits: 1000,
       };
 
-      const svgString = await tokenInstance.generateSVG(
+      const svgFractionString = await tokenInstance.generateSvgFraction(
         input.name,
         input.description,
         input.workTimeframe,
@@ -29,9 +29,19 @@ describe("Unit tests", function () {
         input.totalUnits,
       );
 
-      await fs.writeFile("testSVG.svg", svgString);
+      const svgHypercertString = await tokenInstance.generateSvgHypercert(
+        input.name,
+        input.description,
+        input.workTimeframe,
+        input.impactTimeframe,
+        input.totalUnits,
+      );
 
-      expect(svgString).to.include("svg").to.include(input.name).to.include(input.description);
+      await fs.writeFile("testSvgFraction.svg", svgFractionString);
+      await fs.writeFile("testSvgHypercert.svg", svgHypercertString);
+
+      expect(svgFractionString).to.include("svg").to.include(input.name).to.include(input.description);
+      expect(svgHypercertString).to.include("svg").to.include(input.name).to.include(input.description);
     });
   });
 });

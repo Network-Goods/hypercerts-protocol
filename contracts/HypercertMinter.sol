@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.4;
+pragma solidity ^0.8.14;
 
 import "./ERC3525Upgradeable.sol";
 import "./interfaces/IHypercertMetadata.sol";
