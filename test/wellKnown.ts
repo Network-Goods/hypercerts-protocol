@@ -2,6 +2,7 @@ import { ethers } from "hardhat";
 
 import { toHashMap } from "./utils";
 
+export const DataApplicationJson = "data:application/json;";
 export const HypercertMetadata = "HypercertMetadata";
 export const HypercertMinter = "HypercertMinter";
 

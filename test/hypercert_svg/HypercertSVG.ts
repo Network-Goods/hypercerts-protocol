@@ -1,49 +1,78 @@
 import { expect } from "chai";
+import { BigNumberish } from "ethers";
 import { promises as fs } from "fs";
 import { ethers } from "hardhat";
+import { parseXml } from "libxmljs";
 
 import { HypercertSVG as SVG } from "../../src/types";
-import { HypercertSVG, svgBackground } from "../wellKnown";
+import { PromiseOrValue } from "../../src/types/common";
+import { HypercertSVG } from "../wellKnown";
+
+type InputType = {
+  name: PromiseOrValue<string>;
+  description: PromiseOrValue<string>;
+  workTimeframe: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>];
+  impactTimeframe: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>];
+  units: PromiseOrValue<BigNumberish>;
+  totalUnits: PromiseOrValue<BigNumberish>;
+};
+
+const input: InputType = {
+  name: "TestSVG",
+  description: "Testing SVG rendering",
+  workTimeframe: [12345678, 87654321],
+  impactTimeframe: [87654321, 12345678],
+  units: 333,
+  totalUnits: 1000,
+};
+
+const BASE_PATH = "test/hypercert_svg/";
+
+const generateAndValidateSVG = async (fn: (tokenInstance: SVG) => Promise<string>) => {
+  const tokenFactory = await ethers.getContractFactory(HypercertSVG);
+  const tokenInstance = <SVG>await tokenFactory.deploy();
+  const svg = await fn(tokenInstance);
+  // await fs.writeFile(`${BASE_PATH}test.svg`, svg);
+  await validate(svg);
+};
+
+const validate = async (svg: string) => {
+  const baseUrl = `${BASE_PATH}xsd/`;
+  const xsd = await fs.readFile(`${baseUrl}svg.xsd`, { encoding: "utf-8" });
+  const xsdDoc = parseXml(xsd, { baseUrl });
+  const svgDoc = parseXml(svg);
+  svgDoc.validate(xsdDoc);
+
+  expect(svgDoc.find(`//*[@id='name-color']//*[text()='${input.name}']`).length).to.eq(1);
+  // expect(svgDoc.find("//description")).to.include(input.description);
+  expect(svgDoc.validationErrors.length).to.eq(0, svgDoc.validationErrors.join("\n"));
+};
 
 describe("Unit tests", function () {
-  describe.only("Hypercert SVG", function () {
-    it("renders a valid SVG string", async () => {
-      const tokenFactory = await ethers.getContractFactory(HypercertSVG);
-      const tokenInstance = <SVG>await tokenFactory.deploy();
-
-      await tokenInstance.addBackground(svgBackground);
-
-      const input = {
-        name: "TestSVG one two three four five six seven eight",
-        scopesOfImpact: ["First scope", "Second scope with filler", "Third scope a bit longer than the first"],
-        workTimeframe: [12345678, 87654321],
-        impactTimeframe: [87654321, 12345678],
-        units: 333,
-        totalUnits: 1000,
-      };
-
-      const svgFractionString = await tokenInstance.generateSvgFraction(
-        input.name,
-        input.scopesOfImpact,
-        input.workTimeframe,
-        input.impactTimeframe,
-        input.units,
-        input.totalUnits,
+  describe("Hypercert SVG", async function () {
+    it("should generate valid hypercert SVG", async () => {
+      await generateAndValidateSVG(tokenInstance =>
+        tokenInstance.generateSvgHypercert(
+          input.name,
+          input.description,
+          input.workTimeframe,
+          input.impactTimeframe,
+          input.totalUnits,
+        ),
       );
+    });
 
-      const svgHypercertString = await tokenInstance.generateSvgHypercert(
-        input.name,
-        input.scopesOfImpact,
-        input.workTimeframe,
-        input.impactTimeframe,
-        input.totalUnits,
+    it("should generate valid token SVG", async () => {
+      await generateAndValidateSVG(tokenInstance =>
+        tokenInstance.generateSvgFraction(
+          input.name,
+          input.description,
+          input.workTimeframe,
+          input.impactTimeframe,
+          input.units,
+          input.totalUnits,
+        ),
       );
-
-      await fs.writeFile("testSvgFraction.svg", svgFractionString);
-      await fs.writeFile("testSvgHypercert.svg", svgHypercertString);
-
-      expect(svgFractionString).to.include("svg").to.include(input.name).to.include(input.description);
-      expect(svgHypercertString).to.include("svg").to.include(input.name).to.include(input.description);
     });
   });
 });

@@ -1,10 +1,10 @@
 import { ParamType } from "@ethersproject/abi";
 import { expect } from "chai";
-import { BigNumber } from "ethers";
+import { BigNumber, utils } from "ethers";
 import { ethers, getNamedAccounts } from "hardhat";
 
 import { HypercertMinter } from "../src/types";
-import { ImpactScopes, LoremIpsum, Rights, WorkScopes } from "./wellKnown";
+import { DataApplicationJson, ImpactScopes, LoremIpsum, Rights, WorkScopes } from "./wellKnown";
 
 export type Claim = {
   rights: string[];
@@ -122,6 +122,19 @@ export const compareClaimAgainstInput = async (claim: HypercertMinter.ClaimStruc
   expect(claim.impactScopes).to.be.eql(options.impactScopes);
 };
 
-//TODO check URI strings
+export const decode64 = (value: string, header: boolean = true) => {
+  const base64String = () => (header ? value.substring(value.indexOf("base64,") + 7) : value);
+  return utils.toUtf8String(utils.base64.decode(base64String()));
+};
+
+export const validateMetadata = (metadata64: string, expected?: string | string[]) => {
+  expect(metadata64.startsWith(DataApplicationJson)).to.be.true;
+  const metadata = decode64(metadata64);
+  if (typeof expected === "string") expect(metadata).to.include(expected);
+  if (typeof expected === "object")
+    expected?.forEach(x => {
+      expect(metadata).to.include(x);
+    });
+};
 
 //TODO check SVG strings

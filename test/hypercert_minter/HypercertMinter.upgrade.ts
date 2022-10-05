@@ -1,8 +1,9 @@
 import { expect } from "chai";
 import { ethers, getNamedAccounts, upgrades } from "hardhat";
 
+import { HypercertMinterUpgrade } from "../../src/types";
 import setupTest, { setupImpactScopes, setupRights, setupWorkScopes } from "../setup";
-import { getClaimSlotID, getEncodedImpactClaim, newClaim } from "../utils";
+import { getClaimSlotID, getEncodedImpactClaim, newClaim, validateMetadata } from "../utils";
 import { HypercertMetadata, HypercertMinter, HypercertMinter_Upgrade, HypercertSVG, UPGRADER_ROLE } from "../wellKnown";
 
 export function shouldBehaveLikeHypercertMinterUpgrade(): void {
@@ -63,29 +64,26 @@ export function shouldBehaveLikeHypercertMinterUpgrade(): void {
     });
     expect(await proxy.version()).to.be.eq(0);
 
-    const proxyWithUser = await ethers.getContractAt(HypercertMinter, proxy.address, user);
+    const proxyWithUser = <HypercertMinterUpgrade>await ethers.getContractAt(HypercertMinter, proxy.address, user);
     await setupImpactScopes(proxyWithUser);
     await setupRights(proxyWithUser);
     await setupWorkScopes(proxyWithUser);
     await proxyWithUser.mint(user, data);
 
-    expect(await proxyWithUser.tokenURI(1))
-      .to.include("data:application/json;")
-      .to.include("ipfs://mockedImpactClaim");
-    expect(await proxyWithUser.slotURI(claimID))
-      .to.include("data:application/json;")
-      .to.include("ipfs://mockedImpactClaim");
+    const tokenURI = await proxyWithUser.tokenURI(1);
+
+    console.log(tokenURI);
+
+    const cid = "ipfs://mockedImpactClaim";
+    validateMetadata(await proxyWithUser.tokenURI(1), cid);
+    validateMetadata(await proxyWithUser.slotURI(claimID), cid);
 
     const upgrade = await upgrades.upgradeProxy(proxy, UpgradeFactory, {
       call: "updateVersion",
     });
 
-    expect(await upgrade.tokenURI(1))
-      .to.include("data:application/json;")
-      .to.include("ipfs://mockedImpactClaim");
-    expect(await upgrade.slotURI(claimID))
-      .to.include("data:application/json;")
-      .to.include("ipfs://mockedImpactClaim");
+    validateMetadata(await upgrade.tokenURI(1), cid);
+    validateMetadata(await upgrade.slotURI(claimID), cid);
 
     const upgradeWithUser = await ethers.getContractAt(HypercertMinter_Upgrade, upgrade.address, user);
     await expect(upgradeWithUser.split(1)).to.emit(upgrade, "Split").withArgs(1, [2]);
