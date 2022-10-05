@@ -26,23 +26,26 @@ const input: InputType = {
   totalUnits: 1000,
 };
 
+const BASE_PATH = "test/hypercert_svg/";
+
 const generateAndValidateSVG = async (fn: (tokenInstance: SVG) => Promise<string>) => {
   const tokenFactory = await ethers.getContractFactory(HypercertSVG);
   const tokenInstance = <SVG>await tokenFactory.deploy();
   const svg = await fn(tokenInstance);
+  // await fs.writeFile(`${BASE_PATH}test.svg`, svg);
   await validate(svg);
 };
 
 const validate = async (svg: string) => {
-  const baseUrl = "test/hypercert_svg/";
+  const baseUrl = `${BASE_PATH}xsd/`;
   const xsd = await fs.readFile(`${baseUrl}svg.xsd`, { encoding: "utf-8" });
   const xsdDoc = parseXml(xsd, { baseUrl });
-  //await fs.writeFile(svg, `${baseUrl}testSvg.svg`);
   const svgDoc = parseXml(svg);
   svgDoc.validate(xsdDoc);
 
+  expect(svgDoc.find(`//*[@id='name-color']//*[text()='${input.name}']`).length).to.eq(1);
+  // expect(svgDoc.find("//description")).to.include(input.description);
   expect(svgDoc.validationErrors.length).to.eq(0, svgDoc.validationErrors.join("\n"));
-  expect(svg).to.include(input.name).to.include(input.description);
 };
 
 describe("Unit tests", function () {
