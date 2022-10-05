@@ -3,17 +3,19 @@ import { promises as fs } from "fs";
 import { ethers } from "hardhat";
 
 import { HypercertSVG as SVG } from "../../src/types";
-import { HypercertSVG } from "../wellKnown";
+import { HypercertSVG, svgBackground } from "../wellKnown";
 
 describe("Unit tests", function () {
-  describe("Hypercert SVG", function () {
+  describe.only("Hypercert SVG", function () {
     it("renders a valid SVG string", async () => {
       const tokenFactory = await ethers.getContractFactory(HypercertSVG);
       const tokenInstance = <SVG>await tokenFactory.deploy();
 
+      await tokenInstance.addBackground(svgBackground);
+
       const input = {
-        name: "TestSVG",
-        description: "Testing SVG rendering",
+        name: "TestSVG one two three four five six seven eight",
+        scopesOfImpact: ["First scope", "Second scope with filler", "Third scope a bit longer than the first"],
         workTimeframe: [12345678, 87654321],
         impactTimeframe: [87654321, 12345678],
         units: 333,
@@ -22,7 +24,7 @@ describe("Unit tests", function () {
 
       const svgFractionString = await tokenInstance.generateSvgFraction(
         input.name,
-        input.description,
+        input.scopesOfImpact,
         input.workTimeframe,
         input.impactTimeframe,
         input.units,
@@ -31,7 +33,7 @@ describe("Unit tests", function () {
 
       const svgHypercertString = await tokenInstance.generateSvgHypercert(
         input.name,
-        input.description,
+        input.scopesOfImpact,
         input.workTimeframe,
         input.impactTimeframe,
         input.totalUnits,

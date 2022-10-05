@@ -19,7 +19,11 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
     const { deployer, minter } = await setupTest();
 
     const workScopes = Object.keys(WorkScopes);
-    const claim1 = await newClaim({ workScopes: workScopes.slice(0, 1), fractions: [100] });
+    const claim1 = await newClaim({
+      name: "Impact claim simple minting test",
+      workScopes: workScopes.slice(0, 1),
+      fractions: [100],
+    });
     const data1 = encodeClaim(claim1);
     const claimID = await getClaimSlotID(claim1);
     const data2 = await getEncodedImpactClaim({ workTimeframe: [234567890, 123456789] });
@@ -55,6 +59,9 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
     expect(await minter["balanceOf(uint256)"](1)).to.be.eq("100");
     expect(await minter.tokenURI(1)).to.include("data:application/json;");
     expect(await minter.slotURI(claimID)).to.include("data:application/json;");
+
+    const tokenURI = await minter.tokenURI(1);
+    console.log(tokenURI);
 
     await expect(deployer.minter.mint(ethers.constants.AddressZero, data1)).to.be.revertedWith("ToZeroAddress");
   });

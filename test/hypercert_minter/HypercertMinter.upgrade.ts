@@ -3,7 +3,7 @@ import { ethers, getNamedAccounts, upgrades } from "hardhat";
 
 import setupTest, { setupImpactScopes, setupRights, setupWorkScopes } from "../setup";
 import { getClaimSlotID, getEncodedImpactClaim, newClaim } from "../utils";
-import { HypercertSVG, HypercertMetadata, HypercertMinter, HypercertMinter_Upgrade, UPGRADER_ROLE } from "../wellKnown";
+import { HypercertMetadata, HypercertMinter, HypercertMinter_Upgrade, HypercertSVG, UPGRADER_ROLE } from "../wellKnown";
 
 export function shouldBehaveLikeHypercertMinterUpgrade(): void {
   it("supports upgrader role", async function () {
@@ -68,10 +68,6 @@ export function shouldBehaveLikeHypercertMinterUpgrade(): void {
     await setupRights(proxyWithUser);
     await setupWorkScopes(proxyWithUser);
     await proxyWithUser.mint(user, data);
-
-    const tokenURI = await proxyWithUser.tokenURI(1);
-
-    console.log(tokenURI);
 
     expect(await proxyWithUser.tokenURI(1))
       .to.include("data:application/json;")

@@ -38,7 +38,7 @@ interface IHypercertMinter {
 interface IHypercertSVG {
     function generateSvgHypercert(
         string memory name,
-        string memory description,
+        string[] memory scopesOfImpact,
         uint64[2] memory workTimeframe,
         uint64[2] memory impactTimeframe,
         uint256 totalUnits
@@ -46,7 +46,7 @@ interface IHypercertSVG {
 
     function generateSvgFraction(
         string memory name,
-        string memory description,
+        string[] memory scopesOfImpact,
         uint64[2] memory workTimeframe,
         uint64[2] memory impactTimeframe,
         uint256 units,
@@ -55,6 +55,7 @@ interface IHypercertSVG {
 }
 
 /// @dev Hypercertificate metadata creation logic
+// TODO optimise where to call string data
 contract HypercertMetadata is IHypercertMetadata {
     using ArraysUpgradeable for uint64[2];
     using ArraysUpgradeable for uint256[];
@@ -71,6 +72,16 @@ contract HypercertMetadata is IHypercertMetadata {
     function generateTokenURI(uint256 slotId, uint256 tokenId) external view virtual returns (string memory) {
         IHypercertMinter.Claim memory claim = IHypercertMinter(msg.sender).getImpactCert(slotId);
         uint256 units = IHypercertMinter(msg.sender).balanceOf(tokenId);
+        string[] memory impactScopes;
+
+        uint256 impactScopesLength = claim.impactScopes.length;
+        if (impactScopesLength > 0) {
+            string[] memory values = new string[](impactScopesLength);
+            for (uint256 i = 0; i < impactScopesLength; i++) {
+                values[i] = IHypercertMinter(msg.sender).impactScopes(claim.impactScopes[i]);
+            }
+            impactScopes = values;
+        }
 
         return
             string(
@@ -83,7 +94,7 @@ contract HypercertMetadata is IHypercertMetadata {
                             '","description":"',
                             claim.description,
                             '","image":"',
-                            _generateImageStringFraction(claim, units),
+                            _generateImageStringFraction(claim, units, impactScopes),
                             '","external_url":"',
                             claim.uri,
                             '","properties":{',
@@ -139,6 +150,17 @@ contract HypercertMetadata is IHypercertMetadata {
 
     function generateSlotURI(uint256 slotId) external view virtual returns (string memory) {
         IHypercertMinter.Claim memory claim = IHypercertMinter(msg.sender).getImpactCert(slotId);
+
+        string[] memory impactScopes;
+
+        uint256 impactScopesLength = claim.impactScopes.length;
+        if (impactScopesLength > 0) {
+            string[] memory values = new string[](impactScopesLength);
+            for (uint256 i = 0; i < impactScopesLength; i++) {
+                values[i] = IHypercertMinter(msg.sender).impactScopes(claim.impactScopes[i]);
+            }
+            impactScopes = values;
+        }
         return
             string(
                 abi.encodePacked(
@@ -150,7 +172,7 @@ contract HypercertMetadata is IHypercertMetadata {
                             '","description":"',
                             claim.description,
                             '","image":"',
-                            _generateImageStringHypercert(claim),
+                            _generateImageStringHypercert(claim, impactScopes),
                             '","properties":{',
                             string.concat('"name":', _propertyString("name", "Name of hypercert.", claim.name, false)),
                             "}"
@@ -212,11 +234,11 @@ contract HypercertMetadata is IHypercertMetadata {
             );
     }
 
-    function _generateImageStringFraction(IHypercertMinter.Claim memory claim, uint256 units)
-        internal
-        view
-        returns (string memory)
-    {
+    function _generateImageStringFraction(
+        IHypercertMinter.Claim memory claim,
+        uint256 units,
+        string[] memory impactScopes
+    ) internal view returns (string memory) {
         return
             string.concat(
                 "data:image/svg+xml;base64,",
@@ -224,7 +246,7 @@ contract HypercertMetadata is IHypercertMetadata {
                     bytes(
                         IHypercertSVG(svgGenerator).generateSvgFraction(
                             claim.name,
-                            claim.description,
+                            impactScopes,
                             claim.workTimeframe,
                             claim.impactTimeframe,
                             units,
@@ -235,7 +257,11 @@ contract HypercertMetadata is IHypercertMetadata {
             );
     }
 
-    function _generateImageStringHypercert(IHypercertMinter.Claim memory claim) internal view returns (string memory) {
+    function _generateImageStringHypercert(IHypercertMinter.Claim memory claim, string[] memory scopesOfImpact)
+        internal
+        view
+        returns (string memory)
+    {
         return
             string.concat(
                 "data:image/svg+xml;base64,",
@@ -243,7 +269,7 @@ contract HypercertMetadata is IHypercertMetadata {
                     bytes(
                         IHypercertSVG(svgGenerator).generateSvgHypercert(
                             claim.name,
-                            claim.description,
+                            scopesOfImpact,
                             claim.workTimeframe,
                             claim.impactTimeframe,
                             claim.totalUnits
