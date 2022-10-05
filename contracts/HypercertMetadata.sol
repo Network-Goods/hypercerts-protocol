@@ -84,13 +84,55 @@ contract HypercertMetadata is IHypercertMetadata {
                             claim.description,
                             '","image":"',
                             _generateImageStringFraction(claim, units),
+                            '","external_url":"',
+                            claim.uri,
                             '","properties":{',
-                            _slotProperties(claim),
-                            ",",
-                            _tokenProperties(claim, units),
+                            abi.encodePacked(
+                                '"fraction":',
+                                _propertyStringRange(
+                                    "Fraction",
+                                    "Units held by fraction.",
+                                    units,
+                                    claim.totalUnits,
+                                    false
+                                ),
+                                ","
+                            ),
+                            _hypercertDimensions(claim),
                             "}}"
                         )
                     )
+                )
+            );
+    }
+
+    function _hypercertDimensions(IHypercertMinter.Claim memory claim) internal view returns (string memory) {
+        return
+            string(
+                abi.encodePacked(
+                    abi.encodePacked('"scopesOfWork":', _mapWorkScopesIdsToValues(claim.workScopes), ","),
+                    abi.encodePacked('"scopesOfImpact":', _mapImpactScopesIdsToValues(claim.impactScopes), ","),
+                    abi.encodePacked(
+                        '"timeOfWork":',
+                        _propertyString(
+                            "Timeframe of work",
+                            "Timeframe in which work to achieve impact has been performed",
+                            claim.workTimeframe,
+                            true
+                        ),
+                        ","
+                    ),
+                    abi.encodePacked(
+                        '"timeOfImpact":',
+                        _propertyString(
+                            "Timeframe of impact",
+                            "Timeframe in which impact is realized",
+                            claim.impactTimeframe,
+                            true
+                        ),
+                        ","
+                    ),
+                    abi.encodePacked('"rights":', _mapRightsIdsToValues(claim.rights))
                 )
             );
     }
@@ -110,8 +152,8 @@ contract HypercertMetadata is IHypercertMetadata {
                             '","image":"',
                             _generateImageStringHypercert(claim),
                             '","properties":{',
-                            _slotProperties(claim),
-                            "}}"
+                            string.concat('"name":', _propertyString("name", "Name of hypercert.", claim.name, false)),
+                            "}"
                         )
                     )
                 )
@@ -129,7 +171,7 @@ contract HypercertMetadata is IHypercertMetadata {
                         true
                     ),
                     ",",
-                    _mapWorkscopeIdsToValues(claim.workScopes),
+                    _mapWorkScopesIdsToValues(claim.workScopes),
                     ",",
                     _propertyString(
                         "impact_timeframe",
@@ -255,6 +297,31 @@ contract HypercertMetadata is IHypercertMetadata {
             );
     }
 
+    function _propertyStringRange(
+        string memory name_,
+        string memory description_,
+        uint256 value_,
+        uint256 maxValue,
+        bool isIntrinsic_
+    ) internal pure virtual returns (string memory) {
+        return
+            string(
+                abi.encodePacked(
+                    '{"name":"',
+                    name_,
+                    '","description":"',
+                    description_,
+                    '","value":',
+                    value_.toString(),
+                    ',"max_value":',
+                    maxValue.toString(),
+                    ',"is_intrinsic":"',
+                    isIntrinsic_.toString(),
+                    '"}'
+                )
+            );
+    }
+
     function _propertyString(
         string memory name_,
         string memory description_,
@@ -344,7 +411,7 @@ contract HypercertMetadata is IHypercertMetadata {
     }
 
     /// @dev use keys to look up values in the supplied mapping
-    function _mapWorkscopeIdsToValues(bytes32[] memory keys) internal view returns (string memory) {
+    function _mapWorkScopesIdsToValues(bytes32[] memory keys) internal view returns (string memory) {
         uint256 len = keys.length;
         string[] memory values = new string[](len);
         for (uint256 i = 0; i < len; i++) {
@@ -353,7 +420,7 @@ contract HypercertMetadata is IHypercertMetadata {
         return
             string(
                 abi.encodePacked(
-                    '{"name":"work_scopes","description":"The scopes of work of the claim.","value":[',
+                    '{"name":"Scopes of Work","description":"Scopes of work encapsulated in this hypercert fraction.","value":[',
                     values.toCsv(),
                     '],"is_intrinsic":"true"}'
                 )
@@ -375,7 +442,7 @@ contract HypercertMetadata is IHypercertMetadata {
         return
             string(
                 abi.encodePacked(
-                    '{"name":"impact_scopes","description":"The scopes of impact of the claim.","value":[',
+                    '{"name":"Scopes of Impact","description":"Scopes of impact encapsulated in this hypercert fraction.","value":[',
                     vals.toCsv(),
                     '],"is_intrinsic":"true"}'
                 )
@@ -392,7 +459,7 @@ contract HypercertMetadata is IHypercertMetadata {
         return
             string(
                 abi.encodePacked(
-                    '{"name":"rights","description":"Rights associated with owning the hypercert (fractions)","value":[',
+                    '{"name":"Rights","description":"Rights associated with owning the hypercert (fractions)","value":[',
                     values.toCsv(),
                     '],"is_intrinsic":"true"}'
                 )
