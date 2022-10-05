@@ -8,9 +8,10 @@ import { HypercertSVG as SVG } from "../../src/types";
 import { PromiseOrValue } from "../../src/types/common";
 import { HypercertSVG } from "../wellKnown";
 
+//TODO not sure if needed, Typescript should infer this from contract types
 type InputType = {
   name: PromiseOrValue<string>;
-  description: PromiseOrValue<string>;
+  scopesOfImpact: PromiseOrValue<string>[];
   workTimeframe: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>];
   impactTimeframe: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>];
   units: PromiseOrValue<BigNumberish>;
@@ -19,7 +20,7 @@ type InputType = {
 
 const input: InputType = {
   name: "TestSVG",
-  description: "Testing SVG rendering",
+  scopesOfImpact: ["Developing SVG rendering", "Trololololololol"],
   workTimeframe: [12345678, 87654321],
   impactTimeframe: [87654321, 12345678],
   units: 333,
@@ -28,6 +29,7 @@ const input: InputType = {
 
 const BASE_PATH = "test/hypercert_svg/";
 
+//TODO add uploading `svgBackground` using `addBackground` method
 const generateAndValidateSVG = async (fn: (tokenInstance: SVG) => Promise<string>) => {
   const tokenFactory = await ethers.getContractFactory(HypercertSVG);
   const tokenInstance = <SVG>await tokenFactory.deploy();
@@ -54,7 +56,7 @@ describe("Unit tests", function () {
       await generateAndValidateSVG(tokenInstance =>
         tokenInstance.generateSvgHypercert(
           input.name,
-          input.description,
+          input.scopesOfImpact,
           input.workTimeframe,
           input.impactTimeframe,
           input.totalUnits,
@@ -66,7 +68,7 @@ describe("Unit tests", function () {
       await generateAndValidateSVG(tokenInstance =>
         tokenInstance.generateSvgFraction(
           input.name,
-          input.description,
+          input.scopesOfImpact,
           input.workTimeframe,
           input.impactTimeframe,
           input.units,
