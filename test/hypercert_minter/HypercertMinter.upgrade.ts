@@ -1,6 +1,7 @@
 import { expect } from "chai";
 import { ethers, getNamedAccounts, upgrades } from "hardhat";
 
+import { HypercertMinterUpgrade } from "../../src/types";
 import setupTest, { setupImpactScopes, setupRights, setupWorkScopes } from "../setup";
 import { getClaimSlotID, getEncodedImpactClaim, newClaim, validateMetadata } from "../utils";
 import { HypercertMetadata, HypercertMinter, HypercertMinter_Upgrade, HypercertSVG, UPGRADER_ROLE } from "../wellKnown";
@@ -63,7 +64,7 @@ export function shouldBehaveLikeHypercertMinterUpgrade(): void {
     });
     expect(await proxy.version()).to.be.eq(0);
 
-    const proxyWithUser = await ethers.getContractAt(HypercertMinter, proxy.address, user);
+    const proxyWithUser = <HypercertMinterUpgrade>await ethers.getContractAt(HypercertMinter, proxy.address, user);
     await setupImpactScopes(proxyWithUser);
     await setupRights(proxyWithUser);
     await setupWorkScopes(proxyWithUser);
@@ -83,7 +84,6 @@ export function shouldBehaveLikeHypercertMinterUpgrade(): void {
 
     validateMetadata(await upgrade.tokenURI(1), cid);
     validateMetadata(await upgrade.slotURI(claimID), cid);
-    d;
 
     const upgradeWithUser = await ethers.getContractAt(HypercertMinter_Upgrade, upgrade.address, user);
     await expect(upgradeWithUser.split(1)).to.emit(upgrade, "Split").withArgs(1, [2]);
