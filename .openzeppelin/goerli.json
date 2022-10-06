@@ -2,45 +2,15 @@
   "manifestVersion": "3.2",
   "proxies": [
     {
-      "address": "0x81eF83E26a19C0532a0DF80D84525bfCaCF2E4C4",
-      "txHash": "0xe95ef83e02df0e19efeda922223440a2a2c8cbe0f4313b8de0a358f8a82aff1d",
-      "kind": "uups"
-    },
-    {
-      "address": "0xc9997Bf3D85ef279C2671Fccc4E7Fa4ef092450B",
-      "txHash": "0xf748acefab2da60fd88b0df444cb0a3b80c81f7197d84c731ff640ffeacb90e4",
-      "kind": "uups"
-    },
-    {
-      "address": "0xF8Ff08a263D258c0618394734feD493806bd60cd",
-      "txHash": "0x753b7fd45388ed7abddb6cd1962df96a44796ec773197e5c1678be0e538b01c3",
-      "kind": "uups"
-    },
-    {
-      "address": "0xdc383fEB53B439ECE111625F67b28456db2899c6",
-      "txHash": "0x6a6ee110a8eda1c17ef787f0269300bb2784a9b94cbed1f7e3dd2a457112eba1",
-      "kind": "uups"
-    },
-    {
-      "address": "0xb89F8441bdDd3507ca4E744F7A91D5da727CC4c2",
-      "txHash": "0xd256f90b01f0570aa661df41216ca9d5ba9875d397f71c499dafd161ab4b2be3",
-      "kind": "uups"
-    },
-    {
-      "address": "0xbf96cDFbf6Eb39e461670fE76894948760e362Dc",
-      "txHash": "0xa5690aef66daf0332e1692b86de110bf3003070bfeebba881da820a49b764b97",
-      "kind": "uups"
-    },
-    {
-      "address": "0xc99C3394846702e3BF67bbF222565C3C14C5433F",
-      "txHash": "0xf120db57d510dcdc0247b1b03c8c7acedde6749d2ded64eecca6652cc628451b",
+      "address": "0xB1f61bE6E5003dB6367E9E0b7BC9e4374b14f137",
+      "txHash": "0x0f2fe556d329d66ded4d6d921ca36f3208b204920ee43d4bd4133657b6992a66",
       "kind": "uups"
     }
   ],
   "impls": {
-    "a7b6a8183c9a633a65123bcc66353f3f955e03789a6b8660478a5755132288da": {
-      "address": "0x8e9222b23d019423AF39fD5139617F9a75c441E9",
-      "txHash": "0xa287ce264dfc9e6f5d907f0e54d5d2cac8825bd48fe6f95b23e93623e7709e0f",
+    "66eb1e6f0c8f1c1eb64c58db07b5b2cc6ce176c9ee9fe1bebe0fcd0b37a2dbcc": {
+      "address": "0xa0312FD12E611531B7E665D0AF6E93cfaf263fa5",
+      "txHash": "0x807afc32eb662601724fb1bca4a5374fd4bcfac0337a2945e07700a311e6e792",
       "layout": {
         "storage": [
           {
@@ -192,7 +162,7 @@
             "label": "_approvedValues",
             "offset": 0,
             "slot": "252",
-            "type": "t_mapping(t_uint256,t_struct(ApproveData)3439_storage)",
+            "type": "t_mapping(t_uint256,t_struct(ApproveData)3486_storage)",
             "contract": "ERC3525Upgradeable",
             "src": "contracts/ERC3525Upgradeable.sol:45"
           },
@@ -304,7 +274,7 @@
             "label": "_impactCerts",
             "offset": 0,
             "slot": "411",
-            "type": "t_mapping(t_uint256,t_struct(Claim)4542_storage)",
+            "type": "t_mapping(t_uint256,t_struct(Claim)5552_storage)",
             "contract": "HypercertMinter",
             "src": "contracts/HypercertMinter.sol:44"
           }
@@ -394,11 +364,11 @@
             "label": "mapping(uint256 => uint256[])",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint256,t_struct(ApproveData)3439_storage)": {
+          "t_mapping(t_uint256,t_struct(ApproveData)3486_storage)": {
             "label": "mapping(uint256 => struct ERC3525Upgradeable.ApproveData)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint256,t_struct(Claim)4542_storage)": {
+          "t_mapping(t_uint256,t_struct(Claim)5552_storage)": {
             "label": "mapping(uint256 => struct HypercertMinter.Claim)",
             "numberOfBytes": "32"
           },
@@ -410,7 +380,7 @@
             "label": "string",
             "numberOfBytes": "32"
           },
-          "t_struct(ApproveData)3439_storage": {
+          "t_struct(ApproveData)3486_storage": {
             "label": "struct ERC3525Upgradeable.ApproveData",
             "members": [
               {
@@ -428,7 +398,7 @@
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(Claim)4542_storage": {
+          "t_struct(Claim)5552_storage": {
             "label": "struct HypercertMinter.Claim",
             "members": [
               {

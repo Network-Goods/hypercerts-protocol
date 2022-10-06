@@ -16,4 +16,4 @@ const initBackground =
 
 export default deploy;
 deploy.tags = ["local", "staging"];
-deploy.dependencies = ["HypercertMetadata"];
+deploy.dependencies = ["HypercertMinter"];

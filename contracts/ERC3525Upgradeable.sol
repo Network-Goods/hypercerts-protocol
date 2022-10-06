@@ -190,7 +190,7 @@ abstract contract ERC3525Upgradeable is
         address to_,
         uint256 tokenId_,
         uint256 slot_
-    ) private {
+    ) internal {
         ERC721Upgradeable._mint(to_, tokenId_);
         _slots[tokenId_] = slot_;
         if (_tokensBySlot[slot_].length == 0) {

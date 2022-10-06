@@ -24,7 +24,7 @@ library ArraysUpgradeable {
     }
 
     function toString(uint64[2] memory array) internal pure returns (string memory) {
-        return string(abi.encodePacked("[", uint256(array[0]).toString(), ",", uint256(array[1]).toString(), "]"));
+        return string(abi.encodePacked('["', uint256(array[0]).toString(), '","', uint256(array[1]).toString(), '"]'));
     }
 
     function toCsv(uint256[] memory array) internal pure returns (string memory) {

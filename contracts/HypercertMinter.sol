@@ -22,7 +22,7 @@ contract HypercertMinter is Initializable, ERC3525Upgradeable, AccessControlUpgr
     using ArraysUpgradeable for uint8[];
 
     /// @notice Contract name
-    string public constant NAME = "Hypercerts";
+    string public constant NAME = "HyperCerts";
     /// @notice Token symbol
     string public constant SYMBOL = "HCRT";
     /// @notice Token value decimals
@@ -161,6 +161,35 @@ contract HypercertMinter is Initializable, ERC3525Upgradeable, AccessControlUpgr
         }
 
         emit ImpactClaimed(slot, account, fractions);
+    }
+
+    function split(uint256 tokenId, uint8[] calldata amounts) public {
+        uint256 total;
+
+        uint256 amountsLength = amounts.length;
+        for (uint256 i; i < amountsLength; i++) {
+            total += amounts[i];
+        }
+
+        if (total > balanceOf(tokenId)) revert InsufficientBalance(total, balanceOf(tokenId));
+
+        uint256 len = amounts.length;
+        uint256 slotID = slotOf(tokenId);
+        for (uint256 i = 1; i < len; i++) {
+            uint256 newTokenID = _getNewTokenId(0);
+            _mint(msg.sender, newTokenID, slotID);
+            _transfer(tokenId, newTokenID, amounts[i]);
+        }
+    }
+
+    function merge(uint256[] memory tokenIds) public {
+        uint256 len = tokenIds.length;
+        uint256 targetTokenId = tokenIds[len];
+        for (uint256 i = 0; i < len; i++) {
+            uint256 tokenId = tokenIds[i];
+            _transfer(tokenId, targetTokenId, balanceOf(tokenId));
+            if (tokenId != targetTokenId) _burn(tokenId);
+        }
     }
 
     /// @notice Gets the impact claim with the specified id

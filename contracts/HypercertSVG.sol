@@ -230,7 +230,6 @@ contract HypercertSVG {
     function _generateFraction(SVGParams memory params) internal view virtual returns (string memory) {
         console.log("Units: ", params.units);
         console.log("totalUnits: ", params.totalUnits);
-        uint256 fraction = (params.units * 10000) / params.totalUnits;
         uint256 percent = getPercent(params.units, params.totalUnits);
         return
             string(

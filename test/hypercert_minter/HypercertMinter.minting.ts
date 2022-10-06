@@ -15,7 +15,7 @@ import {
 import { Rights, WorkScopes } from "../wellKnown";
 
 export function shouldBehaveLikeHypercertMinterMinting(): void {
-  it("anybody can mint an impact claim with 1 or more fractions - except zero-address", async function () {
+  it.only("anybody can mint an impact claim with 1 or more fractions - except zero-address", async function () {
     const { deployer, minter } = await setupTest();
 
     const workScopes = Object.keys(WorkScopes);
@@ -62,6 +62,9 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
 
     const tokenURI = await minter.tokenURI(1);
     console.log(tokenURI);
+
+    const slotURI = await minter.slotURI(claimID);
+    console.log(slotURI);
 
     await expect(deployer.minter.mint(ethers.constants.AddressZero, data1)).to.be.revertedWith("ToZeroAddress");
   });
