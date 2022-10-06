@@ -20,7 +20,7 @@ error InvalidInput();
 /// @notice Contains functions and events to initialize and issue a hypercertificate
 /// @author bitbeckers, mr_bluesky
 contract HyperCertMinter is Initializable, ERC3525Upgradeable, AccessControlUpgradeable, UUPSUpgradeable {
-    using ArraysUpgradeable for uint256[];
+    using ArraysUpgradeable for uint64[];
 
     /// @notice Contract name
     string public constant NAME = "HyperCerts";
@@ -68,7 +68,7 @@ contract HyperCertMinter is Initializable, ERC3525Upgradeable, AccessControlUpgr
     /// @param id Id of the claimed impact.
     /// @param minter Address of cert minter.
     /// @param fractions Units of tokens issued under the hypercert.
-    event ImpactClaimed(uint256 id, address minter, uint256[] fractions);
+    event ImpactClaimed(uint256 id, address minter, uint64[] fractions);
 
     /// @notice Emitted when a new impact scope is added.
     /// @param id Id of the impact scope.
@@ -143,7 +143,7 @@ contract HyperCertMinter is Initializable, ERC3525Upgradeable, AccessControlUpgr
     /// @param data Data representing the parameters of the claim
     function mint(address account, bytes calldata data) public virtual {
         // Parse data to get Claim
-        (Claim memory claim, uint256[] memory fractions) = _parseData(data);
+        (Claim memory claim, uint64[] memory fractions) = _parseData(data);
 
         _authorizeMint(account, claim);
 
@@ -339,7 +339,7 @@ contract HyperCertMinter is Initializable, ERC3525Upgradeable, AccessControlUpgr
     /// @dev This function is overridable in order to support future schema changes
     /// @return claim The parsed Claim struct
     /// @return Claim metadata URI
-    function _parseData(bytes calldata data) internal pure virtual returns (Claim memory claim, uint256[] memory) {
+    function _parseData(bytes calldata data) internal pure virtual returns (Claim memory claim, uint64[] memory) {
         if (data.length == 0) {
             revert EmptyInput();
         }
@@ -354,10 +354,10 @@ contract HyperCertMinter is Initializable, ERC3525Upgradeable, AccessControlUpgr
             string memory name_,
             string memory description_,
             string memory uri_,
-            uint256[] memory fractions
+            uint64[] memory fractions
         ) = abi.decode(
                 data,
-                (bytes32[], bytes32[], bytes32[], uint64[2], uint64[2], address[], string, string, string, uint256[])
+                (bytes32[], bytes32[], bytes32[], uint64[2], uint64[2], address[], string, string, string, uint64[])
             );
 
         claim.claimHash = getHash(workTimeframe, workScopes_, impactTimeframe, impactScopes_);

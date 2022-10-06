@@ -43,6 +43,7 @@ export const newClaim = async (claim?: Partial<Claim>) => {
 
 export const getEncodedImpactClaim = async (claim?: Partial<Claim>) => encodeClaim(await newClaim(claim));
 
+//TODO input types
 export const encodeClaim = (c: Claim) => {
   const types = [
     "uint256[]",
