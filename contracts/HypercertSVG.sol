@@ -107,7 +107,7 @@ contract HyperCertSVG {
         return
             string(
                 abi.encodePacked(
-                    '<rect id="background-color-2" data-name="background-color" x=".5" y="0" width="550" height="850" rx="32" ry="32"/>'
+                    '<rect id="background-color-2" x=".5" y="0" width="550" height="850" rx="32" ry="32"/>'
                 )
             );
     }
@@ -124,11 +124,11 @@ contract HyperCertSVG {
             string(
                 abi.encodePacked(
                     abi.encodePacked(
-                        '<path id="foreground-color-2" data-name="foreground-color" d="M435,777.83H115v-50H435v50Zm0-532.83H115v360H435V245Zm0-122.83H115v-50H435v50Z"/>'
+                        '<path id="foreground-color-2" xd="M435,777.83H115v-50H435v50Zm0-532.83H115v360H435V245Zm0-122.83H115v-50H435v50Z"/>'
                     ),
                     abi.encodePacked(
                         '<g id="divider-color" text-rendering="optimizeSpeed" font-size="10" fill="#ffce43">',
-                        '<path id="divider-color-2" data-name="divider-color" d="M156.35,514.59h237.31" style="fill: none; stroke: #ffce43; stroke-miterlimit: 10; stroke-width: 2px;"/>',
+                        '<path id="divider-color-2" d="M156.35,514.59h237.31" style="fill: none; stroke: #ffce43; stroke-miterlimit: 10; stroke-width: 2px;"/>',
                         '<text id="work-period-color" transform="translate(134.75 102.06)" style="font-family: Helvetica; font-size: 15px;">',
                         '<tspan x="0" y="0" style="letter-spacing: -.05em;">Work Period: ',
                         abi.encodePacked(yearFrom.toString(), "-", monthFrom.toString(), "-", dayFrom.toString()),
