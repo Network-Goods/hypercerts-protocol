@@ -59,6 +59,9 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
     validateMetadata(await minter.tokenURI(1), claim1);
     validateMetadata(await minter.slotURI(claimID), claim1);
 
+    const slotURI = await minter.slotURI(claimID);
+    console.log(slotURI);
+
     await expect(deployer.minter.mint(ethers.constants.AddressZero, data1)).to.be.revertedWith("ToZeroAddress");
   });
 

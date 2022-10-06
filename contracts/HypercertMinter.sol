@@ -2,7 +2,7 @@
 pragma solidity ^0.8.14;
 
 import "./ERC3525Upgradeable.sol";
-import "./interfaces/IHypercertMetadata.sol";
+import "./interfaces/IHyperCertMetadata.sol";
 import "./utils/ArraysUpgradeable.sol";
 import "./utils/StringsExtensions.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
@@ -14,15 +14,16 @@ error DuplicateScope();
 error InvalidScope();
 error InvalidTimeframe(uint64 from, uint64 to);
 error ConflictingClaim();
+error InvalidInput();
 
 /// @title Hypercertificate minting logic
 /// @notice Contains functions and events to initialize and issue a hypercertificate
 /// @author bitbeckers, mr_bluesky
-contract HypercertMinter is Initializable, ERC3525Upgradeable, AccessControlUpgradeable, UUPSUpgradeable {
-    using ArraysUpgradeable for uint8[];
+contract HyperCertMinter is Initializable, ERC3525Upgradeable, AccessControlUpgradeable, UUPSUpgradeable {
+    using ArraysUpgradeable for uint256[];
 
     /// @notice Contract name
-    string public constant NAME = "Hypercerts";
+    string public constant NAME = "HyperCerts";
     /// @notice Token symbol
     string public constant SYMBOL = "HCRT";
     /// @notice Token value decimals
@@ -67,7 +68,7 @@ contract HypercertMinter is Initializable, ERC3525Upgradeable, AccessControlUpgr
     /// @param id Id of the claimed impact.
     /// @param minter Address of cert minter.
     /// @param fractions Units of tokens issued under the hypercert.
-    event ImpactClaimed(uint256 id, address minter, uint8[] fractions);
+    event ImpactClaimed(uint256 id, address minter, uint256[] fractions);
 
     /// @notice Emitted when a new impact scope is added.
     /// @param id Id of the impact scope.
@@ -142,7 +143,7 @@ contract HypercertMinter is Initializable, ERC3525Upgradeable, AccessControlUpgr
     /// @param data Data representing the parameters of the claim
     function mint(address account, bytes calldata data) public virtual {
         // Parse data to get Claim
-        (Claim memory claim, uint8[] memory fractions) = _parseData(data);
+        (Claim memory claim, uint256[] memory fractions) = _parseData(data);
 
         _authorizeMint(account, claim);
 
@@ -161,6 +162,41 @@ contract HypercertMinter is Initializable, ERC3525Upgradeable, AccessControlUpgr
         }
 
         emit ImpactClaimed(slot, account, fractions);
+    }
+
+    function split(uint256 tokenId, uint256[] calldata amounts) public {
+        if (!_exists(tokenId)) revert NonExistentToken(tokenId);
+
+        uint256 total;
+
+        uint256 amountsLength = amounts.length;
+        if (amounts.length == 1) revert AlreadyMinted(tokenId);
+
+        for (uint256 i; i < amountsLength; i++) {
+            total += amounts[i];
+        }
+
+        if (total > balanceOf(tokenId) || total < balanceOf(tokenId)) revert InvalidInput();
+
+        uint256 len = amounts.length;
+        uint256 slotID = slotOf(tokenId);
+        for (uint256 i = 1; i < len; i++) {
+            uint256 newTokenID = _getNewTokenId(0);
+            _mint(msg.sender, newTokenID, slotID);
+            _transfer(tokenId, newTokenID, amounts[i]);
+        }
+    }
+
+    function merge(uint256[] memory tokenIds) public {
+        uint256 len = tokenIds.length;
+        uint256 targetTokenId = tokenIds[len - 1];
+        for (uint256 i = 0; i < len; i++) {
+            uint256 tokenId = tokenIds[i];
+            if (tokenId != targetTokenId) {
+                _transfer(tokenId, targetTokenId, balanceOf(tokenId));
+                _burn(tokenId);
+            }
+        }
     }
 
     /// @notice Gets the impact claim with the specified id
@@ -215,7 +251,7 @@ contract HypercertMinter is Initializable, ERC3525Upgradeable, AccessControlUpgr
     }
 
     function slotURI(uint256 slotId_) external view returns (string memory) {
-        return IHypercertMetadata(_metadata).generateSlotURI(slotId_);
+        return IHyperCertMetadata(_metadata).generateSlotURI(slotId_);
     }
 
     function tokenURI(uint256 tokenId_)
@@ -224,7 +260,7 @@ contract HypercertMinter is Initializable, ERC3525Upgradeable, AccessControlUpgr
         override(ERC721Upgradeable, IERC721MetadataUpgradeable)
         returns (string memory)
     {
-        return IHypercertMetadata(_metadata).generateTokenURI(slotOf(tokenId_), tokenId_);
+        return IHyperCertMetadata(_metadata).generateTokenURI(slotOf(tokenId_), tokenId_);
     }
 
     /*******************
@@ -303,7 +339,7 @@ contract HypercertMinter is Initializable, ERC3525Upgradeable, AccessControlUpgr
     /// @dev This function is overridable in order to support future schema changes
     /// @return claim The parsed Claim struct
     /// @return Claim metadata URI
-    function _parseData(bytes calldata data) internal pure virtual returns (Claim memory claim, uint8[] memory) {
+    function _parseData(bytes calldata data) internal pure virtual returns (Claim memory claim, uint256[] memory) {
         if (data.length == 0) {
             revert EmptyInput();
         }
@@ -318,10 +354,10 @@ contract HypercertMinter is Initializable, ERC3525Upgradeable, AccessControlUpgr
             string memory name_,
             string memory description_,
             string memory uri_,
-            uint8[] memory fractions
+            uint256[] memory fractions
         ) = abi.decode(
                 data,
-                (bytes32[], bytes32[], bytes32[], uint64[2], uint64[2], address[], string, string, string, uint8[])
+                (bytes32[], bytes32[], bytes32[], uint64[2], uint64[2], address[], string, string, string, uint256[])
             );
 
         claim.claimHash = getHash(workTimeframe, workScopes_, impactTimeframe, impactScopes_);

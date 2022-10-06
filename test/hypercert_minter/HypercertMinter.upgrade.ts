@@ -1,10 +1,9 @@
 import { expect } from "chai";
 import { ethers, getNamedAccounts, upgrades } from "hardhat";
 
-import { HypercertMinterUpgrade } from "../../src/types";
 import setupTest, { setupImpactScopes, setupRights, setupWorkScopes } from "../setup";
 import { getClaimSlotID, getEncodedImpactClaim, newClaim, validateMetadata } from "../utils";
-import { HypercertMetadata, HypercertMinter, HypercertMinter_Upgrade, HypercertSVG, UPGRADER_ROLE } from "../wellKnown";
+import { HyperCertMetadata, HyperCertMinter, HyperCertMinter_Upgrade, HyperCertSVG, UPGRADER_ROLE } from "../wellKnown";
 
 export function shouldBehaveLikeHypercertMinterUpgrade(): void {
   it("supports upgrader role", async function () {
@@ -25,10 +24,10 @@ export function shouldBehaveLikeHypercertMinterUpgrade(): void {
   });
 
   it("updates version number on update", async function () {
-    const HypercertMinterV0Factory = await ethers.getContractFactory(HypercertMinter);
+    const HypercertMinterV0Factory = await ethers.getContractFactory(HyperCertMinter);
     const { anon } = await getNamedAccounts();
 
-    const UpgradeFactory = await ethers.getContractFactory(HypercertMinter_Upgrade);
+    const UpgradeFactory = await ethers.getContractFactory(HyperCertMinter_Upgrade);
 
     const proxy = await upgrades.deployProxy(HypercertMinterV0Factory, [anon], {
       kind: "uups",
@@ -50,21 +49,21 @@ export function shouldBehaveLikeHypercertMinterUpgrade(): void {
     const data = await getEncodedImpactClaim(claim);
     const claimID = await getClaimSlotID(claim);
 
-    const HypercertSVGFactory = await ethers.getContractFactory(HypercertSVG);
+    const HypercertSVGFactory = await ethers.getContractFactory(HyperCertSVG);
     const svg = await HypercertSVGFactory.deploy();
 
-    const HypercertMetadataFactory = await ethers.getContractFactory(HypercertMetadata);
+    const HypercertMetadataFactory = await ethers.getContractFactory(HyperCertMetadata);
     const metadata = await HypercertMetadataFactory.deploy(svg.address);
 
-    const HypercertMinterFactory = await ethers.getContractFactory(HypercertMinter);
-    const UpgradeFactory = await ethers.getContractFactory(HypercertMinter_Upgrade);
+    const HypercertMinterFactory = await ethers.getContractFactory(HyperCertMinter);
+    const UpgradeFactory = await ethers.getContractFactory(HyperCertMinter_Upgrade);
 
     const proxy = await upgrades.deployProxy(HypercertMinterFactory, [metadata.address], {
       kind: "uups",
     });
     expect(await proxy.version()).to.be.eq(0);
 
-    const proxyWithUser = <HypercertMinterUpgrade>await ethers.getContractAt(HypercertMinter, proxy.address, user);
+    const proxyWithUser = <HyperCertMinterUpgrade>await ethers.getContractAt(HyperCertMinter, proxy.address, user);
     await setupImpactScopes(proxyWithUser);
     await setupRights(proxyWithUser);
     await setupWorkScopes(proxyWithUser);
@@ -80,7 +79,7 @@ export function shouldBehaveLikeHypercertMinterUpgrade(): void {
     validateMetadata(await upgrade.tokenURI(1), cid);
     validateMetadata(await upgrade.slotURI(claimID), cid);
 
-    const upgradeWithUser = await ethers.getContractAt(HypercertMinter_Upgrade, upgrade.address, user);
+    const upgradeWithUser = await ethers.getContractAt(HyperCertMinter_Upgrade, upgrade.address, user);
     await expect(upgradeWithUser.split(1)).to.emit(upgrade, "Split").withArgs(1, [2]);
   });
 }

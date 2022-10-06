@@ -13,7 +13,7 @@ library ArraysUpgradeable {
     /**
      * @dev calculate the sum of the elements of an array
      */
-    function getSum(uint8[] memory array) internal pure returns (uint256) {
+    function getSum(uint256[] memory array) internal pure returns (uint256) {
         if (array.length == 0) {
             return 0;
         }
@@ -24,7 +24,7 @@ library ArraysUpgradeable {
     }
 
     function toString(uint64[2] memory array) internal pure returns (string memory) {
-        return string(abi.encodePacked("[", uint256(array[0]).toString(), ",", uint256(array[1]).toString(), "]"));
+        return string(abi.encodePacked('["', uint256(array[0]).toString(), '","', uint256(array[1]).toString(), '"]'));
     }
 
     function toCsv(uint256[] memory array) internal pure returns (string memory) {

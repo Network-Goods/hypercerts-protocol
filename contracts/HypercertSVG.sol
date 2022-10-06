@@ -8,7 +8,7 @@ import "./lib/DateTime.sol";
 import "./lib/strings.sol";
 import "hardhat/console.sol";
 
-contract HypercertSVG {
+contract HyperCertSVG {
     using StringsUpgradeable for uint256;
     using strings for *;
 
@@ -36,7 +36,7 @@ contract HypercertSVG {
         backgroundCounter += 1;
     }
 
-    function generateSvgHypercert(
+    function generateSvgHyperCert(
         string memory name,
         string[] memory scopesOfImpact,
         uint64[2] memory workTimeframe,
@@ -49,7 +49,7 @@ contract HypercertSVG {
         svgParams.workTimeframe = workTimeframe;
         svgParams.impactTimeframe = impactTimeframe;
         svgParams.totalUnits = totalUnits;
-        return _generateHypercert(svgParams);
+        return _generateHyperCert(svgParams);
     }
 
     function generateSvgFraction(
@@ -67,10 +67,10 @@ contract HypercertSVG {
         svgParams.impactTimeframe = impactTimeframe;
         svgParams.units = units;
         svgParams.totalUnits = totalUnits;
-        return _generateHypercertFraction(svgParams);
+        return _generateHyperCertFraction(svgParams);
     }
 
-    function _generateHypercert(SVGParams memory params) internal view virtual returns (string memory) {
+    function _generateHyperCert(SVGParams memory params) internal view virtual returns (string memory) {
         return
             string(
                 abi.encodePacked(
@@ -86,7 +86,7 @@ contract HypercertSVG {
             );
     }
 
-    function _generateHypercertFraction(SVGParams memory params) internal view virtual returns (string memory) {
+    function _generateHyperCertFraction(SVGParams memory params) internal view virtual returns (string memory) {
         return
             string(
                 abi.encodePacked(
@@ -107,7 +107,7 @@ contract HypercertSVG {
         return
             string(
                 abi.encodePacked(
-                    '<rect id="background-color-2" data-name="background-color" x=".5" y="0" width="550" height="850" rx="32" ry="32"/>'
+                    '<rect id="background-color-2" x=".5" y="0" width="550" height="850" rx="32" ry="32"/>'
                 )
             );
     }
@@ -124,11 +124,11 @@ contract HypercertSVG {
             string(
                 abi.encodePacked(
                     abi.encodePacked(
-                        '<path id="foreground-color-2" data-name="foreground-color" d="M435,777.83H115v-50H435v50Zm0-532.83H115v360H435V245Zm0-122.83H115v-50H435v50Z"/>'
+                        '<path id="foreground-color-2" xd="M435,777.83H115v-50H435v50Zm0-532.83H115v360H435V245Zm0-122.83H115v-50H435v50Z"/>'
                     ),
                     abi.encodePacked(
                         '<g id="divider-color" text-rendering="optimizeSpeed" font-size="10" fill="#ffce43">',
-                        '<path id="divider-color-2" data-name="divider-color" d="M156.35,514.59h237.31" style="fill: none; stroke: #ffce43; stroke-miterlimit: 10; stroke-width: 2px;"/>',
+                        '<path id="divider-color-2" d="M156.35,514.59h237.31" style="fill: none; stroke: #ffce43; stroke-miterlimit: 10; stroke-width: 2px;"/>',
                         '<text id="work-period-color" transform="translate(134.75 102.06)" style="font-family: Helvetica; font-size: 15px;">',
                         '<tspan x="0" y="0" style="letter-spacing: -.05em;">Work Period: ',
                         abi.encodePacked(yearFrom.toString(), "-", monthFrom.toString(), "-", dayFrom.toString()),
@@ -230,7 +230,6 @@ contract HypercertSVG {
     function _generateFraction(SVGParams memory params) internal view virtual returns (string memory) {
         console.log("Units: ", params.units);
         console.log("totalUnits: ", params.totalUnits);
-        uint256 fraction = (params.units * 10000) / params.totalUnits;
         uint256 percent = getPercent(params.units, params.totalUnits);
         return
             string(
