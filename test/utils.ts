@@ -99,10 +99,12 @@ export const toHashMap = (array: string[]) => Object.fromEntries(array.map(s => 
 export const randomScopes = (limit?: number) => {
   const loremIpsum = LoremIpsum.split(/[\s,.]+/).map(s => s.toLowerCase());
   const l = loremIpsum.length;
-  const scopes = [];
+  const nextIndex = () => Math.floor(Math.random() * l);
+  const nextScope = () => `${loremIpsum[nextIndex()]}-${loremIpsum[nextIndex()]}`;
 
+  const scopes = [];
   for (let i = 0; i < (limit ?? l); i++) {
-    scopes.push(`${loremIpsum[Math.random() * l]}-${loremIpsum[Math.random() * l]}`);
+    scopes.push(nextScope());
   }
 
   return toHashMap(scopes);
@@ -127,14 +129,41 @@ export const decode64 = (value: string, header: boolean = true) => {
   return utils.toUtf8String(utils.base64.decode(base64String()));
 };
 
-export const validateMetadata = (metadata64: string, expected?: string | string[]) => {
+interface Dictionary<T> {
+  [key: string]: T;
+}
+
+type Metadata = {
+  name: string;
+  description: string;
+  external_url: string;
+  image: string;
+  properties: Dictionary<MetadataProperty>;
+};
+
+type MetadataProperty = {
+  name: string;
+  description: string;
+  value: number | string;
+  is_intrinsic: boolean;
+};
+
+export const validateMetadata = (metadata64: string, expected?: string | Claim) => {
   expect(metadata64.startsWith(DataApplicationJson)).to.be.true;
-  const metadata = decode64(metadata64);
-  if (typeof expected === "string") expect(metadata).to.include(expected);
-  if (typeof expected === "object")
-    expected?.forEach(x => {
-      expect(metadata).to.include(x);
-    });
+  const metadataJson = decode64(metadata64);
+  if (typeof expected === "string") expect(metadataJson).to.include(expected);
+  if (typeof expected === "object") {
+    try {
+      const metadata = <Metadata>JSON.parse(metadataJson);
+
+      expect(metadata.name).to.eq(expected.name);
+      expect(metadata.description).to.eq(expected.description);
+      expect(metadata.external_url).to.eq(expected.uri);
+    } catch (error) {
+      console.error(error, metadataJson);
+      throw error;
+    }
+  }
 };
 
 //TODO check SVG strings

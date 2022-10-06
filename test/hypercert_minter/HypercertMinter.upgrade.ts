@@ -68,11 +68,6 @@ export function shouldBehaveLikeHypercertMinterUpgrade(): void {
     await setupRights(proxyWithUser);
     await setupWorkScopes(proxyWithUser);
     await proxyWithUser.mint(user, data);
-
-    const tokenURI = await proxyWithUser.tokenURI(1);
-
-    console.log(tokenURI);
-
     const cid = "ipfs://mockedImpactClaim";
     validateMetadata(await proxyWithUser.tokenURI(1), cid);
     validateMetadata(await proxyWithUser.slotURI(claimID), cid);

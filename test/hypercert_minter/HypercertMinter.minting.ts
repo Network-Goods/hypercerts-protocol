@@ -55,13 +55,9 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
     expect(await minter.ownerOf(1)).to.be.eq(deployer.address);
     expect(await minter.slotOf(1)).to.be.eq(claimID);
     expect(await minter.tokenSupplyInSlot(claimID)).to.be.eq(1);
-
-    expect(await minter["balanceOf(uint256)"](1)).to.be.eq("100");
-    expect(await minter.tokenURI(1)).to.include("data:application/json;");
-    expect(await minter.slotURI(claimID)).to.include("data:application/json;");
-
-    const tokenURI = await minter.tokenURI(1);
-    console.log(tokenURI);
+    expect(await minter["balanceOf(uint256)"](1)).to.be.eq(100);
+    validateMetadata(await minter.tokenURI(1), claim1);
+    validateMetadata(await minter.slotURI(claimID), claim1);
 
     const slotURI = await minter.slotURI(claimID);
     console.log(slotURI);
@@ -152,9 +148,9 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
       .to.emit(minter, "Transfer")
       .withArgs(ethers.constants.AddressZero, user.address, 2);
 
-    validateMetadata(await minter.tokenURI(1), claim.uri);
-    validateMetadata(await minter.tokenURI(2), claim.uri);
-    validateMetadata(await minter.slotURI(claimID), claim.uri);
+    validateMetadata(await minter.tokenURI(1), claim);
+    validateMetadata(await minter.tokenURI(2), claim);
+    validateMetadata(await minter.slotURI(claimID), claim);
 
     const cid = "ipfs://QmW2WQi7j6c7UgJTarActp7tDNikE4B2qXtFCfLPdsgaTQ/cat.jpg";
 
@@ -167,13 +163,15 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
       .to.emit(minter, "Transfer")
       .withArgs(ethers.constants.AddressZero, user.address, 3);
 
-    validateMetadata(await minter.tokenURI(3), cid);
-    validateMetadata(await minter.slotURI(claimID2), cid);
+    validateMetadata(await minter.tokenURI(3), claim2);
+    validateMetadata(await minter.slotURI(claimID2), claim2);
   });
 
   it("parses input data to create hypercert - minimal", async function () {
     const { user, minter } = await setupTest();
 
+    const impactScopes = randomScopes(1);
+    const workScopes = randomScopes(1);
     const options = {
       name: "Test minimal",
       description: "Light load testing",
@@ -181,12 +179,15 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
       workTimeframe: [1, 2],
       impactTimeframe: [2, 3],
       contributors: [user.address],
-      workScopes: [] as string[],
-      impactScopes: [] as string[],
+      impactScopes: Object.keys(impactScopes),
+      workScopes: Object.keys(workScopes),
       uri: "ipfs://QmW2WQi7j6c7UgJTarActp7tDNikE4B2qXtFCfLPdsgaTQ/",
       version: 0,
       fractions: [100],
     };
+
+    await setupImpactScopes(minter, user.minter, impactScopes);
+    await setupWorkScopes(minter, user.minter, workScopes);
 
     const claim = await newClaim(options);
     const shortdata = await getEncodedImpactClaim(claim);
@@ -196,8 +197,8 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
       .to.emit(minter, "ImpactClaimed")
       .withArgs(claimID, user.address, claim.fractions);
 
-    validateMetadata(await minter.tokenURI(1), options.uri);
-    validateMetadata(await minter.slotURI(claimID), options.uri);
+    validateMetadata(await minter.tokenURI(1), claim);
+    validateMetadata(await minter.slotURI(claimID), claim);
 
     expect(await minter.tokenSupplyInSlot(claimID)).to.be.eq(1);
 
@@ -238,9 +239,9 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
       .to.emit(minter, "ImpactClaimed")
       .withArgs(claimID, user.address, claim.fractions);
 
-    validateMetadata(await minter.tokenURI(1), options.uri);
-    validateMetadata(await minter.tokenURI(25), options.uri);
-    validateMetadata(await minter.slotURI(claimID), options.uri);
+    validateMetadata(await minter.tokenURI(1), claim);
+    validateMetadata(await minter.tokenURI(25), claim);
+    validateMetadata(await minter.slotURI(claimID), claim);
 
     expect(await minter.tokenSupplyInSlot(claimID)).to.be.eq(25);
 
@@ -284,9 +285,9 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
 
     expect(await minter.tokenSupplyInSlot(claimID)).to.be.eq(100);
 
-    validateMetadata(await minter.tokenURI(1), options.uri);
-    validateMetadata(await minter.tokenURI(100), options.uri);
-    validateMetadata(await minter.slotURI(claimID), options.uri);
+    validateMetadata(await minter.tokenURI(1), claim);
+    validateMetadata(await minter.tokenURI(100), claim);
+    validateMetadata(await minter.slotURI(claimID), claim);
 
     const hypercert = await minter.getImpactCert(claimID);
 
@@ -300,22 +301,23 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
     const { user, minter } = await setupTest();
 
     const contributors: string[] = [];
-    Array.from({ length: 25 }).forEach(() => contributors.push(faker.finance.ethereumAddress()));
+    Array.from({ length: 20 }).forEach(() => contributors.push(faker.finance.ethereumAddress()));
 
-    const impactScopes = randomScopes(250);
-    const workScopes = randomScopes(250);
+    const n = 111;
+    const impactScopes = randomScopes(n);
+    const workScopes = randomScopes(n);
     const options = {
-      name: "Test high",
-      description: "High load testing",
+      name: "Test limit",
+      description: "Limit load testing",
       rights: Object.keys(Rights),
       workTimeframe: [1, 2],
       impactTimeframe: [2, 3],
       contributors,
       impactScopes: Object.keys(impactScopes),
       workScopes: Object.keys(workScopes),
-      uri: "cillum tempor exercitation cillum minim non proident laboris et pariatur dolore duis sit ad Lorem proident voluptate ex officia nostrud officia do esse deserunt adipisicing excepteur nostrud aliqua qui in amet deserunt laboris nostrud tempor in culpa",
+      uri: "ipfs://test",
       version: 0,
-      fractions: new Array(140).fill(50),
+      fractions: new Array(n).fill(50),
     };
 
     await setupImpactScopes(minter, user.minter, impactScopes);
@@ -327,12 +329,11 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
 
     await expect(user.minter.mint(user.address, shortdata)).to.emit(minter, "ImpactClaimed");
 
-    expect(await minter.tokenSupplyInSlot(claimID)).to.be.eq(140);
+    expect(await minter.tokenSupplyInSlot(claimID)).to.be.eq(n);
 
-    const expectedMetadataIncludes = [options.uri, options.name, options.description];
-    validateMetadata(await minter.tokenURI(1), expectedMetadataIncludes);
-    validateMetadata(await minter.tokenURI(125), expectedMetadataIncludes);
-    validateMetadata(await minter.slotURI(claimID), expectedMetadataIncludes);
+    validateMetadata(await minter.tokenURI(1), claim);
+    validateMetadata(await minter.tokenURI(n), claim);
+    validateMetadata(await minter.slotURI(claimID), claim);
 
     const hypercert = await minter.getImpactCert(claimID);
 
