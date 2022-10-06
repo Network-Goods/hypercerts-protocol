@@ -124,7 +124,7 @@ contract HyperCertSVG {
             string(
                 abi.encodePacked(
                     abi.encodePacked(
-                        '<path id="foreground-color-2" xd="M435,777.83H115v-50H435v50Zm0-532.83H115v360H435V245Zm0-122.83H115v-50H435v50Z"/>'
+                        '<path id="foreground-color-2" d="M435,777.83H115v-50H435v50Zm0-532.83H115v360H435V245Zm0-122.83H115v-50H435v50Z"/>'
                     ),
                     abi.encodePacked(
                         '<g id="divider-color" text-rendering="optimizeSpeed" font-size="10" fill="#ffce43">',
