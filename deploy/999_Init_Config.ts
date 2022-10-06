@@ -9,7 +9,7 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const { deployer } = await getNamedAccounts();
 
-  await execute("HypercertSVG", { from: deployer, log: true }, "addBackground", SVGBackgrounds[0]);
+  await execute("HyperCertSVG", { from: deployer, log: true }, "addBackground", SVGBackgrounds[0]);
 };
 
 export default deploy;
