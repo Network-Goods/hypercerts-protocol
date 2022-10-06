@@ -7,8 +7,7 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const { deployer } = await getNamedAccounts();
 
-  const receipt = await execute("HypercertSVG", { from: deployer, log: true }, "addBackground", initBackground);
-  console.log(receipt);
+  await execute("HyperCertSVG", { from: deployer, log: true }, "addBackground", initBackground);
 };
 
 const initBackground =
@@ -16,4 +15,4 @@ const initBackground =
 
 export default deploy;
 deploy.tags = ["local", "staging"];
-deploy.dependencies = ["HypercertMinter"];
+deploy.dependencies = ["HyperCertMinter"];

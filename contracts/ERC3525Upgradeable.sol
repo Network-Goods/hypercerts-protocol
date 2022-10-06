@@ -253,7 +253,7 @@ abstract contract ERC3525Upgradeable is
             revert NonExistentToken(toTokenId_);
         }
 
-        if (value_ >= _values[fromTokenId_]) {
+        if (value_ > _values[fromTokenId_]) {
             revert InsufficientBalance(value_, _values[fromTokenId_]);
         }
 

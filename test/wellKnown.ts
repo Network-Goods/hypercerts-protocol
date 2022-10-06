@@ -3,15 +3,15 @@ import { ethers } from "hardhat";
 import { toHashMap } from "./utils";
 
 export const DataApplicationJson = "data:application/json;";
-export const HypercertMetadata = "HypercertMetadata";
-export const HypercertMinter = "HypercertMinter";
+export const HyperCertMetadata = "HyperCertMetadata";
+export const HyperCertMinter = "HyperCertMinter";
 
-export const HypercertMinter_Upgrade = "HypercertMinterUpgrade";
-export const HypercertMinter_Current = HypercertMinter;
+export const HyperCertMinter_Upgrade = "HyperCertMinterUpgrade";
+export const HyperCertMinter_Current = HyperCertMinter;
 
 export const ERC3525 = "ERC3525_Testing";
 
-export const HypercertSVG = "HypercertSVG";
+export const HyperCertSVG = "HyperCertSVG";
 
 export const UPGRADER_ROLE = ethers.utils.id("UPGRADER_ROLE");
 

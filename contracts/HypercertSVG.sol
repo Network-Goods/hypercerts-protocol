@@ -8,7 +8,7 @@ import "./lib/DateTime.sol";
 import "./lib/strings.sol";
 import "hardhat/console.sol";
 
-contract HypercertSVG {
+contract HyperCertSVG {
     using StringsUpgradeable for uint256;
     using strings for *;
 
@@ -36,7 +36,7 @@ contract HypercertSVG {
         backgroundCounter += 1;
     }
 
-    function generateSvgHypercert(
+    function generateSvgHyperCert(
         string memory name,
         string[] memory scopesOfImpact,
         uint64[2] memory workTimeframe,
@@ -49,7 +49,7 @@ contract HypercertSVG {
         svgParams.workTimeframe = workTimeframe;
         svgParams.impactTimeframe = impactTimeframe;
         svgParams.totalUnits = totalUnits;
-        return _generateHypercert(svgParams);
+        return _generateHyperCert(svgParams);
     }
 
     function generateSvgFraction(
@@ -67,10 +67,10 @@ contract HypercertSVG {
         svgParams.impactTimeframe = impactTimeframe;
         svgParams.units = units;
         svgParams.totalUnits = totalUnits;
-        return _generateHypercertFraction(svgParams);
+        return _generateHyperCertFraction(svgParams);
     }
 
-    function _generateHypercert(SVGParams memory params) internal view virtual returns (string memory) {
+    function _generateHyperCert(SVGParams memory params) internal view virtual returns (string memory) {
         return
             string(
                 abi.encodePacked(
@@ -86,7 +86,7 @@ contract HypercertSVG {
             );
     }
 
-    function _generateHypercertFraction(SVGParams memory params) internal view virtual returns (string memory) {
+    function _generateHyperCertFraction(SVGParams memory params) internal view virtual returns (string memory) {
         return
             string(
                 abi.encodePacked(

@@ -13,7 +13,7 @@ library ArraysUpgradeable {
     /**
      * @dev calculate the sum of the elements of an array
      */
-    function getSum(uint8[] memory array) internal pure returns (uint256) {
+    function getSum(uint256[] memory array) internal pure returns (uint256) {
         if (array.length == 0) {
             return 0;
         }

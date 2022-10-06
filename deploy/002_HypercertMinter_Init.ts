@@ -7,29 +7,29 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { save, get } = deployments; // The deployments field itself contains the deploy function.
 
   try {
-    const exists = await get("HypercertMinter");
+    const exists = await get("HyperCertMinter");
     if (exists && hre.network.name !== "hardhat") {
-      console.log("Already deployed HypercertMinter");
+      console.log("Already deployed HyperCertMinter");
     }
   } catch {
-    const HypercertMetadata = await get("HypercertMetadata");
+    const HypercertMetadata = await get("HyperCertMetadata");
 
-    const HypercertMinter = await ethers.getContractFactory("HypercertMinter");
+    const HypercertMinter = await ethers.getContractFactory("HyperCertMinter");
     const proxy = await upgrades.deployProxy(HypercertMinter, [HypercertMetadata.address], {
       kind: "uups",
     });
-    console.log("Deployed HypercertMinter + Proxy: " + proxy.address);
+    console.log("Deployed HyperCertMinter + Proxy: " + proxy.address);
 
-    const artifact = await deployments.getExtendedArtifact("HypercertMinter");
+    const artifact = await deployments.getExtendedArtifact("HyperCertMinter");
     const proxyDeployments = {
       address: proxy.address,
       ...artifact,
     };
 
-    await save("HypercertMinter", proxyDeployments);
+    await save("HyperCertMinter", proxyDeployments);
   }
 };
 
 export default deploy;
 deploy.tags = ["local", "staging"];
-deploy.dependencies = ["HypercertMetadata"];
+deploy.dependencies = ["HyperCertMetadata"];

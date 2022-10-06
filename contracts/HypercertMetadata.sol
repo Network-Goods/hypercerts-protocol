@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.14;
 
-import "./interfaces/IHypercertMetadata.sol";
+import "./interfaces/IHyperCertMetadata.sol";
 import "./utils/ArraysUpgradeable.sol";
 import "./utils/StringsExtensions.sol";
 import "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/Base64Upgradeable.sol";
 
-interface IHypercertMinter {
+interface IHyperCertMinter {
     struct Claim {
         bytes32 claimHash;
         uint64[2] workTimeframe;
@@ -35,8 +35,8 @@ interface IHypercertMinter {
     function balanceOf(uint256 tokenId) external view returns (uint256);
 }
 
-interface IHypercertSVG {
-    function generateSvgHypercert(
+interface IHyperCertSVG {
+    function generateSvgHyperCert(
         string memory name,
         string[] memory scopesOfImpact,
         uint64[2] memory workTimeframe,
@@ -56,7 +56,7 @@ interface IHypercertSVG {
 
 /// @dev Hypercertificate metadata creation logic
 // TODO optimise where to call string data
-contract HypercertMetadata is IHypercertMetadata {
+contract HyperCertMetadata is IHyperCertMetadata {
     using ArraysUpgradeable for uint64[2];
     using ArraysUpgradeable for uint256[];
     using ArraysUpgradeable for string[];
@@ -70,8 +70,8 @@ contract HypercertMetadata is IHypercertMetadata {
     }
 
     function generateTokenURI(uint256 slotId, uint256 tokenId) external view virtual returns (string memory) {
-        IHypercertMinter.Claim memory claim = IHypercertMinter(msg.sender).getImpactCert(slotId);
-        uint256 units = IHypercertMinter(msg.sender).balanceOf(tokenId);
+        IHyperCertMinter.Claim memory claim = IHyperCertMinter(msg.sender).getImpactCert(slotId);
+        uint256 units = IHyperCertMinter(msg.sender).balanceOf(tokenId);
         string[] memory impactScopes = _mapImpactScopesIdsToValues(claim.impactScopes);
 
         return
@@ -100,7 +100,7 @@ contract HypercertMetadata is IHypercertMetadata {
                                 ),
                                 ","
                             ),
-                            _hypercertDimensions(claim),
+                            _hyperCertDimensions(claim),
                             "}}"
                         )
                     )
@@ -109,7 +109,7 @@ contract HypercertMetadata is IHypercertMetadata {
     }
 
     function generateSlotURI(uint256 slotId) external view virtual returns (string memory) {
-        IHypercertMinter.Claim memory claim = IHypercertMinter(msg.sender).getImpactCert(slotId);
+        IHyperCertMinter.Claim memory claim = IHyperCertMinter(msg.sender).getImpactCert(slotId);
 
         string[] memory impactScopes = _mapImpactScopesIdsToValues(claim.impactScopes);
 
@@ -133,7 +133,7 @@ contract HypercertMetadata is IHypercertMetadata {
                                 _propertyString("Total units", "Units held by fraction.", claim.totalUnits, false),
                                 ","
                             ),
-                            _hypercertDimensions(claim),
+                            _hyperCertDimensions(claim),
                             "}}"
                         )
                     )
@@ -141,7 +141,7 @@ contract HypercertMetadata is IHypercertMetadata {
             );
     }
 
-    function _hypercertDimensions(IHypercertMinter.Claim memory claim) internal view returns (string memory) {
+    function _hyperCertDimensions(IHyperCertMinter.Claim memory claim) internal view returns (string memory) {
         return
             string(
                 abi.encodePacked(
@@ -199,7 +199,7 @@ contract HypercertMetadata is IHypercertMetadata {
     }
 
     function _generateImageStringFraction(
-        IHypercertMinter.Claim memory claim,
+        IHyperCertMinter.Claim memory claim,
         uint256 units,
         string[] memory impactScopes
     ) internal view returns (string memory) {
@@ -208,7 +208,7 @@ contract HypercertMetadata is IHypercertMetadata {
                 "data:image/svg+xml;base64,",
                 Base64Upgradeable.encode(
                     bytes(
-                        IHypercertSVG(svgGenerator).generateSvgFraction(
+                        IHyperCertSVG(svgGenerator).generateSvgFraction(
                             claim.name,
                             impactScopes,
                             claim.workTimeframe,
@@ -221,7 +221,7 @@ contract HypercertMetadata is IHypercertMetadata {
             );
     }
 
-    function _generateImageStringHypercert(IHypercertMinter.Claim memory claim, string[] memory scopesOfImpact)
+    function _generateImageStringHypercert(IHyperCertMinter.Claim memory claim, string[] memory scopesOfImpact)
         internal
         view
         returns (string memory)
@@ -231,7 +231,7 @@ contract HypercertMetadata is IHypercertMetadata {
                 "data:image/svg+xml;base64,",
                 Base64Upgradeable.encode(
                     bytes(
-                        IHypercertSVG(svgGenerator).generateSvgHypercert(
+                        IHyperCertSVG(svgGenerator).generateSvgHyperCert(
                             claim.name,
                             scopesOfImpact,
                             claim.workTimeframe,
@@ -428,7 +428,7 @@ contract HypercertMetadata is IHypercertMetadata {
         if (len > 0) {
             string[] memory values = new string[](len);
             for (uint256 i = 0; i < len; i++) {
-                values[i] = IHypercertMinter(msg.sender).workScopes(keys[i]);
+                values[i] = IHyperCertMinter(msg.sender).workScopes(keys[i]);
             }
             vals = values;
         }
@@ -440,7 +440,7 @@ contract HypercertMetadata is IHypercertMetadata {
         if (len > 0) {
             string[] memory values = new string[](len);
             for (uint256 i = 0; i < len; i++) {
-                values[i] = IHypercertMinter(msg.sender).impactScopes(keys[i]);
+                values[i] = IHyperCertMinter(msg.sender).impactScopes(keys[i]);
             }
             vals = values;
         }
@@ -452,7 +452,7 @@ contract HypercertMetadata is IHypercertMetadata {
         if (len > 0) {
             string[] memory values = new string[](len);
             for (uint256 i = 0; i < len; i++) {
-                values[i] = IHypercertMinter(msg.sender).rights(keys[i]);
+                values[i] = IHyperCertMinter(msg.sender).rights(keys[i]);
             }
             vals = values;
         }

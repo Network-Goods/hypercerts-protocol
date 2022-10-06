@@ -15,7 +15,7 @@ import {
 import { Rights, WorkScopes } from "../wellKnown";
 
 export function shouldBehaveLikeHypercertMinterMinting(): void {
-  it.only("anybody can mint an impact claim with 1 or more fractions - except zero-address", async function () {
+  it("anybody can mint an impact claim with 1 or more fractions - except zero-address", async function () {
     const { deployer, minter } = await setupTest();
 
     const workScopes = Object.keys(WorkScopes);

@@ -4,9 +4,9 @@ import { promises as fs } from "fs";
 import { ethers } from "hardhat";
 import { parseXml } from "libxmljs";
 
-import { HypercertSVG as SVG } from "../../src/types";
+import { HyperCertSVG as SVG } from "../../src/types";
 import { PromiseOrValue } from "../../src/types/common";
-import { HypercertSVG } from "../wellKnown";
+import { HyperCertSVG } from "../wellKnown";
 
 //TODO not sure if needed, Typescript should infer this from contract types
 type InputType = {
@@ -31,7 +31,7 @@ const BASE_PATH = "test/hypercert_svg/";
 
 //TODO add uploading `svgBackground` using `addBackground` method
 const generateAndValidateSVG = async (fn: (tokenInstance: SVG) => Promise<string>) => {
-  const tokenFactory = await ethers.getContractFactory(HypercertSVG);
+  const tokenFactory = await ethers.getContractFactory(HyperCertSVG);
   const tokenInstance = <SVG>await tokenFactory.deploy();
   const svg = await fn(tokenInstance);
   // await fs.writeFile(`${BASE_PATH}test.svg`, svg);
@@ -54,7 +54,7 @@ describe("Unit tests", function () {
   describe("Hypercert SVG", async function () {
     it("should generate valid hypercert SVG", async () => {
       await generateAndValidateSVG(tokenInstance =>
-        tokenInstance.generateSvgHypercert(
+        tokenInstance.generateSvgHyperCert(
           input.name,
           input.scopesOfImpact,
           input.workTimeframe,
