@@ -107,7 +107,7 @@ const validate = async (svg: string, input: InputType, fraction: boolean = false
 };
 
 describe("Unit tests", function () {
-  describe.only("HyperCert SVG", async function () {
+  describe("HyperCert SVG", async function () {
     const data = [input1, input2, input3];
 
     data.forEach(input => {
