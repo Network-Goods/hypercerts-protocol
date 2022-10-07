@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 
 import setupTest from "../setup";
-import { encodeClaim, getClaimSlotID, getEncodedImpactClaim, newClaim, validateMetadata } from "../utils";
+import { encodeClaim, getClaimSlotID, newClaim, validateMetadata } from "../utils";
 
 // TODO looping fractions
 export function shouldBehaveLikeHypercertMinterSplitAndMerge(): void {

@@ -157,7 +157,7 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
                         'd="M435,777.83H115v-50H435v50Zm0-532.83H115v360H435V245Zm0-122.83H115v-50H435v50Z"/>'
                     ),
                     abi.encodePacked(
-                        '<g id="divider-color" text-rendering="optimizeSpeed" font-size="10" fill="#ffce43">',
+                        '<g id="divider-color" text-rendering="optimizeSpeed" font-size="10" fill="white">',
                         '<path id="divider-color-2" d="M156.35,514.59h237.31" '
                         'style="fill: none; stroke: #ffce43; stroke-miterlimit: 10; stroke-width: 2px;"/>',
                         '<text id="work-period-color" transform="translate(134.75 102.06)" '
@@ -237,23 +237,54 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
             );
     }
 
+    function stringToBytes32(string memory source) internal pure returns (bytes32 result) {
+        bytes memory tempEmptyStringTest = bytes(source);
+        if (tempEmptyStringTest.length == 0) {
+            return 0x0;
+        }
+
+        assembly {
+            result := mload(add(source, 32))
+        }
+    }
+
+    function bytes32ToString(bytes32 _bytes32) internal pure returns (string memory) {
+        uint8 i = 0;
+        while (i < 27 && _bytes32[i] != 0) {
+            i++;
+        }
+        bytes memory bytesArray = new bytes(i);
+        for (i = 0; i < 27 && _bytes32[i] != 0; i++) {
+            bytesArray[i] = _bytes32[i];
+        }
+        string memory parsedString = string(bytesArray);
+        if (_bytes32[28] != 0) {
+            parsedString = string.concat(parsedString, "...");
+        }
+        return parsedString;
+    }
+
     function _generateScopeOfImpact(SVGParams memory params) internal pure virtual returns (string memory) {
-        string memory renderedText = string.concat('<tspan x="0" y="0">', params.scopesOfImpact[0], "</tspan>");
+        string memory renderedText = "";
         uint256 inputLength = params.scopesOfImpact.length;
-        if (inputLength > 1) {
-            renderedText = string(
-                abi.encodePacked(
-                    abi.encodePacked('<tspan x="0" y="-20">', params.scopesOfImpact[0], "</tspan>"),
-                    abi.encodePacked('<tspan x="0" y="0">', params.scopesOfImpact[1], "</tspan>"),
-                    abi.encodePacked('<tspan x="0" y="20">', params.scopesOfImpact[2], "</tspan>")
-                )
+        if (inputLength > 3) inputLength = 3;
+        for (uint256 i = 0; i < inputLength; i++) {
+            bytes32 stringShort = stringToBytes32(params.scopesOfImpact[i]);
+            renderedText = string.concat(
+                renderedText,
+                '<tspan x="0" y="',
+                uint256(20 * i).toString(),
+                '">',
+                bytes32ToString(stringShort),
+                "</tspan>"
             );
         }
+
         return
             string(
                 abi.encodePacked(
                     '<g id="description-color" text-rendering="optimizeSpeed" font-size="15" fill="white">',
-                    '<text transform="translate(155 480)" style="font-family: Helvetica; font-size: 15px;">',
+                    '<text transform="translate(155 460)" style="font-family: Helvetica; font-size: 15px;">',
                     renderedText,
                     "</text></g>"
                 )
@@ -298,7 +329,7 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
         return
             string(
                 abi.encodePacked(
-                    '<g id="impact-period-color" text-rendering="optimizeSpeed" font-size="10" fill="#ffce43">',
+                    '<g id="impact-period-color" text-rendering="optimizeSpeed" font-size="10" fill="white">',
                     '<text id="impact-period-color-2" transform="translate(134.75 758)" '
                     'style="font-family: Helvetica; font-size: 15px;">',
                     '<tspan x="0" y="0" style="letter-spacing: -.05em;">Impact Period: ',
