@@ -51,6 +51,8 @@ abstract contract ERC3525Upgradeable is
     /// @dev slot => tokenId[]
     mapping(uint256 => uint256[]) internal _tokensBySlot;
 
+    uint256 internal _tokenCounter;
+
     function supportsInterface(bytes4 interfaceId)
         public
         view
@@ -198,6 +200,7 @@ abstract contract ERC3525Upgradeable is
         }
         _tokensBySlot[slot_].push(tokenId_);
         emit SlotChanged(tokenId_, 0, slot_);
+        _tokenCounter += 1;
     }
 
     function _mintValue(
@@ -302,7 +305,7 @@ abstract contract ERC3525Upgradeable is
     function _getNewTokenId(
         uint256 /*fromTokenId_*/
     ) internal virtual returns (uint256) {
-        return ERC721EnumerableUpgradeable.totalSupply() + 1;
+        return _tokenCounter + 1;
     }
 
     function _beforeTokenTransfer(

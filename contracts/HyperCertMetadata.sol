@@ -171,6 +171,16 @@ contract HyperCertMetadata is IHyperCertMetadata, Initializable, AccessControlUp
             string(
                 abi.encodePacked(
                     abi.encodePacked(
+                        '"slotID":',
+                        _propertyString(
+                            "Slot ID",
+                            "Unique identifier of HyperCert in contract.",
+                            uint256(claim.claimHash).toString(),
+                            false
+                        ),
+                        ","
+                    ),
+                    abi.encodePacked(
                         '"scopesOfWork":',
                         _propertyStringCSV(
                             "Scopes of Work",
