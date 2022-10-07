@@ -53,7 +53,7 @@ export function shouldBehaveLikeHypercertMinterUpgrade(): void {
     const svg = await HypercertSVGFactory.deploy();
 
     const HypercertMetadataFactory = await ethers.getContractFactory(HyperCertMetadata);
-    const metadata = await HypercertMetadataFactory.deploy(svg.address);
+    const metadata = await HypercertMetadataFactory.deploy();
 
     const HypercertMinterFactory = await ethers.getContractFactory(HyperCertMinter);
     const UpgradeFactory = await ethers.getContractFactory(HyperCertMinter_Upgrade);

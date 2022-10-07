@@ -1,4 +1,4 @@
-import { getNamedAccounts } from "hardhat";
+import hre, { getNamedAccounts } from "hardhat";
 import { DeployFunction } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
@@ -11,4 +11,4 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
 export default deploy;
 deploy.tags = ["local"];
-deploy.skip = async () => true;
+deploy.skip = async hre => hre.network.name !== "hardhat";

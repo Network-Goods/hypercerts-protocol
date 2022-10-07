@@ -230,6 +230,10 @@ abstract contract ERC3525Upgradeable is
 
     function _burn(uint256 tokenId_) internal virtual override(ERC721Upgradeable) {
         address owner = ERC721Upgradeable.ownerOf(tokenId_);
+
+        if (msg.sender != owner) {
+            revert NotApprovedOrOwner();
+        }
         uint256 slot = _slots[tokenId_];
         uint256 value = _values[tokenId_];
 

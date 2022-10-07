@@ -6,7 +6,6 @@ pragma solidity ^0.8.14;
 import "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
 import "./lib/DateTime.sol";
 import "./lib/strings.sol";
-import "hardhat/console.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
@@ -172,7 +171,6 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
             );
     }
 
-    //TODO new line 13 chars
     //TODO ugly string manipulation
     function _generateName(SVGParams memory params) internal pure virtual returns (string memory) {
         string memory renderedText = string.concat('<tspan x="0" y="0">', params.name, "</tspan>");
@@ -292,8 +290,6 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
     }
 
     function _generateFraction(SVGParams memory params) internal view virtual returns (string memory) {
-        console.log("Units: ", params.units);
-        console.log("totalUnits: ", params.totalUnits);
         uint256 percent = getPercent(params.units, params.totalUnits);
         return
             string(
@@ -349,7 +345,6 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
     }
 
     function uint2decimal(uint256 self, uint8 decimals) internal view returns (bytes memory) {
-        console.log("Self: ", self);
         uint256 base = 10**decimals;
         string memory round = (self / base).toString();
         string memory fraction = (self % base).toString();

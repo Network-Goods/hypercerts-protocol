@@ -94,6 +94,24 @@ contract HyperCertMetadata is IHyperCertMetadata, Initializable, AccessControlUp
         _grantRole(UPGRADER_ROLE, msg.sender);
     }
 
+    function generateContractURI() external view returns (string memory) {
+        return
+            string(
+                abi.encodePacked(
+                    "data:application/json;base64,",
+                    Base64Upgradeable.encode(
+                        abi.encodePacked(
+                            '{"name":"HyperCerts"',
+                            '","description":"HyperCerts create an interoperable data layer to account for actions that are expected to have positive impact. They are a tool to build scalable reward systems for impact."',
+                            '","image":"https://bafkreifjgpewz56lvddyau7xsbaefm3quc3k4mk34cokqkl2hxuyihun7q.ipfs.nftstorage.link/"',
+                            ',"external_url":"https://www.hypercerts.xyz"',
+                            "}"
+                        )
+                    )
+                )
+            );
+    }
+
     function generateTokenURI(uint256 slotId, uint256 tokenId) external view virtual returns (string memory) {
         IHyperCertMinter.Claim memory claim = IHyperCertMinter(msg.sender).getImpactCert(slotId);
         uint256 units = IHyperCertMinter(msg.sender).balanceOf(tokenId);

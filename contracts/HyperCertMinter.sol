@@ -199,6 +199,10 @@ contract HyperCertMinter is Initializable, ERC3525Upgradeable, AccessControlUpgr
         }
     }
 
+    function donate(uint256 tokenId) public {
+        _burn(tokenId);
+    }
+
     /// @notice Gets the impact claim with the specified id
     /// @param claimID Id of the claim
     /// @return The claim, if it doesn't exist with default values
@@ -261,6 +265,10 @@ contract HyperCertMinter is Initializable, ERC3525Upgradeable, AccessControlUpgr
         returns (string memory)
     {
         return IHyperCertMetadata(_metadata).generateTokenURI(slotOf(tokenId_), tokenId_);
+    }
+
+    function contractURI() public view override returns (string memory) {
+        return IHyperCertMetadata(_metadata).generateContractURI();
     }
 
     /*******************
