@@ -6,8 +6,9 @@ import { parseXml } from "libxmljs";
 
 import { HyperCertSVG as SVG } from "../../src/types";
 import { SVGBackgrounds } from "../../src/util/wellKnown";
+import { setupTestSVG } from "../setup";
 import { randomScopes } from "../utils";
-import { HyperCertSVG } from "../wellKnown";
+import { DEFAULT_ADMIN_ROLE, HyperCertSVG, UPGRADER_ROLE } from "../wellKnown";
 
 type InputType = {
   name: string;
@@ -110,7 +111,42 @@ const validate = async (svg: string, input: InputType, fraction: boolean = false
 };
 
 describe("Unit tests", function () {
-  describe("HyperCert SVG", async function () {
+  describe(HyperCertSVG, async function () {
+    it("is an initializable contract", async () => {
+      const tokenFactory = await ethers.getContractFactory(HyperCertSVG);
+      const tokenInstance = <SVG>await tokenFactory.deploy();
+
+      await expect(tokenInstance.initialize()).to.be.revertedWith("Initializable: contract is already initialized");
+    });
+
+    it("is a UUPS-upgradeable contract", async () => {
+      const { sft } = await setupTestSVG();
+
+      await expect(sft.proxiableUUID()).to.be.revertedWith("UUPSUpgradeable: must not be called through delegatecall");
+    });
+
+    const roles = <[string, string][]>[
+      ["admin", DEFAULT_ADMIN_ROLE],
+      ["upgrader", UPGRADER_ROLE],
+    ];
+
+    roles.forEach(([name, role]) => {
+      it(`supports ${name} role`, async function () {
+        const { sft, user, deployer } = await setupTestSVG();
+
+        expect(await sft.hasRole(role, deployer.address)).to.be.true;
+        expect(await sft.hasRole(role, user.address)).to.be.false;
+
+        await expect(user.sft.grantRole(role, user.address)).to.be.revertedWith(
+          `AccessControl: account ${user.address.toLowerCase()} is missing role ${DEFAULT_ADMIN_ROLE}`,
+        );
+
+        await expect(deployer.sft.grantRole(role, user.address))
+          .to.emit(sft, "RoleGranted")
+          .withArgs(role, user.address, deployer.address);
+      });
+    });
+
     const data = [input1, input2, input3, input4];
 
     data.forEach(input => {

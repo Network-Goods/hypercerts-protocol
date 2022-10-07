@@ -1,8 +1,22 @@
 import { expect } from "chai";
 import { deployments } from "hardhat";
 
-import { ERC3525_Testing, HyperCertMinter, HyperCertMinterUpgrade, HyperCertSVG as SVG } from "../src/types";
-import { ERC3525, HyperCertMinter_Current, HyperCertSVG, ImpactScopes, Rights, WorkScopes } from "./wellKnown";
+import {
+  ERC3525_Testing,
+  HyperCertMinter,
+  HyperCertMinterUpgrade,
+  HyperCertMetadata as Metadata,
+  HyperCertSVG as SVG,
+} from "../src/types";
+import {
+  ERC3525,
+  HyperCertMetadata,
+  HyperCertMinter_Current,
+  HyperCertSVG,
+  ImpactScopes,
+  Rights,
+  WorkScopes,
+} from "./wellKnown";
 
 export type HyperCertContract = HyperCertMinter | HyperCertMinterUpgrade;
 export type ERC3525 = ERC3525_Testing;
@@ -46,19 +60,44 @@ export const setupTestERC3525 = deployments.createFixture(
   },
 );
 
+export const setupTestMetadata = deployments.createFixture(
+  async ({ deployments, getNamedAccounts, ethers }, _options) => {
+    await deployments.fixture(); // ensure you start from a fresh deployments
+    const { deployer, user, anon } = await getNamedAccounts();
+
+    // Contracts
+    const sft = <Metadata>await ethers.getContract(HyperCertMetadata);
+
+    // Account config
+    const setupAddress = async (address: string) => {
+      return {
+        address: address,
+        sft: <Metadata>await ethers.getContract(HyperCertMetadata, address),
+      };
+    };
+
+    // Struct
+    return {
+      sft,
+      deployer: await setupAddress(deployer),
+      user: await setupAddress(user),
+      anon: await setupAddress(anon),
+    };
+  },
+);
+
 export const setupTestSVG = deployments.createFixture(async ({ deployments, getNamedAccounts, ethers }, _options) => {
   await deployments.fixture(); // ensure you start from a fresh deployments
   const { deployer, user, anon } = await getNamedAccounts();
 
   // Contracts
   const sft = <SVG>await ethers.getContract(HyperCertSVG);
-  await sft.initialize();
 
   // Account config
   const setupAddress = async (address: string) => {
     return {
       address: address,
-      sft: <HyperCertSVG>await ethers.getContract(HyperCert_SVG, address),
+      sft: <SVG>await ethers.getContract(HyperCertSVG, address),
     };
   };
 
