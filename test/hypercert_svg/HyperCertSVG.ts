@@ -92,7 +92,7 @@ describe("Unit tests", function () {
         );
       });
 
-      it("should generate valid token SVG", async () => {
+      it(`should generate valid token SVG (${name})`, async () => {
         await generateAndValidateSVG(`fraction_${name}`, input, tokenInstance =>
           tokenInstance.generateSvgFraction(
             input.name,
