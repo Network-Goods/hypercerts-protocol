@@ -3,5 +3,5 @@ module.exports = {
   providerOptions: {
     mnemonic: process.env.MNEMONIC,
   },
-  skipFiles: ["test", "mocks"],
+  skipFiles: ["test", "mocks", "lib"],
 };
