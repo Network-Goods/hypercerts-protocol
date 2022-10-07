@@ -12,7 +12,7 @@ export function shouldBehaveLikeSemiFungibleTokenBurn(): void {
       await expect(sft.burn(1)).to.emit(sft, "SlotChanged").withArgs(1, 1, 0);
     });
 
-    it.skip("does not allow burning other tokens in the same slot the caller does not own", async function () {
+    it("does not allow burning other tokens in the same slot the caller does not own", async function () {
       const { sft, user, anon } = await setupTestERC3525();
 
       await sft.mintValue(user.address, 1, 1, 1_000_000);
