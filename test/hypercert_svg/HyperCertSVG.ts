@@ -17,7 +17,7 @@ type InputType = {
   totalUnits: number;
 };
 
-const input: InputType = {
+const input1: InputType = {
   name: "TestSVG",
   scopesOfImpact: ["Developing SVG rendering"],
   workTimeframe: [1640998800, 1643590800],
@@ -26,21 +26,30 @@ const input: InputType = {
   totalUnits: 1000,
 };
 
+const input2: InputType = {
+  name: "TestSVG2",
+  scopesOfImpact: ["Developing further SVG rendering", "tralalalala"],
+  workTimeframe: [1640998800, 1643590800],
+  impactTimeframe: [1643677200, 1646010000],
+  units: 500,
+  totalUnits: 1000,
+};
+
 const BASE_PATH = "test/hypercert_svg/";
 
 const formatDate = (unix: number) => format(new Date(unix * 1000), "yyyy-M-d");
 const formatTimeframe = (timeframe: [number, number]) => `${formatDate(timeframe[0])} > ${formatDate(timeframe[1])}`;
 
-const generateAndValidateSVG = async (name: string, fn: (tokenInstance: SVG) => Promise<string>) => {
+const generateAndValidateSVG = async (name: string, input: InputType, fn: (tokenInstance: SVG) => Promise<string>) => {
   const tokenFactory = await ethers.getContractFactory(HyperCertSVG);
   const tokenInstance = <SVG>await tokenFactory.deploy();
   await tokenInstance.addBackground(SVGBackgrounds[0]);
   const svg = await fn(tokenInstance);
   await fs.writeFile(`${BASE_PATH}test_${name}.svg`, svg);
-  await validate(svg);
+  await validate(svg, input);
 };
 
-const validate = async (svg: string) => {
+const validate = async (svg: string, input: InputType) => {
   const baseUrl = `${BASE_PATH}xsd/`;
   const xsd = await fs.readFile(`${baseUrl}svg.xsd`, { encoding: "utf-8" });
   const xsdDoc = parseXml(xsd, { baseUrl });
@@ -65,29 +74,36 @@ const validate = async (svg: string) => {
 
 describe("Unit tests", function () {
   describe("HyperCert SVG", async function () {
-    it("should generate valid hypercert SVG", async () => {
-      await generateAndValidateSVG("hypercert", tokenInstance =>
-        tokenInstance.generateSvgHyperCert(
-          input.name,
-          input.scopesOfImpact,
-          input.workTimeframe,
-          input.impactTimeframe,
-          input.totalUnits,
-        ),
-      );
-    });
+    const data = <[string, InputType][]>[
+      ["simple", input1],
+      ["medium", input2],
+    ];
 
-    it("should generate valid token SVG", async () => {
-      await generateAndValidateSVG("fraction", tokenInstance =>
-        tokenInstance.generateSvgFraction(
-          input.name,
-          input.scopesOfImpact,
-          input.workTimeframe,
-          input.impactTimeframe,
-          input.units,
-          input.totalUnits,
-        ),
-      );
+    data.forEach(([name, input]) => {
+      it(`should generate valid hypercert SVG (${name})`, async () => {
+        await generateAndValidateSVG(`hypercert_${name}`, input, tokenInstance =>
+          tokenInstance.generateSvgHyperCert(
+            input.name,
+            input.scopesOfImpact,
+            input.workTimeframe,
+            input.impactTimeframe,
+            input.totalUnits,
+          ),
+        );
+      });
+
+      it("should generate valid token SVG", async () => {
+        await generateAndValidateSVG(`fraction_${name}`, input, tokenInstance =>
+          tokenInstance.generateSvgFraction(
+            input.name,
+            input.scopesOfImpact,
+            input.workTimeframe,
+            input.impactTimeframe,
+            input.units,
+            input.totalUnits,
+          ),
+        );
+      });
     });
   });
 });
