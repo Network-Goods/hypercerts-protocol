@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import { format } from "date-fns";
 import { promises as fs } from "fs";
 import { ethers } from "hardhat";
 import { parseXml } from "libxmljs";
@@ -27,8 +28,8 @@ const input: InputType = {
 
 const BASE_PATH = "test/hypercert_svg/";
 
-// const formatDate = (unix: number) =>
-//   new Date(unix * 1000).toLocaleString("en-US", { year: "numeric", month: "numeric", day: "numeric" });
+const formatDate = (unix: number) => format(new Date(unix * 1000), "yyyy-M-d");
+const formatTimeframe = (timeframe: [number, number]) => `${formatDate(timeframe[0])} > ${formatDate(timeframe[1])}`;
 
 const generateAndValidateSVG = async (name: string, fn: (tokenInstance: SVG) => Promise<string>) => {
   const tokenFactory = await ethers.getContractFactory(HyperCertSVG);
@@ -51,19 +52,14 @@ const validate = async (svg: string) => {
     1,
     "Description not found",
   );
-  // const workPeriod = `Work Period: ${formatDate(input.workTimeframe[0])} > ${formatDate(input.workTimeframe[1])}`;
-  // console.log(workPeriod);
-  // expect(svgDoc.find(`//*[@id='work-period-color']//*[text()='${workPeriod}']`).length).to.eq(
-  //   1,
-  //   "Work period not found",
-  // );
-  // expect(
-  //   svgDoc.find(
-  //     `//*[@id='impact-period-color']//*[text()='Impact Period: ${formatDate(input.impactTimeframe[0])} > ${formatDate(
-  //       input.impactTimeframe[1],
-  //     )}']`,
-  //   ).length,
-  // ).to.eq(1, "Impact period not found");
+  expect(
+    svgDoc.find(`//*[@id='work-period-color']//*[text()='Work Period: ${formatTimeframe(input.workTimeframe)}']`)
+      .length,
+  ).to.eq(1, "Work period not found");
+  expect(
+    svgDoc.find(`//*[@id='impact-period-color']//*[text()='Impact Period: ${formatTimeframe(input.impactTimeframe)}']`)
+      .length,
+  ).to.eq(1, "Work period not found");
   expect(svgDoc.validationErrors.length).to.eq(0, svgDoc.validationErrors.join("\n"));
 };
 
