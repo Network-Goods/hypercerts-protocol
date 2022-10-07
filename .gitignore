@@ -29,3 +29,6 @@ yarn-error.log*
 .DS_Store
 /.idea
 test*.svg
+
+test/hypercert_minter/HypercertMinter.split.merge.ts
+test/hypercert_svg/HypercertSVG.ts
