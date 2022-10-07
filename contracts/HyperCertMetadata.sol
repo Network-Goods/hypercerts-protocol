@@ -71,7 +71,7 @@ contract HyperCertMetadata is IHyperCertMetadata, Initializable, AccessControlUp
     /// @notice Current version of the contract
     uint16 internal _version;
 
-    address svgGenerator;
+    address internal _svgGenerator;
 
     /*******************
      * DEPLOY
@@ -85,7 +85,7 @@ contract HyperCertMetadata is IHyperCertMetadata, Initializable, AccessControlUp
 
     /// @notice Contract initialization logic
     function initialize(address svgGenerationAddress) public initializer {
-        svgGenerator = svgGenerationAddress;
+        _svgGenerator = svgGenerationAddress;
 
         __AccessControl_init();
         __UUPSUpgradeable_init();
@@ -233,7 +233,7 @@ contract HyperCertMetadata is IHyperCertMetadata, Initializable, AccessControlUp
                 "data:image/svg+xml;base64,",
                 Base64Upgradeable.encode(
                     bytes(
-                        IHyperCertSVG(svgGenerator).generateSvgFraction(
+                        IHyperCertSVG(_svgGenerator).generateSvgFraction(
                             claim.name,
                             impactScopes,
                             claim.workTimeframe,
@@ -256,7 +256,7 @@ contract HyperCertMetadata is IHyperCertMetadata, Initializable, AccessControlUp
                 "data:image/svg+xml;base64,",
                 Base64Upgradeable.encode(
                     bytes(
-                        IHyperCertSVG(svgGenerator).generateSvgHyperCert(
+                        IHyperCertSVG(_svgGenerator).generateSvgHyperCert(
                             claim.name,
                             scopesOfImpact,
                             claim.workTimeframe,

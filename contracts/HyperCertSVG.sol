@@ -101,7 +101,8 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
         return
             string(
                 abi.encodePacked(
-                    '<svg width="550" height="850" viewBox="0 0 550 850" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">',
+                    '<svg width="550" height="850" viewBox="0 0 550 850" '
+                    'xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">',
                     _generateBackgroundColor(),
                     _generateBackground(),
                     _generateHeader(params),
@@ -117,7 +118,8 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
         return
             string(
                 abi.encodePacked(
-                    '<svg width="550" height="850" viewBox="0 0 550 850" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">',
+                    '<svg width="550" height="850" viewBox="0 0 550 850" '
+                    'xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">',
                     _generateBackgroundColor(),
                     _generateBackground(),
                     _generateHeader(params),
@@ -151,12 +153,15 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
             string(
                 abi.encodePacked(
                     abi.encodePacked(
-                        '<path id="foreground-color-2" d="M435,777.83H115v-50H435v50Zm0-532.83H115v360H435V245Zm0-122.83H115v-50H435v50Z"/>'
+                        '<path id="foreground-color-2" '
+                        'd="M435,777.83H115v-50H435v50Zm0-532.83H115v360H435V245Zm0-122.83H115v-50H435v50Z"/>'
                     ),
                     abi.encodePacked(
                         '<g id="divider-color" text-rendering="optimizeSpeed" font-size="10" fill="#ffce43">',
-                        '<path id="divider-color-2" d="M156.35,514.59h237.31" style="fill: none; stroke: #ffce43; stroke-miterlimit: 10; stroke-width: 2px;"/>',
-                        '<text id="work-period-color" transform="translate(134.75 102.06)" style="font-family: Helvetica; font-size: 15px;">',
+                        '<path id="divider-color-2" d="M156.35,514.59h237.31" '
+                        'style="fill: none; stroke: #ffce43; stroke-miterlimit: 10; stroke-width: 2px;"/>',
+                        '<text id="work-period-color" transform="translate(134.75 102.06)" '
+                        'style="font-family: Helvetica; font-size: 15px;">',
                         '<tspan x="0" y="0" style="letter-spacing: -.05em;">Work Period: ',
                         abi.encodePacked(yearFrom.toString(), "-", monthFrom.toString(), "-", dayFrom.toString()),
                         " > ",
@@ -222,7 +227,8 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
                 abi.encodePacked(
                     '<g id="name-color" text-rendering="optimizeSpeed" font-size="30">',
                     abi.encodePacked(
-                        '<text id="name-color-2" transform="translate(156.35 300)" style="fill: #ffce43; font-family: Monaco;">',
+                        '<text id="name-color-2" transform="translate(156.35 300)" '
+                        'style="fill: #ffce43; font-family: Monaco;">',
                         renderedText,
                         "</text>"
                     ),
@@ -262,7 +268,8 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
             string(
                 abi.encodePacked(
                     '<g id="fraction-color" text-rendering="optimizeSpeed" font-size="30">',
-                    '<text id="fraction-color-2" transform="translate(156.35 568.03)" style="fill: #ffce43; font-family: Monaco">'
+                    '<text id="fraction-color-2" transform="translate(156.35 568.03)" '
+                    'style="fill: #ffce43; font-family: Monaco">'
                     '<tspan x="0" y="0">',
                     // abi.encodePacked(((params.units / params.totalUnits) * 10000).toString()),
                     string.concat(string(uint2decimal(percent, 2)), " %"),
@@ -276,7 +283,8 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
             string(
                 abi.encodePacked(
                     '<g id="total-units-color" text-rendering="optimizeSpeed" font-size="30">',
-                    '<text id="total-units-color" transform="translate(156.35 568.03)" style="fill: #ffce43; font-family: Monaco">'
+                    '<text id="total-units-color" transform="translate(156.35 568.03)" '
+                    'style="fill: #ffce43; font-family: Monaco">'
                     '<tspan x="0" y="0">',
                     params.totalUnits.toString(),
                     "</tspan></text></g>"
@@ -291,7 +299,8 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
             string(
                 abi.encodePacked(
                     '<g id="impact-period-color" text-rendering="optimizeSpeed" font-size="10" fill="#ffce43">',
-                    '<text id="impact-period-color-2" transform="translate(134.75 758)" style="font-family: Helvetica; font-size: 15px;">',
+                    '<text id="impact-period-color-2" transform="translate(134.75 758)" '
+                    'style="font-family: Helvetica; font-size: 15px;">',
                     '<tspan x="0" y="0" style="letter-spacing: -.05em;">Impact Period: ',
                     abi.encodePacked(yearFrom.toString(), "-", monthFrom.toString(), "-", dayFrom.toString()),
                     " > ",
@@ -303,7 +312,7 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
 
     function getPercent(uint256 part, uint256 whole) public pure returns (uint256 percent) {
         uint256 numerator = part * 100000;
-        require(numerator > part); // overflow. Should use SafeMath throughout if this was a real implementation.
+        require(numerator > part, "Overflow"); // Should use SafeMath throughout if this was a real implementation.
         uint256 temp = numerator / whole + 5; // proper rounding up
         return temp / 10;
     }

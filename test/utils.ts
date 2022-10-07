@@ -3,7 +3,6 @@ import { expect } from "chai";
 import { BigNumber, utils } from "ethers";
 import { ethers, getNamedAccounts } from "hardhat";
 
-import { HyperCertMinter } from "../src/types";
 import { DataApplicationJson, ImpactScopes, LoremIpsum, Rights, WorkScopes } from "./wellKnown";
 
 export type Claim = {
