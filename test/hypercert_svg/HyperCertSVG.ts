@@ -19,7 +19,7 @@ type InputType = {
 };
 
 const input1: InputType = {
-  name: "TestSVG_light",
+  name: "TestSVG_S",
   scopesOfImpact: ["Developing SVG rendering"],
   workTimeframe: [1640998800, 1643590800],
   impactTimeframe: [1643677200, 1646010000],
@@ -28,7 +28,7 @@ const input1: InputType = {
 };
 
 const input2: InputType = {
-  name: "TestSVG2_medium",
+  name: "TestSVG2_M",
   scopesOfImpact: ["Developing further SVG rendering", "tralalalala"],
   workTimeframe: [1640998800, 1643590800],
   impactTimeframe: [1643677200, 1646010000],
@@ -37,8 +37,17 @@ const input2: InputType = {
 };
 
 const input3: InputType = {
-  name: "TestSVG_heavy",
-  scopesOfImpact: Object.keys(randomScopes(100)),
+  name: "TestSVG_L",
+  scopesOfImpact: Object.values(randomScopes(100)),
+  workTimeframe: [1640998800, 1643590800],
+  impactTimeframe: [1643677200, 1646010000],
+  units: 500,
+  totalUnits: 1000,
+};
+
+const input4: InputType = {
+  name: "TestSVG_XL_____________________",
+  scopesOfImpact: Object.keys(randomScopes(200)),
   workTimeframe: [1640998800, 1643590800],
   impactTimeframe: [1643677200, 1646010000],
   units: 500,
@@ -49,12 +58,10 @@ const BASE_PATH = "test/hypercert_svg/";
 
 const formatDate = (unix: number) => format(new Date(unix * 1000), "yyyy-M-d");
 const formatTimeframe = (timeframe: [number, number]) => `${formatDate(timeframe[0])} > ${formatDate(timeframe[1])}`;
-
 const formatFraction = (input: InputType) => {
   const percentage = ((input.units / input.totalUnits) * 100).toLocaleString("en-us", {
     minimumFractionDigits: 2,
   });
-  console.log(percentage);
   return `${percentage} %`;
 };
 
@@ -92,10 +99,6 @@ const validate = async (svg: string, input: InputType, fraction: boolean = false
     svgDoc.find(`//*[@id='impact-period-color']//*[text()='Impact Period: ${formatTimeframe(input.impactTimeframe)}']`)
       .length,
   ).to.eq(1, "Impact period not found");
-  expect(
-    svgDoc.find(`//*[@id='impact-period-color']//*[text()='Impact Period: ${formatTimeframe(input.impactTimeframe)}']`)
-      .length,
-  ).to.eq(1, "Impact period not found");
   if (fraction) {
     expect(svgDoc.find(`//*[@id='fraction-color']//*[text()='${formatFraction(input)}']`).length).to.eq(
       1,
@@ -108,7 +111,7 @@ const validate = async (svg: string, input: InputType, fraction: boolean = false
 
 describe("Unit tests", function () {
   describe("HyperCert SVG", async function () {
-    const data = [input1, input2, input3];
+    const data = [input1, input2, input3, input4];
 
     data.forEach(input => {
       it(`should generate valid hypercert SVG (${input.name})`, async () => {
