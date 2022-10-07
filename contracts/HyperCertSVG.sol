@@ -7,10 +7,22 @@ import "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
 import "./lib/DateTime.sol";
 import "./lib/strings.sol";
 import "hardhat/console.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-contract HyperCertSVG {
+contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeable {
     using StringsUpgradeable for uint256;
     using strings for *;
+
+    /// @notice User role required in order to upgrade the contract
+    bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
+    /// @notice Current version of the contract
+    uint16 internal _version;
+
+    /// @dev id => background
+    mapping(uint256 => string) public backgrounds;
+    uint256 public backgroundCounter;
 
     struct SVGParams {
         string name;
@@ -21,17 +33,32 @@ contract HyperCertSVG {
         uint256 totalUnits;
     }
 
-    /// @dev voucher => claimType => background colors
-    mapping(uint256 => string) background;
-    uint256 backgroundCounter = 0;
-
     event BackgroundAdded(uint256 id);
 
-    constructor() {}
+    /*******************
+     * DEPLOY
+     ******************/
+
+    /// @notice Contract constructor logic
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
+    /// @notice Contract initialization logic
+    function initialize() public initializer {
+        __AccessControl_init();
+        __UUPSUpgradeable_init();
+
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(UPGRADER_ROLE, msg.sender);
+
+        backgroundCounter = 0;
+    }
 
     function addBackground(string memory svgString) external returns (uint256 id) {
         id = backgroundCounter;
-        background[id] = svgString;
+        backgrounds[id] = svgString;
         emit BackgroundAdded(id);
         backgroundCounter += 1;
     }
@@ -113,7 +140,7 @@ contract HyperCertSVG {
     }
 
     function _generateBackground() internal view returns (string memory) {
-        return background[0];
+        return backgrounds[0];
     }
 
     function _generateHeader(SVGParams memory params) internal pure virtual returns (string memory) {
@@ -296,5 +323,39 @@ contract HyperCertSVG {
         }
 
         return abi.encodePacked(fullStr, fraction);
+    }
+
+    /*******************
+     * ADMIN
+     ******************/
+    /// @notice gets the current version of the contract
+    function version() public view virtual returns (uint256) {
+        return _version;
+    }
+
+    /// @notice Update the contract version number
+    /// @notice Only allowed for member of UPGRADER_ROLE
+    function updateVersion() external onlyRole(UPGRADER_ROLE) {
+        _version += 1;
+    }
+
+    /// @notice Returns a flag indicating if the contract supports the specified interface
+    /// @param interfaceId Id of the interface
+    /// @return true, if the interface is supported
+    function supportsInterface(bytes4 interfaceId) public view override returns (bool) {
+        return super.supportsInterface(interfaceId);
+    }
+
+    /// @notice upgrade authorization logic
+    /// @dev adds onlyRole(UPGRADER_ROLE) requirement
+    function _authorizeUpgrade(
+        address /*newImplementation*/
+    )
+        internal
+        view
+        override
+        onlyRole(UPGRADER_ROLE) // solhint-disable-next-line no-empty-blocks
+    {
+        //empty block
     }
 }

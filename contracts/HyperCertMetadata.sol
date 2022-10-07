@@ -6,6 +6,9 @@ import "./utils/ArraysUpgradeable.sol";
 import "./utils/StringsExtensions.sol";
 import "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/Base64Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 interface IHyperCertMinter {
     struct Claim {
@@ -56,17 +59,39 @@ interface IHyperCertSVG {
 
 /// @dev Hypercertificate metadata creation logic
 // TODO optimise where to call string data
-contract HyperCertMetadata is IHyperCertMetadata {
+contract HyperCertMetadata is IHyperCertMetadata, Initializable, AccessControlUpgradeable, UUPSUpgradeable {
     using ArraysUpgradeable for uint64[2];
     using ArraysUpgradeable for uint256[];
     using ArraysUpgradeable for string[];
     using StringsExtensions for bool;
     using StringsUpgradeable for uint256;
 
+    /// @notice User role required in order to upgrade the contract
+    bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
+    /// @notice Current version of the contract
+    uint16 internal _version;
+
     address svgGenerator;
 
-    constructor(address svgGenerationAddress) {
+    /*******************
+     * DEPLOY
+     ******************/
+
+    /// @notice Contract constructor logic
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
+    /// @notice Contract initialization logic
+    function initialize(address svgGenerationAddress) public initializer {
         svgGenerator = svgGenerationAddress;
+
+        __AccessControl_init();
+        __UUPSUpgradeable_init();
+
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(UPGRADER_ROLE, msg.sender);
     }
 
     function generateTokenURI(uint256 slotId, uint256 tokenId) external view virtual returns (string memory) {
@@ -456,5 +481,40 @@ contract HyperCertMetadata is IHyperCertMetadata {
             }
             vals = values;
         }
+    }
+
+    /*******************
+     * ADMIN
+     ******************/
+
+    /// @notice gets the current version of the contract
+    function version() public view virtual returns (uint256) {
+        return _version;
+    }
+
+    /// @notice Update the contract version number
+    /// @notice Only allowed for member of UPGRADER_ROLE
+    function updateVersion() external onlyRole(UPGRADER_ROLE) {
+        _version += 1;
+    }
+
+    /// @notice Returns a flag indicating if the contract supports the specified interface
+    /// @param interfaceId Id of the interface
+    /// @return true, if the interface is supported
+    function supportsInterface(bytes4 interfaceId) public view override returns (bool) {
+        return super.supportsInterface(interfaceId);
+    }
+
+    /// @notice upgrade authorization logic
+    /// @dev adds onlyRole(UPGRADER_ROLE) requirement
+    function _authorizeUpgrade(
+        address /*newImplementation*/
+    )
+        internal
+        view
+        override
+        onlyRole(UPGRADER_ROLE) // solhint-disable-next-line no-empty-blocks
+    {
+        //empty block
     }
 }
