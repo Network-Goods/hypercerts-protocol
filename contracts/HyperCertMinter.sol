@@ -19,7 +19,7 @@ error InvalidInput();
 /// @title Hypercertificate minting logic
 /// @notice Contains functions and events to initialize and issue a hypercertificate
 /// @author bitbeckers, mr_bluesky
-contract HyperCertMinter is Initializable, ERC3525Upgradeable, AccessControlUpgradeable, UUPSUpgradeable {
+contract HyperCertMinter is Initializable, ERC3525SlotEnumerableUpgradeable, AccessControlUpgradeable, UUPSUpgradeable {
     using ArraysUpgradeable for uint64[];
 
     /// @notice Contract name
