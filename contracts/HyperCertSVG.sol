@@ -241,6 +241,7 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
             return 0x0;
         }
 
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             result := mload(add(source, 32))
         }

@@ -13,6 +13,7 @@ export const ERC3525 = "ERC3525_Testing";
 
 export const HyperCertSVG = "HyperCertSVG";
 
+export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
 export const UPGRADER_ROLE = ethers.utils.id("UPGRADER_ROLE");
 
 export const Rights = toHashMap(["admin", "mint", "merge", "split", "burn"]);

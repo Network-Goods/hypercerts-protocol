@@ -101,11 +101,12 @@ contract HyperCertMetadata is IHyperCertMetadata, Initializable, AccessControlUp
                     "data:application/json;base64,",
                     Base64Upgradeable.encode(
                         abi.encodePacked(
-                            '{"name":"HyperCerts"',
-                            '","description":"HyperCerts create an interoperable data layer to account for actions that are expected to have positive impact. They are a tool to build scalable reward systems for impact."',
-                            '","image":"https://bafkreifjgpewz56lvddyau7xsbaefm3quc3k4mk34cokqkl2hxuyihun7q.ipfs.nftstorage.link/"',
-                            ',"external_url":"https://www.hypercerts.xyz"',
-                            "}"
+                            '{"name":"HyperCerts"'
+                            '","description":"HyperCerts create an interoperable data layer to account for'
+                            " actions that are expected to have positive impact. They are a tool to build"
+                            ' scalable reward systems for impact.","image":"'
+                            "https://bafkreifjgpewz56lvddyau7xsbaefm3quc3k4mk34cokqkl2hxuyihun7q.ipfs.nftstorage.link/"
+                            '","external_url":"https://www.hypercerts.xyz"}'
                         )
                     )
                 )
