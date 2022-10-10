@@ -13,6 +13,13 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   if (currentBackground.length == 0) {
     await execute("HyperCertSVG", { from: deployer, log: true }, "addBackground", SVGBackgrounds[0]);
+    await execute("HyperCertSVG", { from: deployer, log: true }, "addBackground", SVGBackgrounds[1]);
+    await execute("HyperCertSVG", { from: deployer, log: true }, "addBackground", SVGBackgrounds[2]);
+    await execute("HyperCertSVG", { from: deployer, log: true }, "addBackground", SVGBackgrounds[3]);
+    await execute("HyperCertSVG", { from: deployer, log: true }, "addBackground", SVGBackgrounds[4]);
+    await execute("HyperCertSVG", { from: deployer, log: true }, "addBackground", SVGBackgrounds[5]);
+    await execute("HyperCertSVG", { from: deployer, log: true }, "addBackground", SVGBackgrounds[6]);
+    await execute("HyperCertSVG", { from: deployer, log: true }, "addBackground", SVGBackgrounds[7]);
   }
 };
 

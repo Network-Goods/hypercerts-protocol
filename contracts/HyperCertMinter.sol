@@ -434,4 +434,11 @@ contract HyperCertMinter is Initializable, ERC3525SlotEnumerableUpgradeable, Acc
     function _msgSender() internal view override(ContextUpgradeable, ERC3525Upgradeable) returns (address sender) {
         return msg.sender;
     }
+
+    function setMetadataGenerator(address metadataGenerator) external onlyRole(UPGRADER_ROLE) {
+        if (metadataGenerator == address(0)) {
+            revert ToZeroAddress();
+        }
+        _metadata = IHyperCertMetadata(metadataGenerator);
+    }
 }

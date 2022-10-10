@@ -21,7 +21,11 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
 
     /// @dev id => background
     mapping(uint256 => string) public backgrounds;
+    /// @dev id => colorPairs [prime, second]
+    mapping(uint256 => string[2]) public colorPairs;
+
     uint256 public backgroundCounter;
+    uint256 public colorPairCounter;
 
     struct SVGParams {
         string name;
@@ -33,6 +37,7 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
     }
 
     event BackgroundAdded(uint256 id);
+    event ColorPairAdded(uint256 id, string[2] colorPair);
 
     /*******************
      * DEPLOY
@@ -60,6 +65,13 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
         backgrounds[id] = svgString;
         emit BackgroundAdded(id);
         backgroundCounter += 1;
+    }
+
+    function addColorPair(string[2] memory colorPair) external returns (uint256 id) {
+        id = colorPairCounter;
+        colorPairs[id] = colorPair;
+        emit ColorPairAdded(id, colorPair);
+        colorPairCounter += 1;
     }
 
     function generateSvgHyperCert(
@@ -103,7 +115,7 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
                     '<svg width="550" height="850" viewBox="0 0 550 850" '
                     'xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">',
                     _generateBackgroundColor(),
-                    _generateBackground(),
+                    _generateBackground(params.scopesOfImpact[0]),
                     _generateHeader(params),
                     _generateName(params),
                     _generateScopeOfImpact(params),
@@ -120,7 +132,7 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
                     '<svg width="550" height="850" viewBox="0 0 550 850" '
                     'xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">',
                     _generateBackgroundColor(),
-                    _generateBackground(),
+                    _generateBackground(params.scopesOfImpact[0]),
                     _generateHeader(params),
                     _generateName(params),
                     _generateScopeOfImpact(params),
@@ -140,8 +152,16 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
             );
     }
 
-    function _generateBackground() internal view returns (string memory) {
-        return backgrounds[0];
+    function _generateBackground(string memory primaryScopeOfImpact) internal view returns (string memory background) {
+        background = backgrounds[_getBackgroundIndex(primaryScopeOfImpact)];
+        if (bytes(background).length == 0) {
+            background = backgrounds[0];
+        }
+    }
+
+    function _getBackgroundIndex(string memory primaryScopeOfImpact) internal view returns (uint256 index) {
+        bytes32 stringBytes = stringToBytes32(primaryScopeOfImpact);
+        index = uint256(stringBytes) % 10;
     }
 
     function _generateHeader(SVGParams memory params) internal pure virtual returns (string memory) {
