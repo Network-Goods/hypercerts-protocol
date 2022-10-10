@@ -12,14 +12,14 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const colorsSize = await read("HyperCertSVG", { from: deployer }, "colorsCounter");
 
   if (colorsSize == 0) {
-    await execute("HyperCertSVG", { from: deployer, log: true }, "addColors",(["#F3556F", "#121933", "#D4BFFF"]); //
-    await tokenInstance.addColors(["#FFBFCA", "#FFFFFF", "#5500FF"]); //
-    await tokenInstance.addColors(["#25316D", "#121933", "#80E5D3"]); //
-    await tokenInstance.addColors(["#25316D", "#FFFFFF", "#F3556F"]); //
-    await tokenInstance.addColors(["#80E5D3", "#FFFFFF", "#121933"]); //
-    await tokenInstance.addColors(["#FEF5AC", "#FFFFFF", "#25316D"]); //
-    await tokenInstance.addColors(["#F3556F", "#121933", "#FFBFCA"]); //
-    await tokenInstance.addColors(["#5500FF", "#121933", "#FFCC00"]); //
+    await execute("HyperCertSVG", { from: deployer, log: true }, "addColors",["#F3556F", "#121933", "#D4BFFF"]); //
+     await execute("HyperCertSVG", { from: deployer, log: true }, "addColors",["#FFBFCA", "#FFFFFF", "#5500FF"]); //
+     await execute("HyperCertSVG", { from: deployer, log: true }, "addColors",["#25316D", "#121933", "#80E5D3"]); //
+     await execute("HyperCertSVG", { from: deployer, log: true }, "addColors",["#25316D", "#FFFFFF", "#F3556F"]); //
+     await execute("HyperCertSVG", { from: deployer, log: true }, "addColors",["#80E5D3", "#FFFFFF", "#121933"]); //
+     await execute("HyperCertSVG", { from: deployer, log: true }, "addColors",["#FEF5AC", "#FFFFFF", "#25316D"]); //
+     await execute("HyperCertSVG", { from: deployer, log: true }, "addColors",["#F3556F", "#121933", "#FFBFCA"]); //
+     await execute("HyperCertSVG", { from: deployer, log: true }, "addColors",["#5500FF", "#121933", "#FFCC00"]); //
   }
 
   const currentBackground = await read("HyperCertSVG", { from: deployer }, "backgrounds", 0);
