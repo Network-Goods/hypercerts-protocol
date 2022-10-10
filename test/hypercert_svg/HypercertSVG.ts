@@ -5,10 +5,10 @@ import { ethers } from "hardhat";
 import { parseXml } from "libxmljs";
 
 import { HyperCertSVG as SVG } from "../../src/types";
-import { SVGBackgrounds } from "../../src/util/wellKnown";
+// import { SVGBackgrounds } from "../../src/util/wellKnown";
 import { setupTestSVG } from "../setup";
 import { randomScopes } from "../utils";
-import { DEFAULT_ADMIN_ROLE, HyperCertSVG, UPGRADER_ROLE } from "../wellKnown";
+import { DEFAULT_ADMIN_ROLE, HyperCertSVG, SVGBackgrounds, UPGRADER_ROLE } from "../wellKnown";
 
 type InputType = {
   name: string;
