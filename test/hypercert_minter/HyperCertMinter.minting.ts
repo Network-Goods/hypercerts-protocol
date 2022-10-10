@@ -25,7 +25,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
       fractions: [100],
     });
     const data1 = encodeClaim(claim1);
-    const claimID = await getClaimSlotID(claim1);
+    const claimID = 1;
     const data2 = await getEncodedImpactClaim({ workTimeframe: [234567890, 123456789] });
     const data3 = await getEncodedImpactClaim({ impactTimeframe: [1087654321, 987654321] });
     const data4 = await getEncodedImpactClaim({ impactTimeframe: [108765432, 109999432] });
@@ -68,7 +68,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
     const workScopes = Object.keys(WorkScopes);
     const claim = await newClaim({ workScopes: workScopes.slice(1, 2), fractions: [50, 50] });
     const data = encodeClaim(claim);
-    const claimID = await getClaimSlotID(claim);
+    const claimID = 1;
 
     // Supply 100, 2 fractions, single slot
     await expect(user.minter.mint(user.address, data))
@@ -137,7 +137,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
 
     const claim = await newClaim({ uri: "Test 1234", fractions: [50, 50] });
     const shortdata = await getEncodedImpactClaim(claim);
-    const claimID = await getClaimSlotID(claim);
+    const claimID = 1;
 
     await expect(user.minter.mint(user.address, shortdata))
       .to.emit(minter, "Transfer")
@@ -152,7 +152,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
     const cid = "ipfs://QmW2WQi7j6c7UgJTarActp7tDNikE4B2qXtFCfLPdsgaTQ/cat.jpg";
 
     const claim2 = await newClaim({ ...claim, workTimeframe: [12345678, 87654321], uri: cid, fractions: [50, 50] });
-    const claimID2 = await getClaimSlotID(claim2);
+    const claimID2 = 2;
 
     const data2 = await getEncodedImpactClaim(claim2);
 
@@ -188,7 +188,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
 
     const claim = await newClaim(options);
     const shortdata = await getEncodedImpactClaim(claim);
-    const claimID = await getClaimSlotID(claim);
+    const claimID = 1;
 
     await expect(user.minter.mint(user.address, shortdata))
       .to.emit(minter, "ImpactClaimed")
@@ -230,7 +230,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
 
     const claim = await newClaim(options);
     const shortdata = await getEncodedImpactClaim(claim);
-    const claimID = await getClaimSlotID(claim);
+    const claimID = 1;
 
     await expect(user.minter.mint(user.address, shortdata))
       .to.emit(minter, "ImpactClaimed")
@@ -276,7 +276,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
 
     const claim = await newClaim(options);
     const shortdata = await getEncodedImpactClaim(claim);
-    const claimID = await getClaimSlotID(claim);
+    const claimID = 1;
 
     await expect(user.minter.mint(user.address, shortdata)).to.emit(minter, "ImpactClaimed");
 
@@ -322,7 +322,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
 
     const claim = await newClaim(options);
     const shortdata = await getEncodedImpactClaim(claim);
-    const claimID = await getClaimSlotID(claim);
+    const claimID = 1;
 
     await expect(user.minter.mint(user.address, shortdata)).to.emit(minter, "ImpactClaimed");
 

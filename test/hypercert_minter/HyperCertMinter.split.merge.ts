@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 
 import setupTest from "../setup";
-import { encodeClaim, getClaimSlotID, newClaim, validateMetadata } from "../utils";
+import { encodeClaim, newClaim, validateMetadata } from "../utils";
 
 // TODO looping fractions
 export function shouldBehaveLikeHypercertMinterSplitAndMerge(): void {
@@ -10,7 +10,7 @@ export function shouldBehaveLikeHypercertMinterSplitAndMerge(): void {
     const { user, minter } = await setupTest();
     const claim = await newClaim();
     const data = encodeClaim(claim);
-    const slot = await getClaimSlotID(claim);
+    const slot = 1;
 
     await minter.mint(user.address, data);
 
@@ -50,7 +50,7 @@ export function shouldBehaveLikeHypercertMinterSplitAndMerge(): void {
     expect(await minter.slotOf(5)).to.be.eq(slot);
 
     //TODO tokenSupply
-    // expect(await minter.tokenSupplyInSlot(slot)).to.be.eq(5);
+    expect(await minter.tokenSupplyInSlot(slot)).to.be.eq(5);
 
     expect(await minter["balanceOf(uint256)"](1)).to.be.eq("50");
     expect(await minter["balanceOf(uint256)"](2)).to.be.eq("30");
@@ -69,7 +69,7 @@ export function shouldBehaveLikeHypercertMinterSplitAndMerge(): void {
     const { user, minter } = await setupTest();
     const claim = await newClaim({ fractions: [20, 30, 50] });
     const data = encodeClaim(claim);
-    const slot = await getClaimSlotID(claim);
+    const slot = 1;
 
     await minter.mint(user.address, data);
 
@@ -85,6 +85,6 @@ export function shouldBehaveLikeHypercertMinterSplitAndMerge(): void {
     await expect(minter["balanceOf(uint256)"](1)).to.be.revertedWith("NonExistentToken");
     expect(await minter["balanceOf(uint256)"](2)).to.be.eq("50");
     expect(await minter["balanceOf(uint256)"](3)).to.be.eq("50");
-    expect(await minter.tokenSupplyInSlot(slot)).to.be.eq(2); // <-- 3
+    expect(await minter.tokenSupplyInSlot(slot)).to.be.eq(2);
   });
 }

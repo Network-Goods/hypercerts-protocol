@@ -10,6 +10,8 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/IERC721Enume
 import "./interfaces/IERC3525MetadataUpgradeable.sol";
 import "./interfaces/IERC3525Receiver.sol";
 
+import "hardhat/console.sol";
+
 error NonExistentToken(uint256 tokenId);
 error NonExistentSlot(uint256 slotId);
 error InsufficientBalance(uint256 transferAmount, uint256 balance);
@@ -21,6 +23,7 @@ error SlotsMismatch(uint256 fromTokenId, uint256 toTokenId);
 error InvalidApproval(uint256 tokenId, address from, address to);
 error NotApprovedOrOwner();
 error NotERC3525Receiver(address receiver);
+error NotERC721Receiver(address receiver);
 error FromIncorrectOwner();
 
 abstract contract ERC3525Upgradeable is
@@ -132,14 +135,14 @@ abstract contract ERC3525Upgradeable is
     }
 
     function tokenByIndex(uint256 index_) public view virtual override returns (uint256) {
-        if (index_ >= totalSupply()) {
+        if (index_ >= ERC3525Upgradeable.totalSupply()) {
             revert InvalidID(index_);
         }
         return _allTokens[index_].id;
     }
 
     function tokenOfOwnerByIndex(address owner_, uint256 index_) public view virtual override returns (uint256) {
-        if (index_ >= balanceOf(owner_)) {
+        if (index_ >= ERC3525Upgradeable.balanceOf(owner_)) {
             revert InvalidID(index_);
         }
         return _addressData[owner_].ownedTokens[index_];
@@ -149,8 +152,10 @@ abstract contract ERC3525Upgradeable is
         if (!_exists(tokenId_)) {
             revert NonExistentToken(tokenId_);
         }
-        address owner = ownerOf(tokenId_);
-        return (operator_ == owner || isApprovedForAll(owner, operator_) || getApproved(tokenId_) == operator_);
+        address owner = ERC3525Upgradeable.ownerOf(tokenId_);
+        return (operator_ == owner ||
+            ERC3525Upgradeable.isApprovedForAll(owner, operator_) ||
+            ERC3525Upgradeable.getApproved(tokenId_) == operator_);
     }
 
     function _exists(uint256 tokenId_) internal view virtual returns (bool) {
@@ -166,12 +171,12 @@ abstract contract ERC3525Upgradeable is
         address to_,
         uint256 value_
     ) external payable virtual override(IERC3525Upgradeable) {
-        address owner = ownerOf(tokenId_);
+        address owner = ERC3525Upgradeable.ownerOf(tokenId_);
         if (to_ == owner) {
             revert InvalidApproval(tokenId_, to_, owner);
         }
 
-        if (!_isApprovedOrOwner(_msgSender(), tokenId_)) {
+        if (!ERC3525Upgradeable._isApprovedOrOwner(_msgSender(), tokenId_)) {
             revert NotApprovedOrOwner();
         }
 
@@ -179,11 +184,11 @@ abstract contract ERC3525Upgradeable is
     }
 
     function approve(address to_, uint256 tokenId_) public virtual override {
-        address owner = ownerOf(tokenId_);
+        address owner = ERC3525Upgradeable.ownerOf(tokenId_);
         if (to_ == owner) {
             revert InvalidApproval(tokenId_, msg.sender, to_);
         }
-        if (_msgSender() != owner && !isApprovedForAll(owner, _msgSender())) {
+        if (!ERC3525Upgradeable._isApprovedOrOwner(_msgSender(), tokenId_)) {
             revert NotApprovedOrOwner();
         }
 
@@ -342,7 +347,7 @@ abstract contract ERC3525Upgradeable is
     function _splitValue(uint256 fromToken_, uint256 value_) internal virtual returns (uint256 tokenId) {
         tokenId = _createOriginalTokenId();
         address to_ = _msgSender();
-        address from_ = _msgSender();
+        // address from_ = _msgSender();
         uint256 slot_ = slotOf(fromToken_);
 
         if (to_ == address(0)) {
@@ -355,7 +360,7 @@ abstract contract ERC3525Upgradeable is
             revert AlreadyMinted(tokenId);
         }
 
-        _beforeValueTransfer(from_, to_, fromToken_, tokenId, slot_, value_);
+        _beforeValueTransfer(address(0), to_, 0, tokenId, slot_, value_);
 
         _mint(to_, tokenId, slot_);
         _allTokens[_allTokensIndex[tokenId]].balance = value_;
@@ -363,7 +368,39 @@ abstract contract ERC3525Upgradeable is
 
         emit TransferValue(fromToken_, tokenId, value_);
 
-        _afterValueTransfer(from_, to_, fromToken_, tokenId, slot_, value_);
+        _afterValueTransfer(address(0), to_, 0, tokenId, slot_, value_);
+
+        return tokenId;
+    }
+
+    function _mergeValue(uint256 fromToken_, uint256 toToken_) internal virtual returns (uint256 tokenId) {
+        address to_ = ERC3525Upgradeable.ownerOf(toToken_);
+        address from_ = _msgSender();
+        uint256 slotFrom_ = slotOf(fromToken_);
+        uint256 slotTo_ = slotOf(toToken_);
+        uint256 value_ = balanceOf(fromToken_);
+
+        if (to_ == address(0)) {
+            revert ToZeroAddress();
+        }
+        if (fromToken_ == 0 || toToken_ == 0) {
+            revert InvalidID(tokenId);
+        }
+        if (_exists(tokenId)) {
+            revert AlreadyMinted(tokenId);
+        }
+        if (slotFrom_ != slotTo_) {
+            revert SlotsMismatch(slotFrom_, slotTo_);
+        }
+
+        _beforeValueTransfer(from_, to_, fromToken_, toToken_, slotTo_, value_);
+
+        _allTokens[_allTokensIndex[toToken_]].balance += value_;
+        _allTokens[_allTokensIndex[fromToken_]].balance -= value_;
+
+        emit TransferValue(fromToken_, toToken_, value_);
+
+        _afterValueTransfer(from_, to_, fromToken_, toToken_, slotTo_, value_);
 
         return tokenId;
     }
@@ -386,8 +423,8 @@ abstract contract ERC3525Upgradeable is
         _beforeValueTransfer(owner, address(0), tokenId_, 0, slot, value);
 
         _clearApprovedValues(tokenId_);
-        _removeTokenFromAllTokensEnumeration(tokenId_);
         _removeTokenFromOwnerEnumeration(owner, tokenId_);
+        _removeTokenFromAllTokensEnumeration(tokenId_);
 
         emit TransferValue(tokenId_, 0, value);
         emit Transfer(owner, address(0), tokenId_);
@@ -590,7 +627,7 @@ abstract contract ERC3525Upgradeable is
                 return retval == IERC3525Receiver.onERC3525Received.selector;
             } catch (bytes memory reason) {
                 if (reason.length == 0) {
-                    revert("ERC3525: transfer to non ERC3525Receiver implementer");
+                    revert NotERC3525Receiver(to);
                 } else {
                     // solhint-disable-next-line
                     assembly {
@@ -618,7 +655,7 @@ abstract contract ERC3525Upgradeable is
                 return retval == IERC721ReceiverUpgradeable.onERC721Received.selector;
             } catch (bytes memory reason) {
                 if (reason.length == 0) {
-                    revert("ERC721: transfer to non ERC721Receiver");
+                    revert NotERC721Receiver(to_);
                 } else {
                     // solhint-disable-next-line
                     assembly {

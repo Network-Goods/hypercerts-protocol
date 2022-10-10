@@ -26,7 +26,7 @@ export function shouldBehaveLikeSemiFungibleTokenAllowances(): void {
     it("allows for allowance on a specific token's value", async function () {
       const { sft, user, anon } = await setupTestERC3525();
 
-      await sft.mintValue(user.address, 1, 1_000_000);
+      await user.sft.mintValue(user.address, 1, 1_000_000);
       expect(await sft.getApproved(1)).to.be.eq(ethers.constants.AddressZero);
 
       // Custom errors

@@ -9,6 +9,12 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const { deployer } = await getNamedAccounts();
 
+  const colorsSize = await read("HyperCertSVG", { from: deployer }, "colorsCounter");
+
+  if (colorsSize == 0) {
+    await execute("HyperCertSVG", { from: deployer, log: true }, "addColors", ["#FFCE43", "white", "black"]);
+  }
+
   const currentBackground = await read("HyperCertSVG", { from: deployer }, "backgrounds", 0);
 
   if (currentBackground.length == 0) {

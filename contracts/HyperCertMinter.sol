@@ -152,7 +152,7 @@ contract HyperCertMinter is Initializable, ERC3525SlotEnumerableUpgradeable, Acc
         // Check on overlapping contributor-claims and store if success
         _storeContributorsClaims(claim.claimHash, claim.contributors);
 
-        uint256 slot = uint256(claim.claimHash);
+        uint256 slot = slotCount() + 1;
         // Store impact cert
         _hyperCerts[slot] = claim;
 
@@ -180,24 +180,8 @@ contract HyperCertMinter is Initializable, ERC3525SlotEnumerableUpgradeable, Acc
         if (total > balanceOf(tokenId) || total < balanceOf(tokenId)) revert InvalidInput();
 
         uint256 len = amounts.length;
-        // uint256 slotID = slotOf(tokenId);
         for (uint256 i = 1; i < len; i++) {
             _splitValue(tokenId, amounts[i]);
-            // uint256 newTokenID = _createOriginalTokenId();
-            // uint256 value_ = amounts[i];
-            // _beforeValueTransfer(_msgSender(), _msgSender(), tokenId, newTokenID, slotID, value_);
-
-            // _mint(msg.sender, newTokenID, slotID);
-            // ERC3525SlotEnumerableUpgradeable
-            //     ._allTokens[_allTokensIndex[tokenId]]
-            //     .balance = value_;
-
-            // emit TransferValue(0, tokenId, value_);
-            // _transferValue(tokenId, newTokenID, value_);
-
-            // _afterValueTransfer(_msgSender(), _msgSender(), tokenId, newTokenID, slotID, value_);
-            // // _mint(msg.sender, newTokenID, slotID);
-            // // _beforeValueTransfer()
         }
     }
 
@@ -207,7 +191,7 @@ contract HyperCertMinter is Initializable, ERC3525SlotEnumerableUpgradeable, Acc
         for (uint256 i = 0; i < len; i++) {
             uint256 tokenId = tokenIds[i];
             if (tokenId != targetTokenId) {
-                _transferValue(tokenId, targetTokenId, balanceOf(tokenId));
+                _mergeValue(tokenId, targetTokenId);
                 _burn(tokenId);
             }
         }
@@ -265,6 +249,9 @@ contract HyperCertMinter is Initializable, ERC3525SlotEnumerableUpgradeable, Acc
     }
 
     function slotURI(uint256 slotId_) external view override returns (string memory) {
+        if (!_hyperCerts[slotId_].exists) {
+            revert NonExistentSlot(slotId_);
+        }
         return _metadata.generateSlotURI(slotId_);
     }
 
@@ -287,6 +274,7 @@ contract HyperCertMinter is Initializable, ERC3525SlotEnumerableUpgradeable, Acc
         }
 
         _burn(tokenId_);
+        claim.exists = false;
     }
 
     function donate(uint256 tokenId_) public {

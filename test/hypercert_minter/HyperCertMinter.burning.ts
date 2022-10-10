@@ -2,13 +2,13 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 
 import setupTest from "../setup";
-import { encodeClaim, getClaimSlotID, newClaim, validateMetadata } from "../utils";
+import { encodeClaim, newClaim, validateMetadata } from "../utils";
 
 export function shouldBehaveLikeHypercertMinterBurning(): void {
   it("allows burning when the creator owns the full slot", async function () {
     const { deployer, minter } = await setupTest();
     const claim = await newClaim();
-    const slot = await getClaimSlotID(claim);
+    const slot = 1;
     const data = encodeClaim(claim);
     const tokenId = 1;
 
@@ -32,17 +32,17 @@ export function shouldBehaveLikeHypercertMinterBurning(): void {
 
     expect(await deployer.minter["balanceOf(address)"](deployer.address)).to.equal(0);
     await expect(minter["balanceOf(uint256)"](tokenId)).to.be.revertedWith("NonExistentToken");
-    await expect(minter.ownerOf(tokenId)).to.be.revertedWith("ERC721: invalid token ID");
+    await expect(minter.ownerOf(tokenId)).to.be.revertedWith("NonExistentToken");
     await expect(minter.slotOf(tokenId)).to.be.revertedWith("NonExistentToken");
-    expect(await minter.tokenSupplyInSlot(slot)).to.be.eq(0); // <--- this is still 1
+    expect(await minter.tokenSupplyInSlot(slot)).to.be.eq(0);
     await expect(minter.tokenURI(tokenId)).to.be.revertedWith("NonExistentToken");
-    await expect(minter.slotURI(slot)).to.be.revertedWith("TBC"); // <--- ?? claim still exists
+    await expect(minter.slotURI(slot)).to.be.revertedWith("NonExistentSlot"); 
   });
 
   it("prevents burning when the creator doesn't own the full slot", async function () {
     const { deployer, minter, user } = await setupTest();
     const claim = await newClaim({ fractions: [50, 50] });
-    const slot = await getClaimSlotID(claim);
+    const slot = 1;
     const data = encodeClaim(claim);
 
     await expect(deployer.minter.mint(deployer.address, data)).to.emit(minter, "ImpactClaimed");
@@ -68,7 +68,7 @@ export function shouldBehaveLikeHypercertMinterBurning(): void {
   it("prevents burning when the owner isn't the creator", async function () {
     const { deployer, minter, anon } = await setupTest();
     const claim = await newClaim({ fractions: [100] });
-    const slot = await getClaimSlotID(claim);
+    const slot = 1;
     const data = encodeClaim(claim);
 
     await expect(deployer.minter.mint(anon.address, data)).to.emit(minter, "ImpactClaimed");
