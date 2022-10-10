@@ -71,7 +71,7 @@ contract HyperCertMetadata is IHyperCertMetadata, Initializable, AccessControlUp
     /// @notice Current version of the contract
     uint16 internal _version;
 
-    address internal _svgGenerator;
+    IHyperCertSVG internal _svgGenerator;
 
     /*******************
      * DEPLOY
@@ -85,7 +85,7 @@ contract HyperCertMetadata is IHyperCertMetadata, Initializable, AccessControlUp
 
     /// @notice Contract initialization logic
     function initialize(address svgGenerationAddress) public initializer {
-        _svgGenerator = svgGenerationAddress;
+        _svgGenerator = IHyperCertSVG(svgGenerationAddress);
 
         __AccessControl_init();
         __UUPSUpgradeable_init();
@@ -190,9 +190,9 @@ contract HyperCertMetadata is IHyperCertMetadata, Initializable, AccessControlUp
             string(
                 abi.encodePacked(
                     abi.encodePacked(
-                        '"slotID":',
+                        '"hyperCertID":',
                         _propertyString(
-                            "Slot ID",
+                            "HyperCert ID",
                             "Unique identifier of HyperCert in contract.",
                             uint256(claim.claimHash).toString(),
                             false
@@ -262,7 +262,7 @@ contract HyperCertMetadata is IHyperCertMetadata, Initializable, AccessControlUp
                 "data:image/svg+xml;base64,",
                 Base64Upgradeable.encode(
                     bytes(
-                        IHyperCertSVG(_svgGenerator).generateSvgFraction(
+                        _svgGenerator.generateSvgFraction(
                             claim.name,
                             impactScopes,
                             claim.workTimeframe,
@@ -285,7 +285,7 @@ contract HyperCertMetadata is IHyperCertMetadata, Initializable, AccessControlUp
                 "data:image/svg+xml;base64,",
                 Base64Upgradeable.encode(
                     bytes(
-                        IHyperCertSVG(_svgGenerator).generateSvgHyperCert(
+                        _svgGenerator.generateSvgHyperCert(
                             claim.name,
                             scopesOfImpact,
                             claim.workTimeframe,

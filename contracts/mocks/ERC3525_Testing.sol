@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.4;
 
-import "../ERC3525Upgradeable.sol";
+import "../ERC3525SlotEnumerableUpgradeable.sol";
 
 /**
  * @dev Mock implementation of ERC3525 to expose private mutative functions
  */
 // solhint-disable-next-line contract-name-camelcase
-contract ERC3525_Testing is ERC3525Upgradeable {
+contract ERC3525_Testing is ERC3525SlotEnumerableUpgradeable {
     // solhint-disable-next-line no-empty-blocks
     function initialize() public initializer {
         // empty block
@@ -15,14 +15,13 @@ contract ERC3525_Testing is ERC3525Upgradeable {
 
     function mintValue(
         address to_,
-        uint256 tokenId_,
         uint256 slot_,
         uint256 value_
     ) public {
-        _mintValue(to_, tokenId_, slot_, value_);
+        _mintValue(to_, slot_, value_);
     }
 
-    function burn(uint256 tokenId_) public override {
+    function burn(uint256 tokenId_) public {
         _burn(tokenId_);
     }
 
@@ -31,7 +30,7 @@ contract ERC3525_Testing is ERC3525Upgradeable {
         uint256 toTokenId_,
         uint256 value_
     ) public {
-        _transfer(fromTokenId_, toTokenId_, value_);
+        _transferValue(fromTokenId_, toTokenId_, value_);
     }
 
     function spendAllowance(
@@ -69,12 +68,7 @@ contract ERC3525_Testing is ERC3525Upgradeable {
             );
     }
 
-    function tokenURI(uint256 tokenID_)
-        public
-        view
-        override(ERC721Upgradeable, IERC721MetadataUpgradeable)
-        returns (string memory)
-    {
+    function tokenURI(uint256 tokenID_) public view override returns (string memory) {
         return
             string(
                 abi.encodePacked(

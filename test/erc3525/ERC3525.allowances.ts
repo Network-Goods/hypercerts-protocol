@@ -6,17 +6,14 @@ import { setupTestERC3525 } from "../setup";
 export function shouldBehaveLikeSemiFungibleTokenAllowances(): void {
   describe("ERC3525 allows for multiple levels of allowances", () => {
     it("allows for allowance on a specific token", async function () {
-      const { sft, user, anon } = await setupTestERC3525();
+      const { sft, user, anon, deployer } = await setupTestERC3525();
 
-      await sft.mintValue(user.address, 1, 1, 1_000_000);
+      await deployer.sft.mintValue(user.address, 1, 1_000_000);
       expect(await sft.getApproved(1)).to.be.eq(ethers.constants.AddressZero);
 
-      // OpenZeppelin errors
-      await expect(sft["approve(address,uint256)"](anon.address, 1)).to.be.revertedWith(
-        "ERC721: approve caller is not token owner nor approved for all",
-      );
+      await expect(sft["approve(address,uint256)"](anon.address, 1)).to.be.revertedWith("NotApprovedOrOwner()");
       await expect(user.sft["approve(address,uint256)"](user.address, 1)).to.be.revertedWith(
-        "ERC721: approval to current owner",
+        `InvalidApproval(1, "${user.address}", "${user.address}")`,
       );
 
       await expect(user.sft["approve(address,uint256)"](anon.address, 1))
@@ -29,7 +26,7 @@ export function shouldBehaveLikeSemiFungibleTokenAllowances(): void {
     it("allows for allowance on a specific token's value", async function () {
       const { sft, user, anon } = await setupTestERC3525();
 
-      await sft.mintValue(user.address, 1, 1, 1_000_000);
+      await sft.mintValue(user.address, 1, 1_000_000);
       expect(await sft.getApproved(1)).to.be.eq(ethers.constants.AddressZero);
 
       // Custom errors

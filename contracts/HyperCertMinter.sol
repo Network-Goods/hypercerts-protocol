@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.14;
 
-import "./ERC3525Upgradeable.sol";
+import "./ERC3525SlotEnumerableUpgradeable.sol";
 import "./interfaces/IHyperCertMetadata.sol";
 import "./utils/ArraysUpgradeable.sol";
 import "./utils/StringsExtensions.sol";
@@ -33,7 +33,7 @@ contract HyperCertMinter is Initializable, ERC3525SlotEnumerableUpgradeable, Acc
     /// @notice Current version of the contract
     uint16 internal _version;
     /// @notice Hypercert metadata contract
-    address internal _metadata;
+    IHyperCertMetadata internal _metadata;
 
     /// @notice Mapping of id's to work-scopes
     mapping(bytes32 => string) public workScopes;
@@ -42,7 +42,7 @@ contract HyperCertMinter is Initializable, ERC3525SlotEnumerableUpgradeable, Acc
     /// @notice Mapping of id's to rights
     mapping(bytes32 => string) public rights;
     mapping(address => mapping(bytes32 => bool)) internal _contributorImpacts;
-    mapping(uint256 => Claim) internal _impactCerts;
+    mapping(uint256 => Claim) internal _hyperCerts;
 
     struct Claim {
         bytes32 claimHash;
@@ -58,6 +58,7 @@ contract HyperCertMinter is Initializable, ERC3525SlotEnumerableUpgradeable, Acc
         string name;
         string description;
         string uri;
+        address minter;
     }
 
     /*******************
@@ -97,9 +98,9 @@ contract HyperCertMinter is Initializable, ERC3525SlotEnumerableUpgradeable, Acc
 
     /// @notice Contract initialization logic
     function initialize(address metadataAddress) public initializer {
-        _metadata = metadataAddress;
+        _metadata = IHyperCertMetadata(metadataAddress);
 
-        __ERC721Burnable_init();
+        // __ERC721Burnable_init();
         __AccessControl_init();
         __UUPSUpgradeable_init();
 
@@ -144,6 +145,7 @@ contract HyperCertMinter is Initializable, ERC3525SlotEnumerableUpgradeable, Acc
     function mint(address account, bytes calldata data) public virtual {
         // Parse data to get Claim
         (Claim memory claim, uint64[] memory fractions) = _parseData(data);
+        claim.minter = msg.sender;
 
         _authorizeMint(account, claim);
 
@@ -152,13 +154,12 @@ contract HyperCertMinter is Initializable, ERC3525SlotEnumerableUpgradeable, Acc
 
         uint256 slot = uint256(claim.claimHash);
         // Store impact cert
-        _impactCerts[slot] = claim;
+        _hyperCerts[slot] = claim;
 
         // Mint impact cert
         uint256 len = fractions.length;
         for (uint256 i = 0; i < len; i++) {
-            uint256 tokenID = _getNewTokenId(0);
-            _mintValue(account, tokenID, slot, fractions[i]);
+            _mintValue(account, slot, fractions[i]);
         }
 
         emit ImpactClaimed(slot, account, fractions);
@@ -179,11 +180,24 @@ contract HyperCertMinter is Initializable, ERC3525SlotEnumerableUpgradeable, Acc
         if (total > balanceOf(tokenId) || total < balanceOf(tokenId)) revert InvalidInput();
 
         uint256 len = amounts.length;
-        uint256 slotID = slotOf(tokenId);
+        // uint256 slotID = slotOf(tokenId);
         for (uint256 i = 1; i < len; i++) {
-            uint256 newTokenID = _getNewTokenId(0);
-            _mint(msg.sender, newTokenID, slotID);
-            _transfer(tokenId, newTokenID, amounts[i]);
+            _splitValue(tokenId, amounts[i]);
+            // uint256 newTokenID = _createOriginalTokenId();
+            // uint256 value_ = amounts[i];
+            // _beforeValueTransfer(_msgSender(), _msgSender(), tokenId, newTokenID, slotID, value_);
+
+            // _mint(msg.sender, newTokenID, slotID);
+            // ERC3525SlotEnumerableUpgradeable
+            //     ._allTokens[_allTokensIndex[tokenId]]
+            //     .balance = value_;
+
+            // emit TransferValue(0, tokenId, value_);
+            // _transferValue(tokenId, newTokenID, value_);
+
+            // _afterValueTransfer(_msgSender(), _msgSender(), tokenId, newTokenID, slotID, value_);
+            // // _mint(msg.sender, newTokenID, slotID);
+            // // _beforeValueTransfer()
         }
     }
 
@@ -193,21 +207,17 @@ contract HyperCertMinter is Initializable, ERC3525SlotEnumerableUpgradeable, Acc
         for (uint256 i = 0; i < len; i++) {
             uint256 tokenId = tokenIds[i];
             if (tokenId != targetTokenId) {
-                _transfer(tokenId, targetTokenId, balanceOf(tokenId));
+                _transferValue(tokenId, targetTokenId, balanceOf(tokenId));
                 _burn(tokenId);
             }
         }
-    }
-
-    function donate(uint256 tokenId) public {
-        _burn(tokenId);
     }
 
     /// @notice Gets the impact claim with the specified id
     /// @param claimID Id of the claim
     /// @return The claim, if it doesn't exist with default values
     function getImpactCert(uint256 claimID) public view returns (Claim memory) {
-        return _impactCerts[claimID];
+        return _hyperCerts[claimID];
     }
 
     /// @notice gets the current version of the contract
@@ -227,17 +237,17 @@ contract HyperCertMinter is Initializable, ERC3525SlotEnumerableUpgradeable, Acc
     function supportsInterface(bytes4 interfaceId)
         public
         view
-        override(ERC3525Upgradeable, AccessControlUpgradeable)
+        override(ERC3525SlotEnumerableUpgradeable, AccessControlUpgradeable)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
     }
 
-    function name() public pure override(ERC721Upgradeable, IERC721MetadataUpgradeable) returns (string memory) {
+    function name() public pure override returns (string memory) {
         return NAME;
     }
 
-    function symbol() public pure override(ERC721Upgradeable, IERC721MetadataUpgradeable) returns (string memory) {
+    function symbol() public pure override returns (string memory) {
         return SYMBOL;
     }
 
@@ -254,21 +264,37 @@ contract HyperCertMinter is Initializable, ERC3525SlotEnumerableUpgradeable, Acc
         return keccak256(abi.encode(workTimeframe_, workScopes_, impactTimeframe_, impactScopes_));
     }
 
-    function slotURI(uint256 slotId_) external view returns (string memory) {
-        return IHyperCertMetadata(_metadata).generateSlotURI(slotId_);
+    function slotURI(uint256 slotId_) external view override returns (string memory) {
+        return _metadata.generateSlotURI(slotId_);
     }
 
-    function tokenURI(uint256 tokenId_)
-        public
-        view
-        override(ERC721Upgradeable, IERC721MetadataUpgradeable)
-        returns (string memory)
-    {
-        return IHyperCertMetadata(_metadata).generateTokenURI(slotOf(tokenId_), tokenId_);
+    function tokenURI(uint256 tokenId_) public view override returns (string memory) {
+        return _metadata.generateTokenURI(slotOf(tokenId_), tokenId_);
     }
 
     function contractURI() public view override returns (string memory) {
-        return IHyperCertMetadata(_metadata).generateContractURI();
+        return _metadata.generateContractURI();
+    }
+
+    function burn(uint256 tokenId_) public {
+        Claim storage claim = _hyperCerts[slotOf(tokenId_)];
+        if (msg.sender != claim.minter) {
+            revert NotApprovedOrOwner();
+        }
+
+        if (balanceOf(tokenId_) != claim.totalUnits) {
+            revert InsufficientBalance(claim.totalUnits, balanceOf(tokenId_));
+        }
+
+        _burn(tokenId_);
+    }
+
+    function donate(uint256 tokenId_) public {
+        if (msg.sender == ownerOf(tokenId_)) {
+            revert NotApprovedOrOwner();
+        }
+
+        _burn(tokenId_);
     }
 
     /*******************
@@ -403,5 +429,9 @@ contract HyperCertMinter is Initializable, ERC3525SlotEnumerableUpgradeable, Acc
     /// @return true, if the key exists in the mapping
     function _hasKey(mapping(bytes32 => string) storage map, bytes32 key) internal view returns (bool) {
         return (bytes(map[key]).length > 0);
+    }
+
+    function _msgSender() internal view override(ContextUpgradeable, ERC3525Upgradeable) returns (address sender) {
+        return msg.sender;
     }
 }

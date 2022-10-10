@@ -58,7 +58,7 @@ export function shouldBehaveLikeHypercertMinterBurning(): void {
     expect(await minter["balanceOf(address)"](deployer.address)).to.equal(1);
     expect(await minter["balanceOf(address)"](user.address)).to.equal(1);
 
-    await expect(deployer.minter.burn(1)).to.be.revertedWith("ERC721: caller is not token owner nor approved");
+    await expect(deployer.minter.burn(1)).to.be.revertedWith("InsufficientBalance(100, 50)");
 
     expect(await minter.tokenSupplyInSlot(slot)).to.be.eq(2);
     expect(await minter["balanceOf(address)"](deployer.address)).to.equal(1);
@@ -67,22 +67,18 @@ export function shouldBehaveLikeHypercertMinterBurning(): void {
 
   it("prevents burning when the owner isn't the creator", async function () {
     const { deployer, minter, anon } = await setupTest();
-    const claim = await newClaim({ fractions: [50, 50] });
+    const claim = await newClaim({ fractions: [100] });
     const slot = await getClaimSlotID(claim);
     const data = encodeClaim(claim);
 
     await expect(deployer.minter.mint(anon.address, data)).to.emit(minter, "ImpactClaimed");
-    expect(await minter.tokenSupplyInSlot(slot)).to.be.eq(2);
-    expect(await minter["balanceOf(address)"](deployer.address)).to.equal(0);
-    expect(await minter["balanceOf(address)"](minter.address)).to.equal(0);
-    expect(await minter["balanceOf(address)"](anon.address)).to.equal(2);
+    expect(await minter.tokenSupplyInSlot(slot)).to.be.eq(1);
+    expect(await minter["balanceOf(address)"](anon.address)).to.equal(1);
 
-    await expect(anon.minter.burn(1)).to.be.revertedWith("HyperCert: only creator can burn claim"); // not reverted
-    await expect(deployer.minter.burn(1)).to.be.revertedWith("HyperCert: owner isn't creator");
+    await expect(anon.minter.burn(1)).to.be.revertedWith("NotApprovedOrOwner()");
+    await expect(deployer.minter.burn(1)).to.be.revertedWith("NotApprovedOrOwner()");
 
-    expect(await minter.tokenSupplyInSlot(slot)).to.be.eq(2);
-    expect(await minter["balanceOf(address)"](deployer.address)).to.equal(0);
-    expect(await minter["balanceOf(address)"](minter.address)).to.equal(0);
-    expect(await minter["balanceOf(address)"](anon.address)).to.equal(2);
+    expect(await minter.tokenSupplyInSlot(slot)).to.be.eq(1);
+    expect(await minter["balanceOf(address)"](anon.address)).to.equal(1);
   });
 }

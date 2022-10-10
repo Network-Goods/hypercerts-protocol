@@ -4,6 +4,10 @@
 pragma solidity ^0.8.0;
 
 import "./ERC3525Upgradeable.sol";
+import "./interfaces/IERC3525SlotEnumerableUpgradeable.sol";
+error SlotAlreadyMinted();
+error SlotOutOfBounds(uint256 slotId);
+error SlotTokenOutOfBounds(uint256 slotId, uint256 tokenId);
 
 contract ERC3525SlotEnumerableUpgradeable is ERC3525Upgradeable {
     struct SlotData {
@@ -20,25 +24,28 @@ contract ERC3525SlotEnumerableUpgradeable is ERC3525Upgradeable {
     // slot => index
     mapping(uint256 => uint256) private _allSlotsIndex;
 
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        virtual
-        override(IERC165, ERC3525Upgradeable)
-        returns (bool)
-    {
-        return interfaceId == type(IERC3525SlotEnumerable).interfaceId || super.supportsInterface(interfaceId);
+    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+        return
+            interfaceId == type(IERC3525SlotEnumerableUpgradeable).interfaceId || super.supportsInterface(interfaceId);
     }
 
-    function slotCount() public view virtual override returns (uint256) {
+    /**
+     * @notice Get the total amount of slots stored by the contract.
+     * @return The total amount of slots
+     */
+    function slotCount() public view virtual returns (uint256) {
         return _allSlots.length;
     }
 
-    function slotByIndex(uint256 index_) public view virtual override returns (uint256) {
-        require(
-            index_ < ERC3525SlotEnumerableUpgradeable.slotCount(),
-            "ERC3525SlotEnumerable: slot index out of bounds"
-        );
+    /**
+     * @notice Get the slot at the specified index of all slots stored by the contract.
+     * @param index_ The index in the slot list
+     * @return The slot at `index` of all slots.
+     */
+    function slotByIndex(uint256 index_) public view virtual returns (uint256) {
+        if (index_ >= ERC3525SlotEnumerableUpgradeable.slotCount()) {
+            revert SlotOutOfBounds(index_);
+        }
         return _allSlots[index_].slot;
     }
 
@@ -46,18 +53,28 @@ contract ERC3525SlotEnumerableUpgradeable is ERC3525Upgradeable {
         return _allSlots.length != 0 && _allSlots[_allSlotsIndex[slot_]].slot == slot_;
     }
 
-    function tokenSupplyInSlot(uint256 slot_) public view virtual override returns (uint256) {
+    /**
+     * @notice Get the total amount of tokens with the same slot.
+     * @param slot_ The slot to query token supply for
+     * @return The total amount of tokens with the specified `_slot`
+     */
+    function tokenSupplyInSlot(uint256 slot_) public view virtual returns (uint256) {
         if (!_slotExists(slot_)) {
             return 0;
         }
         return _allSlots[_allSlotsIndex[slot_]].slotTokens.length;
     }
 
-    function tokenInSlotByIndex(uint256 slot_, uint256 index_) public view virtual override returns (uint256) {
-        require(
-            index_ < ERC3525SlotEnumerableUpgradeable.tokenSupplyInSlot(slot_),
-            "ERC3525SlotEnumerable: slot token index out of bounds"
-        );
+    /**
+     * @notice Get the token at the specified index of all tokens with the same slot.
+     * @param slot_ The slot to query tokens with
+     * @param index_ The index in the token list of the slot
+     * @return The token ID at `_index` of all tokens with `_slot`
+     */
+    function tokenInSlotByIndex(uint256 slot_, uint256 index_) public view virtual returns (uint256) {
+        if (index_ >= ERC3525SlotEnumerableUpgradeable.tokenSupplyInSlot(slot_)) {
+            revert SlotTokenOutOfBounds(slot_, index_);
+        }
         return _allSlots[_allSlotsIndex[slot_]].slotTokens[index_];
     }
 
@@ -67,7 +84,9 @@ contract ERC3525SlotEnumerableUpgradeable is ERC3525Upgradeable {
     }
 
     function _createSlot(uint256 slot_) internal virtual {
-        require(!_slotExists(slot_), "ERC3525SlotEnumerable: slot already exists");
+        if (_slotExists(slot_)) {
+            revert SlotAlreadyMinted();
+        }
         SlotData memory slotData = SlotData({ slot: slot_, slotTokens: new uint256[](0) });
         _addSlotToAllSlotsEnumeration(slotData);
     }
@@ -131,6 +150,13 @@ contract ERC3525SlotEnumerableUpgradeable is ERC3525Upgradeable {
         delete _slotTokensIndex[slot_][tokenId_];
         slotData.slotTokens.pop();
     }
+
+    //TODO cleanup inheritance
+    function valueDecimals() external view virtual override returns (uint8) {}
+
+    function tokenURI(uint256 tokenId) external view virtual override returns (string memory) {}
+
+    function slotURI(uint256 _slot) external view virtual override returns (string memory) {}
 
     /**
      * @dev This empty reserved space is put in place to allow future versions to add new

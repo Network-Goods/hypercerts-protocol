@@ -39,7 +39,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
     // Invalid impactTimeframe
     await expect(deployer.minter.mint(deployer.address, data4)).to.be.revertedWith("InvalidTimeframe");
 
-    await expect(minter.ownerOf(1)).to.be.revertedWith("ERC721: invalid token ID");
+    await expect(minter.ownerOf(1)).to.be.revertedWith("NonExistentToken");
     await expect(minter.slotOf(1)).to.be.revertedWith("NonExistentToken");
     await expect(minter["balanceOf(uint256)"](1)).to.be.revertedWith("NonExistentToken");
 
@@ -268,7 +268,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
       workScopes: Object.keys(workScopes),
       uri: "ipfs://test",
       version: 0,
-      fractions: new Array(100).fill(50),
+      fractions: new Array(50).fill(50),
     };
 
     await setupImpactScopes(minter, user.minter, impactScopes);
@@ -280,10 +280,10 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
 
     await expect(user.minter.mint(user.address, shortdata)).to.emit(minter, "ImpactClaimed");
 
-    expect(await minter.tokenSupplyInSlot(claimID)).to.be.eq(100);
+    expect(await minter.tokenSupplyInSlot(claimID)).to.be.eq(50);
 
     validateMetadata(await minter.tokenURI(1), claim);
-    validateMetadata(await minter.tokenURI(100), claim);
+    validateMetadata(await minter.tokenURI(50), claim);
     validateMetadata(await minter.slotURI(claimID), claim);
 
     const hypercert = await minter.getImpactCert(claimID);
@@ -300,7 +300,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
     const contributors: string[] = [];
     Array.from({ length: 20 }).forEach(() => contributors.push(faker.finance.ethereumAddress()));
 
-    const n = 111;
+    const n = 75;
     const impactScopes = randomScopes(n);
     const workScopes = randomScopes(n);
     const options = {
