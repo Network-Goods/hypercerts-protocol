@@ -75,6 +75,14 @@ const generateAndValidateSVG = async (
   const tokenFactory = await ethers.getContractFactory(HyperCertSVG);
   const tokenInstance = <SVG>await tokenFactory.deploy();
   await tokenInstance.addBackground(SVGBackgrounds[0]);
+  await tokenInstance.addBackground(SVGBackgrounds[1]);
+  await tokenInstance.addBackground(SVGBackgrounds[2]);
+  await tokenInstance.addBackground(SVGBackgrounds[3]);
+  await tokenInstance.addBackground(SVGBackgrounds[4]);
+  await tokenInstance.addBackground(SVGBackgrounds[5]);
+  await tokenInstance.addBackground(SVGBackgrounds[6]);
+  await tokenInstance.addBackground(SVGBackgrounds[7]);
+
   const svg = await fn(tokenInstance);
   await fs.writeFile(`${BASE_PATH}test_${name}.svg`, svg);
   await validate(svg, input, fraction);
