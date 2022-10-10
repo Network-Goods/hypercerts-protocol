@@ -127,7 +127,6 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
                 abi.encodePacked(
                     '<svg width="550" height="850" viewBox="0 0 550 850" '
                     'xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">',
-                    _generateBackground(),
                     _generateBackground(params.scopesOfImpact[0], colors_.background),
                     _generateHeader(params, colors_.labels, colors_.background),
                     _generateName(params, colors_.primary),
@@ -150,7 +149,6 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
                 abi.encodePacked(
                     '<svg width="550" height="850" viewBox="0 0 550 850" '
                     'xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">',
-                    _generateBackground(),
                     _generateBackground(params.scopesOfImpact[0], colors_.background),
                     _generateHeader(params, colors_.labels, colors_.background),
                     _generateName(params, colors_.primary),
@@ -158,15 +156,6 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
                     _generateFraction(params, colors_.primary),
                     _generateFooter(params, colors_.labels),
                     "</svg>"
-                )
-            );
-    }
-
-    function _generateBackground() internal pure returns (string memory) {
-        return
-            string(
-                abi.encodePacked(
-                    '<rect id="background-color-2" x=".5" y="0" width="550" height="850" rx="32" ry="32"/>'
                 )
             );
     }
@@ -183,11 +172,12 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
 
         return
             string.concat(
-                '<g id="graphic-color"><path id="graphic-color-2" d=',
+                '<rect id="background-color-2" x=".5" y="0" width="550" height="850" rx="32" ry="32"/>',
+                '<g id="graphic-color"><path id="graphic-color-2" d="',
                 backgroundPattern,
-                '" style="fill: none; stroke: ',
+                '" style="fill: none; stroke: "',
                 lineColor,
-                '; stroke-miterlimit: 10; stroke-width: 2px;"/></g>'
+                '"; stroke-miterlimit: 10; stroke-width: 2px;"/></g>'
             );
     }
 
@@ -232,9 +222,9 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
                         ),
                         '<path id="divider-color-2" d="M156.35,514.59h237.31" ',
                         string.concat(
-                            'style="fill: none; stroke: ',
+                            'style="fill: none; stroke: "',
                             lineColor,
-                            '; stroke-miterlimit: 10; stroke-width: 2px;"/>'
+                            '"; stroke-miterlimit: 10; stroke-width: 2px;"/>'
                         ),
                         '<text id="work-period-color" transform="translate(134.75 102.06)" '
                         'style="font-family: Helvetica; font-size: 15px;">',
@@ -308,7 +298,7 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
                     '<g id="name-color" text-rendering="optimizeSpeed" font-size="30">',
                     abi.encodePacked(
                         '<text id="name-color-2" transform="translate(156.35 300)" ',
-                        string.concat('style="fill: ', fontColor, '; font-family: Monaco;">'),
+                        string.concat('style="fill: "', fontColor, '"; font-family: Monaco;">'),
                         renderedText,
                         "</text>"
                     ),
@@ -374,9 +364,9 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
                         fontColor,
                         '">'
                     ),
-                    '<text transform="translate(155 460)" style="font-family: Helvetica; font-size: 15px;">',
+                    '<text transform="translate(155 460)" style="font-family: Helvetica; font-size: 15px;"',
                     renderedText,
-                    "</text></g>"
+                    '"></text></g>'
                 )
             );
     }
@@ -393,7 +383,7 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
                 abi.encodePacked(
                     '<g id="fraction-color" text-rendering="optimizeSpeed" font-size="30">',
                     '<text id="fraction-color-2" transform="translate(156.35 568.03)" ',
-                    string.concat('style="fill: ', fontColor, '; font-family: Monaco">'),
+                    string.concat('style="fill: "', fontColor, '"; font-family: Monaco">'),
                     string.concat('<tspan x="0" y="0">', string(uint2decimal(percent, 2)), " %</tspan></text></g>")
                 )
             );
@@ -410,7 +400,7 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
                 abi.encodePacked(
                     '<g id="total-units-color" text-rendering="optimizeSpeed" font-size="30">',
                     '<text id="total-units-color" transform="translate(156.35 568.03)" ',
-                    string.concat('style="fill: ', fontColor, '; font-family: Monaco">'),
+                    string.concat('style="fill: "', fontColor, '"; font-family: Monaco">'),
                     string.concat('<tspan x="0" y="0">', params.totalUnits.toString(), "</tspan></text></g>")
                 )
             );
