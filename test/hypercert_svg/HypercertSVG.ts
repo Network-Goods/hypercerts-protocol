@@ -65,6 +65,8 @@ const formatFraction = (input: InputType) => {
   });
   return `${percentage} %`;
 };
+const truncate = (scope: string, maxLength: number = 30) =>
+  scope.length <= maxLength ? scope : `${scope.substring(0, maxLength - 3)}...`;
 
 const generateAndValidateSVG = async (
   name: string,
@@ -95,11 +97,18 @@ const validate = async (svg: string, input: InputType, fraction: boolean = false
   const svgDoc = parseXml(svg);
   svgDoc.validate(xsdDoc);
 
-  expect(svgDoc.find(`//*[@id='name-color']//*[text()='${input.name}']`).length).to.eq(1, "Name not found");
-  expect(svgDoc.find(`//*[@id='description-color']//*[text()='${input.scopesOfImpact[0]}']`).length).to.eq(
+  const truncName = truncate(input.name);
+  expect(svgDoc.find(`//*[@id='name-color']//*[text()='${truncName}']`).length).to.eq(
     1,
-    "Description not found",
+    `Name "${truncName}" not found`,
   );
+  input.scopesOfImpact.slice(0, 2).forEach(scope => {
+    const truncScope = truncate(scope);
+    expect(svgDoc.find(`//*[@id='description-color']//*[text()='${truncScope}']`).length).to.eq(
+      1,
+      `Scope "${truncScope}" not found`,
+    );
+  });
   expect(
     svgDoc.find(`//*[@id='work-period-color']//*[text()='Work Period: ${formatTimeframe(input.workTimeframe)}']`)
       .length,
