@@ -1,15 +1,14 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.14;
 
-import "./interfaces/IERC3525MetadataUpgradeable.sol";
-import "./interfaces/IERC3525Receiver.sol";
-
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/IERC721EnumerableUpgradeable.sol";
+import "./interfaces/IERC3525MetadataUpgradeable.sol";
+import "./interfaces/IERC3525Receiver.sol";
 
 error NonExistentToken(uint256 tokenId);
 error NonExistentSlot(uint256 slotId);
@@ -22,6 +21,7 @@ error SlotsMismatch(uint256 fromTokenId, uint256 toTokenId);
 error InvalidApproval(uint256 tokenId, address from, address to);
 error NotApprovedOrOwner();
 error NotERC3525Receiver(address receiver);
+error FromIncorrectOwner();
 
 abstract contract ERC3525Upgradeable is
     Initializable,
@@ -40,11 +40,6 @@ abstract contract ERC3525Upgradeable is
         address approved;
         address[] valueApprovals;
     }
-
-    // struct ApproveData {
-    //     address[] approvals;
-    //     mapping(address => uint256) allowances;
-    // }
 
     struct AddressData {
         uint256[] ownedTokens;
@@ -529,8 +524,12 @@ abstract contract ERC3525Upgradeable is
         address to_,
         uint256 tokenId_
     ) internal virtual {
-        require(ownerOf(tokenId_) == from_, "ERC3525: transfer from incorrect owner");
-        require(to_ != address(0), "ERC3525: transfer to the zero address");
+        if (ownerOf(tokenId_) != from_) {
+            revert NotApprovedOrOwner();
+        }
+        if (to_ == address(0)) {
+            revert ToZeroAddress();
+        }
 
         _beforeValueTransfer(from_, to_, tokenId_, tokenId_, slotOf(tokenId_), balanceOf(tokenId_));
 
@@ -672,6 +671,7 @@ abstract contract ERC3525Upgradeable is
         ownerData.ownedTokensIndex[lastTokenId] = tokenIndex;
 
         delete ownerData.ownedTokensIndex[tokenId_];
+
         ownerData.ownedTokens.pop();
     }
 
