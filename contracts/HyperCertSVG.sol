@@ -127,18 +127,18 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
                 abi.encodePacked(
                     '<svg width="550" height="850" viewBox="0 0 550 850" '
                     'xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">',
-                    _generateBackground(params.scopesOfImpact[0], colors_.background),
-                    _generateHeader(params, colors_.labels, colors_.background),
-                    _generateName(params, colors_.primary),
-                    _generateScopeOfImpact(params, colors_.labels),
-                    _generateFooter(params, colors_.labels),
+                    _generateBackgroundPattern(params.scopesOfImpact[0], colors_),
+                    _generateHeader(params, colors_),
+                    _generateName(params, colors_),
+                    _generateScopeOfImpact(params, colors_),
+                    _generateFooter(params, colors_),
                     "</svg>"
                 )
             );
     }
 
-    /// 1: Divider, graphic, title, units
-    /// 2: Header/footer, scope labels
+    /// 1: Primary
+    /// 2: Labels
     /// 3: Backgrounds
 
     function _generateHyperCertFraction(SVGParams memory params) internal view virtual returns (string memory) {
@@ -149,18 +149,18 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
                 abi.encodePacked(
                     '<svg width="550" height="850" viewBox="0 0 550 850" '
                     'xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">',
-                    _generateBackground(params.scopesOfImpact[0], colors_.background),
-                    _generateHeader(params, colors_.labels, colors_.background),
-                    _generateName(params, colors_.primary),
-                    _generateScopeOfImpact(params, colors_.labels),
-                    _generateFraction(params, colors_.primary),
-                    _generateFooter(params, colors_.labels),
+                    _generateBackgroundPattern(params.scopesOfImpact[0], colors_),
+                    _generateHeader(params, colors_),
+                    _generateName(params, colors_),
+                    _generateScopeOfImpact(params, colors_),
+                    _generateFraction(params, colors_),
+                    _generateFooter(params, colors_),
                     "</svg>"
                 )
             );
     }
 
-    function _generateBackground(string memory primaryScopeOfImpact, string memory lineColor)
+    function _generateBackgroundPattern(string memory primaryScopeOfImpact, SVGColors memory colors)
         internal
         view
         returns (string memory background)
@@ -172,12 +172,16 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
 
         return
             string.concat(
-                '<rect id="background-color-2" x=".5" y="0" width="550" height="850" rx="32" ry="32"/>',
+                string.concat(
+                    '<rect id="background-color-2" x=".5" y="0" width="550" height="850" rx="32" ry="32" style="fill: ',
+                    colors.background,
+                    '"/>'
+                ),
                 '<g id="graphic-color"><path id="graphic-color-2" d="',
                 backgroundPattern,
-                '" style="fill: none; stroke: "',
-                lineColor,
-                '"; stroke-miterlimit: 10; stroke-width: 2px;"/></g>'
+                '" style="fill: none; stroke: ',
+                colors.primary,
+                '; stroke-miterlimit: 10; stroke-width: 2px;"/></g>'
             );
     }
 
@@ -199,11 +203,12 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
         index = uint256(stringToBytes32(primaryScopeOfImpact)) % colorsCounter;
     }
 
-    function _generateHeader(
-        SVGParams memory params,
-        string memory fontColor,
-        string memory lineColor
-    ) internal pure virtual returns (string memory) {
+    function _generateHeader(SVGParams memory params, SVGColors memory colors)
+        internal
+        pure
+        virtual
+        returns (string memory)
+    {
         (uint256 yearFrom, uint256 monthFrom, uint256 dayFrom) = DateTime.timestampToDate(params.workTimeframe[0]);
         (uint256 yearTo, uint256 monthTo, uint256 dayTo) = DateTime.timestampToDate(params.workTimeframe[1]);
 
@@ -212,19 +217,21 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
                 abi.encodePacked(
                     abi.encodePacked(
                         '<path id="foreground-color-2" '
-                        'd="M435,777.83H115v-50H435v50Zm0-532.83H115v360H435V245Zm0-122.83H115v-50H435v50Z"/>'
+                        'd="M435,777.83H115v-50H435v50Zm0-532.83H115v360H435V245Zm0-122.83H115v-50H435v50Z" style="fill: ',
+                        colors.background,
+                        '"/>'
                     ),
                     abi.encodePacked(
                         string.concat(
                             '<g id="divider-color" text-rendering="optimizeSpeed" font-size="10" fill="',
-                            fontColor,
+                            colors.labels,
                             '">'
                         ),
                         '<path id="divider-color-2" d="M156.35,514.59h237.31" ',
                         string.concat(
-                            'style="fill: none; stroke: "',
-                            lineColor,
-                            '"; stroke-miterlimit: 10; stroke-width: 2px;"/>'
+                            'style="fill: none; stroke: ',
+                            colors.primary,
+                            '; stroke-miterlimit: 10; stroke-width: 2px;"/>'
                         ),
                         '<text id="work-period-color" transform="translate(134.75 102.06)" '
                         'style="font-family: Helvetica; font-size: 15px;">',
@@ -239,7 +246,7 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
     }
 
     //TODO ugly string manipulation
-    function _generateName(SVGParams memory params, string memory fontColor)
+    function _generateName(SVGParams memory params, SVGColors memory colors)
         internal
         pure
         virtual
@@ -298,7 +305,7 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
                     '<g id="name-color" text-rendering="optimizeSpeed" font-size="30">',
                     abi.encodePacked(
                         '<text id="name-color-2" transform="translate(156.35 300)" ',
-                        string.concat('style="fill: "', fontColor, '"; font-family: Monaco;">'),
+                        string.concat('style="fill: ', colors.primary, '; font-family: Monaco;">'),
                         renderedText,
                         "</text>"
                     ),
@@ -335,7 +342,7 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
         return parsedString;
     }
 
-    function _generateScopeOfImpact(SVGParams memory params, string memory fontColor)
+    function _generateScopeOfImpact(SVGParams memory params, SVGColors memory colors)
         internal
         pure
         virtual
@@ -361,17 +368,17 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
                 abi.encodePacked(
                     string.concat(
                         '<g id="description-color" text-rendering="optimizeSpeed" font-size="15" fill="',
-                        fontColor,
+                        colors.labels,
                         '">'
                     ),
-                    '<text transform="translate(155 460)" style="font-family: Helvetica; font-size: 15px;"',
+                    '<text transform="translate(155 460)" style="font-family: Helvetica; font-size: 15px;">',
                     renderedText,
-                    '"></text></g>'
+                    "</text></g>"
                 )
             );
     }
 
-    function _generateFraction(SVGParams memory params, string memory fontColor)
+    function _generateFraction(SVGParams memory params, SVGColors memory colors)
         internal
         view
         virtual
@@ -383,30 +390,13 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
                 abi.encodePacked(
                     '<g id="fraction-color" text-rendering="optimizeSpeed" font-size="30">',
                     '<text id="fraction-color-2" transform="translate(156.35 568.03)" ',
-                    string.concat('style="fill: "', fontColor, '"; font-family: Monaco">'),
+                    string.concat('style="fill: ', colors.primary, '; font-family: Monaco">'),
                     string.concat('<tspan x="0" y="0">', string(uint2decimal(percent, 2)), " %</tspan></text></g>")
                 )
             );
     }
 
-    function _generateTotalUnits(SVGParams memory params, string memory fontColor)
-        internal
-        pure
-        virtual
-        returns (string memory)
-    {
-        return
-            string(
-                abi.encodePacked(
-                    '<g id="total-units-color" text-rendering="optimizeSpeed" font-size="30">',
-                    '<text id="total-units-color" transform="translate(156.35 568.03)" ',
-                    string.concat('style="fill: "', fontColor, '"; font-family: Monaco">'),
-                    string.concat('<tspan x="0" y="0">', params.totalUnits.toString(), "</tspan></text></g>")
-                )
-            );
-    }
-
-    function _generateFooter(SVGParams memory params, string memory fontColor)
+    function _generateFooter(SVGParams memory params, SVGColors memory colors)
         internal
         pure
         virtual
@@ -419,7 +409,7 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
                 abi.encodePacked(
                     string.concat(
                         '<g id="impact-period-color" text-rendering="optimizeSpeed" font-size="10" fill="',
-                        fontColor,
+                        colors.labels,
                         '">'
                     ),
                     '<text id="impact-period-color-2" transform="translate(134.75 758)" '

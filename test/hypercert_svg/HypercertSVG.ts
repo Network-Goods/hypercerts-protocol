@@ -77,12 +77,16 @@ const generateAndValidateSVG = async (
   const tokenFactory = await ethers.getContractFactory(HyperCertSVG);
   const tokenInstance = <SVG>await tokenFactory.deploy();
 
-  await tokenInstance.addColors(["#F3556F", "#121933", "#D4BFFF"]);
-  await tokenInstance.addColors(["#FFFFFF", "#FFBFCA", "#5500FF"]);
-  await tokenInstance.addColors(["#121933", "#25316D", "#80E5D3"]);
-  await tokenInstance.addColors(["#25316D", "#FFFFFF", "#F3556F"]);
-  await tokenInstance.addColors(["#F3556F", "#121933", "#D4BFFF"]);
-  await tokenInstance.addColors(["#F3556F", "#121933", "#D4BFFF"]);
+  //Primary, labels, background
+  await tokenInstance.addColors(["#F3556F", "#121933", "#D4BFFF"]); //
+  await tokenInstance.addColors(["#FFBFCA", "#FFFFFF", "#5500FF"]); //
+  await tokenInstance.addColors(["#25316D", "#121933", "#80E5D3"]); //
+  await tokenInstance.addColors(["#25316D", "#FFFFFF", "#F3556F"]); //
+  await tokenInstance.addColors(["#80E5D3", "#FFFFFF", "#121933"]); //
+  await tokenInstance.addColors(["#FEF5AC", "#FFFFFF", "#25316D"]); //
+  await tokenInstance.addColors(["#F3556F", "#121933", "#FFBFCA"]); //
+  await tokenInstance.addColors(["#5500FF", "#121933", "#FFCC00"]); //
+
 
   await tokenInstance.addBackground(SVGBackgrounds[0]);
   await tokenInstance.addBackground(SVGBackgrounds[1]);
