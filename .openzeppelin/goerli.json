@@ -2,25 +2,25 @@
   "manifestVersion": "3.2",
   "proxies": [
     {
-      "address": "0x5bC8D9B685cAB2df3516646dc0b4917e37777435",
-      "txHash": "0x0c68b56b4799011f06fd2fd778e86eb1d1c8d65afa0913e348267cb370aa8430",
+      "address": "0x1A03ebb982BD78Ab32d7a8059baF5A700BBa7560",
+      "txHash": "0xeed59ca20a9a498c51a7787fac7278c704c817bd889a6f06b36206351baeaa87",
       "kind": "uups"
     },
     {
-      "address": "0x8e102503E32234619A54Fa22c7610c49c57BaC8a",
-      "txHash": "0x4af445d26b320d577e3d3c3298eb379442cdfc1729bb8b56802b2c25724bba26",
+      "address": "0xA0A006DE32c664c3600A0467361d7074f0271883",
+      "txHash": "0x4cca290195d879c3ab5173199080bddfd72a4d554efbbb59a4f356c74d8a914d",
       "kind": "uups"
     },
     {
-      "address": "0x707311783afd4AEc0e118Db65f6f1576E0df0298",
-      "txHash": "0x3d3f73269107082a51347e0b82669b0f6d761da2ef170ddd2f0e9f00638a9e11",
+      "address": "0x03588816303CC1c3a2717bD6650Dc1DBAA1DA9e1",
+      "txHash": "0xcb48618ab4d49e5b6560570f42d600b25b2f5cdfff86669163d577823749572e",
       "kind": "uups"
     }
   ],
   "impls": {
     "95f989a0685e7087461e4151537be6e5949f93e9cf4252d726b4747b97ea2c5b": {
-      "address": "0x53f52f4182eC594DA6CC2816eeBAc8A70a740406",
-      "txHash": "0xaa0addef43a14ef620afd4a6f4f230b20a63e192d3cb90927574116ec3ad3627",
+      "address": "0xec49D189a7f9b65c5263F4B1e90858691e4b3fb7",
+      "txHash": "0xfb060dbedc5135ee211adab07fec11ad5397c1c64f62a8d08916d05adee1e19d",
       "layout": {
         "storage": [
           {
@@ -228,8 +228,8 @@
       }
     },
     "b5c3d6c1248f28f4e45681b3afce3485fafd91e76d63ab8c05b26987fb072bce": {
-      "address": "0xd9c8fC5aa0F54879E415b25769Be126c3aC9B717",
-      "txHash": "0x1e3331e5ea2e6a608b440e4c3c3a3f467400ecb02b4c38b75eca80b18c23d60d",
+      "address": "0x9bAccF33a8B79D653BBDC390452657454bb41044",
+      "txHash": "0xb26a41443ced5c07a97c586dc994267945116a3f8fe3017a3e286190bbfa046b",
       "layout": {
         "storage": [
           {
@@ -380,9 +380,9 @@
         }
       }
     },
-    "e6176a730251af8dc1a31996f5f66de3c66e2220b48a3cf6ba4b3ca77749646a": {
-      "address": "0x20D1f8392e001c66c23a2193bF3cfE3D5536c9A3",
-      "txHash": "0x2eaf98857c23a7057c57651121811c60bcb660eb7a0f961a1e5d46aa2a2d034b",
+    "c195b9ffd6a321bdec3d0aeefad80dcd713bc437c582d280dd2bdd274b0e3381": {
+      "address": "0x843fe769aEf044cd378f3be0DC7ff174899c45cC",
+      "txHash": "0xcfd6062431d137a958bd95dc10872c4ad8591398c0778ca18bd8acdbbc226533",
       "layout": {
         "storage": [
           {
@@ -446,7 +446,7 @@
             "label": "_allTokens",
             "offset": 0,
             "slot": "104",
-            "type": "t_array(t_struct(TokenData)2513_storage)dyn_storage",
+            "type": "t_array(t_struct(TokenData)2535_storage)dyn_storage",
             "contract": "ERC3525Upgradeable",
             "src": "contracts/ERC3525Upgradeable.sol:58"
           },
@@ -462,14 +462,22 @@
             "label": "_addressData",
             "offset": 0,
             "slot": "106",
-            "type": "t_mapping(t_address,t_struct(AddressData)2525_storage)",
+            "type": "t_mapping(t_address,t_struct(AddressData)2547_storage)",
             "contract": "ERC3525Upgradeable",
             "src": "contracts/ERC3525Upgradeable.sol:62"
           },
           {
-            "label": "_slotTokensIndex",
+            "label": "tokenCounter",
             "offset": 0,
             "slot": "107",
+            "type": "t_uint256",
+            "contract": "ERC3525Upgradeable",
+            "src": "contracts/ERC3525Upgradeable.sol:63"
+          },
+          {
+            "label": "_slotTokensIndex",
+            "offset": 0,
+            "slot": "108",
             "type": "t_mapping(t_uint256,t_mapping(t_uint256,t_uint256))",
             "contract": "ERC3525SlotEnumerableUpgradeable",
             "src": "contracts/ERC3525SlotEnumerableUpgradeable.sol:20"
@@ -477,7 +485,7 @@
           {
             "label": "_allSlots",
             "offset": 0,
-            "slot": "108",
+            "slot": "109",
             "type": "t_array(t_struct(SlotData)1937_storage)dyn_storage",
             "contract": "ERC3525SlotEnumerableUpgradeable",
             "src": "contracts/ERC3525SlotEnumerableUpgradeable.sol:22"
@@ -485,7 +493,7 @@
           {
             "label": "_allSlotsIndex",
             "offset": 0,
-            "slot": "109",
+            "slot": "110",
             "type": "t_mapping(t_uint256,t_uint256)",
             "contract": "ERC3525SlotEnumerableUpgradeable",
             "src": "contracts/ERC3525SlotEnumerableUpgradeable.sol:25"
@@ -493,15 +501,15 @@
           {
             "label": "__gap",
             "offset": 0,
-            "slot": "110",
+            "slot": "111",
             "type": "t_array(t_uint256)47_storage",
             "contract": "ERC3525SlotEnumerableUpgradeable",
-            "src": "contracts/ERC3525SlotEnumerableUpgradeable.sol:165"
+            "src": "contracts/ERC3525SlotEnumerableUpgradeable.sol:168"
           },
           {
             "label": "_roles",
             "offset": 0,
-            "slot": "157",
+            "slot": "158",
             "type": "t_mapping(t_bytes32,t_struct(RoleData)34_storage)",
             "contract": "AccessControlUpgradeable",
             "src": "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol:61"
@@ -509,7 +517,7 @@
           {
             "label": "__gap",
             "offset": 0,
-            "slot": "158",
+            "slot": "159",
             "type": "t_array(t_uint256)49_storage",
             "contract": "AccessControlUpgradeable",
             "src": "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol:259"
@@ -517,7 +525,7 @@
           {
             "label": "__gap",
             "offset": 0,
-            "slot": "207",
+            "slot": "208",
             "type": "t_array(t_uint256)50_storage",
             "contract": "ERC1967UpgradeUpgradeable",
             "src": "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol:211"
@@ -525,7 +533,7 @@
           {
             "label": "__gap",
             "offset": 0,
-            "slot": "257",
+            "slot": "258",
             "type": "t_array(t_uint256)50_storage",
             "contract": "UUPSUpgradeable",
             "src": "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol:107"
@@ -533,7 +541,7 @@
           {
             "label": "_version",
             "offset": 0,
-            "slot": "307",
+            "slot": "308",
             "type": "t_uint16",
             "contract": "HyperCertMinter",
             "src": "contracts/HyperCertMinter.sol:34"
@@ -541,15 +549,15 @@
           {
             "label": "_metadata",
             "offset": 2,
-            "slot": "307",
-            "type": "t_contract(IHyperCertMetadata)6036",
+            "slot": "308",
+            "type": "t_contract(IHyperCertMetadata)6081",
             "contract": "HyperCertMinter",
             "src": "contracts/HyperCertMinter.sol:36"
           },
           {
             "label": "workScopes",
             "offset": 0,
-            "slot": "308",
+            "slot": "309",
             "type": "t_mapping(t_bytes32,t_string_storage)",
             "contract": "HyperCertMinter",
             "src": "contracts/HyperCertMinter.sol:39"
@@ -557,7 +565,7 @@
           {
             "label": "impactScopes",
             "offset": 0,
-            "slot": "309",
+            "slot": "310",
             "type": "t_mapping(t_bytes32,t_string_storage)",
             "contract": "HyperCertMinter",
             "src": "contracts/HyperCertMinter.sol:41"
@@ -565,7 +573,7 @@
           {
             "label": "rights",
             "offset": 0,
-            "slot": "310",
+            "slot": "311",
             "type": "t_mapping(t_bytes32,t_string_storage)",
             "contract": "HyperCertMinter",
             "src": "contracts/HyperCertMinter.sol:43"
@@ -573,7 +581,7 @@
           {
             "label": "_contributorImpacts",
             "offset": 0,
-            "slot": "311",
+            "slot": "312",
             "type": "t_mapping(t_address,t_mapping(t_bytes32,t_bool))",
             "contract": "HyperCertMinter",
             "src": "contracts/HyperCertMinter.sol:44"
@@ -581,8 +589,8 @@
           {
             "label": "_hyperCerts",
             "offset": 0,
-            "slot": "312",
-            "type": "t_mapping(t_uint256,t_struct(Claim)4720_storage)",
+            "slot": "313",
+            "type": "t_mapping(t_uint256,t_struct(Claim)4768_storage)",
             "contract": "HyperCertMinter",
             "src": "contracts/HyperCertMinter.sol:45"
           }
@@ -604,7 +612,7 @@
             "label": "struct ERC3525SlotEnumerableUpgradeable.SlotData[]",
             "numberOfBytes": "32"
           },
-          "t_array(t_struct(TokenData)2513_storage)dyn_storage": {
+          "t_array(t_struct(TokenData)2535_storage)dyn_storage": {
             "label": "struct ERC3525Upgradeable.TokenData[]",
             "numberOfBytes": "32"
           },
@@ -636,7 +644,7 @@
             "label": "bytes32",
             "numberOfBytes": "32"
           },
-          "t_contract(IHyperCertMetadata)6036": {
+          "t_contract(IHyperCertMetadata)6081": {
             "label": "contract IHyperCertMetadata",
             "numberOfBytes": "20"
           },
@@ -648,7 +656,7 @@
             "label": "mapping(address => mapping(bytes32 => bool))",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_address,t_struct(AddressData)2525_storage)": {
+          "t_mapping(t_address,t_struct(AddressData)2547_storage)": {
             "label": "mapping(address => struct ERC3525Upgradeable.AddressData)",
             "numberOfBytes": "32"
           },
@@ -676,7 +684,7 @@
             "label": "mapping(uint256 => mapping(uint256 => uint256))",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint256,t_struct(Claim)4720_storage)": {
+          "t_mapping(t_uint256,t_struct(Claim)4768_storage)": {
             "label": "mapping(uint256 => struct HyperCertMinter.Claim)",
             "numberOfBytes": "32"
           },
@@ -688,7 +696,7 @@
             "label": "string",
             "numberOfBytes": "32"
           },
-          "t_struct(AddressData)2525_storage": {
+          "t_struct(AddressData)2547_storage": {
             "label": "struct ERC3525Upgradeable.AddressData",
             "members": [
               {
@@ -712,7 +720,7 @@
             ],
             "numberOfBytes": "96"
           },
-          "t_struct(Claim)4720_storage": {
+          "t_struct(Claim)4768_storage": {
             "label": "struct HyperCertMinter.Claim",
             "members": [
               {
@@ -838,7 +846,7 @@
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(TokenData)2513_storage": {
+          "t_struct(TokenData)2535_storage": {
             "label": "struct ERC3525Upgradeable.TokenData",
             "members": [
               {
