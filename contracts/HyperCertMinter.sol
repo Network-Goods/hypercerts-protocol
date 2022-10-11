@@ -100,7 +100,6 @@ contract HyperCertMinter is Initializable, ERC3525SlotEnumerableUpgradeable, Acc
     function initialize(address metadataAddress) public initializer {
         _metadata = IHyperCertMetadata(metadataAddress);
 
-        // __ERC721Burnable_init();
         __AccessControl_init();
         __UUPSUpgradeable_init();
 

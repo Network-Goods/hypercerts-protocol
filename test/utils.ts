@@ -54,7 +54,7 @@ export const encodeClaim = (c: Claim) => {
     "string",
     "string",
     "string",
-    "uint8[]",
+    "uint64[]",
   ];
   const values = [
     c.rights,

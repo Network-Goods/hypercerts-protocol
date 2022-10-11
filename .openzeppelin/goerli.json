@@ -2,25 +2,25 @@
   "manifestVersion": "3.2",
   "proxies": [
     {
-      "address": "0x10df6c27dD4D30e286cBB888Bb4A76a5B37D3Dc3",
-      "txHash": "0xe9dd008aa50e89ad6242e03e3d59f6e0a19243e0369f69aa2d0ab0a302ed2a2d",
+      "address": "0x5bC8D9B685cAB2df3516646dc0b4917e37777435",
+      "txHash": "0x0c68b56b4799011f06fd2fd778e86eb1d1c8d65afa0913e348267cb370aa8430",
       "kind": "uups"
     },
     {
-      "address": "0x42e4AeF93780d14E0F3f556713da766BCEd8ac85",
-      "txHash": "0xfe5c03baeff2b5e5c11c2a095569a2a9206cf27bee2ab23e1c51d0a6c936c70e",
+      "address": "0x8e102503E32234619A54Fa22c7610c49c57BaC8a",
+      "txHash": "0x4af445d26b320d577e3d3c3298eb379442cdfc1729bb8b56802b2c25724bba26",
       "kind": "uups"
     },
     {
-      "address": "0x3d9Fb90b6138a3ccD33C9f04253eE9dD57733F0f",
-      "txHash": "0xfed199e70dfe42fbaffffc6efa4b513452a42cd7cc22f1ca57fa7995b582cf1e",
+      "address": "0x707311783afd4AEc0e118Db65f6f1576E0df0298",
+      "txHash": "0x3d3f73269107082a51347e0b82669b0f6d761da2ef170ddd2f0e9f00638a9e11",
       "kind": "uups"
     }
   ],
   "impls": {
-    "8565561fd5fb70967b970bc09a1f2bee1924099a4a58ba0290ae5a78f5acb42d": {
-      "address": "0x8c29369e7f29FeA9395691c29a6C66Df4974Af09",
-      "txHash": "0x0f64bfbaf9568f59c6497c43bdb5fe7339d2b0af4b39b13d12ec535a5986dc3d",
+    "95f989a0685e7087461e4151537be6e5949f93e9cf4252d726b4747b97ea2c5b": {
+      "address": "0x53f52f4182eC594DA6CC2816eeBAc8A70a740406",
+      "txHash": "0xaa0addef43a14ef620afd4a6f4f230b20a63e192d3cb90927574116ec3ad3627",
       "layout": {
         "storage": [
           {
@@ -105,12 +105,12 @@
             "src": "contracts/HyperCertSVG.sol:23"
           },
           {
-            "label": "colorPairs",
+            "label": "colors",
             "offset": 0,
             "slot": "253",
-            "type": "t_mapping(t_uint256,t_array(t_string_storage)2_storage)",
+            "type": "t_mapping(t_uint256,t_struct(SVGColors)7025_storage)",
             "contract": "HyperCertSVG",
-            "src": "contracts/HyperCertSVG.sol:25"
+            "src": "contracts/HyperCertSVG.sol:26"
           },
           {
             "label": "backgroundCounter",
@@ -118,25 +118,21 @@
             "slot": "254",
             "type": "t_uint256",
             "contract": "HyperCertSVG",
-            "src": "contracts/HyperCertSVG.sol:27"
+            "src": "contracts/HyperCertSVG.sol:28"
           },
           {
-            "label": "colorPairCounter",
+            "label": "colorsCounter",
             "offset": 0,
             "slot": "255",
             "type": "t_uint256",
             "contract": "HyperCertSVG",
-            "src": "contracts/HyperCertSVG.sol:28"
+            "src": "contracts/HyperCertSVG.sol:29"
           }
         ],
         "types": {
           "t_address": {
             "label": "address",
             "numberOfBytes": "20"
-          },
-          "t_array(t_string_storage)2_storage": {
-            "label": "string[2]",
-            "numberOfBytes": "64"
           },
           "t_array(t_uint256)49_storage": {
             "label": "uint256[49]",
@@ -162,12 +158,12 @@
             "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint256,t_array(t_string_storage)2_storage)": {
-            "label": "mapping(uint256 => string[2])",
-            "numberOfBytes": "32"
-          },
           "t_mapping(t_uint256,t_string_storage)": {
             "label": "mapping(uint256 => string)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(SVGColors)7025_storage)": {
+            "label": "mapping(uint256 => struct HyperCertSVG.SVGColors)",
             "numberOfBytes": "32"
           },
           "t_string_storage": {
@@ -192,6 +188,30 @@
             ],
             "numberOfBytes": "64"
           },
+          "t_struct(SVGColors)7025_storage": {
+            "label": "struct HyperCertSVG.SVGColors",
+            "members": [
+              {
+                "label": "primary",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "labels",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "background",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
           "t_uint16": {
             "label": "uint16",
             "numberOfBytes": "2"
@@ -208,8 +228,8 @@
       }
     },
     "b5c3d6c1248f28f4e45681b3afce3485fafd91e76d63ab8c05b26987fb072bce": {
-      "address": "0x5aef9756E3Ac9BaB2c773fB40F614efDc1AE7bd8",
-      "txHash": "0xb12aa41f603dded2d1fb5e3c8c6bdcde8ac72a42fa5ce0ffede9ce68c0030191",
+      "address": "0xd9c8fC5aa0F54879E415b25769Be126c3aC9B717",
+      "txHash": "0x1e3331e5ea2e6a608b440e4c3c3a3f467400ecb02b4c38b75eca80b18c23d60d",
       "layout": {
         "storage": [
           {
@@ -289,7 +309,7 @@
             "label": "_svgGenerator",
             "offset": 2,
             "slot": "251",
-            "type": "t_contract(IHyperCertSVG)4763",
+            "type": "t_contract(IHyperCertSVG)4766",
             "contract": "HyperCertMetadata",
             "src": "contracts/HyperCertMetadata.sol:74"
           }
@@ -315,7 +335,7 @@
             "label": "bytes32",
             "numberOfBytes": "32"
           },
-          "t_contract(IHyperCertSVG)4763": {
+          "t_contract(IHyperCertSVG)4766": {
             "label": "contract IHyperCertSVG",
             "numberOfBytes": "20"
           },
@@ -361,8 +381,8 @@
       }
     },
     "e6176a730251af8dc1a31996f5f66de3c66e2220b48a3cf6ba4b3ca77749646a": {
-      "address": "0x92d3D6dB21422B2F1774e39E2A0c9F626A3F726f",
-      "txHash": "0x0ac520ef93cedbc471792c852191601d46fcdc69e195f0228bc95f28a4297592",
+      "address": "0x20D1f8392e001c66c23a2193bF3cfE3D5536c9A3",
+      "txHash": "0x2eaf98857c23a7057c57651121811c60bcb660eb7a0f961a1e5d46aa2a2d034b",
       "layout": {
         "storage": [
           {

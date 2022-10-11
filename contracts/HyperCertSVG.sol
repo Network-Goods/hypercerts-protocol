@@ -166,7 +166,7 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
         returns (string memory background)
     {
         string memory backgroundPattern = backgrounds[_getBackgroundIndex(primaryScopeOfImpact)];
-        if (bytes(background).length == 0) {
+        if (bytes(backgroundPattern).length == 0) {
             backgroundPattern = backgrounds[0];
         }
 

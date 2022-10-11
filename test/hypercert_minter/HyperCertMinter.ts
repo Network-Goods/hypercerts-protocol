@@ -4,6 +4,7 @@ import { ethers, getNamedAccounts } from "hardhat";
 import { HyperCertMinter as Minter } from "../../src/types";
 import { HyperCertMinter } from "../wellKnown";
 import { shouldBehaveLikeHypercertMinterBurning as shouldBehaveLikeHyperCertMinterBurning } from "./HyperCertMinter.burning";
+import { shouldBehaveLikeHypercertMinterIntegration } from "./HyperCertMinter.integration";
 import { shouldBehaveLikeHypercertMinterMinting as shouldBehaveLikeHyperCertMinterMinting } from "./HyperCertMinter.minting";
 import { shouldBehaveLikeHypercertMinterAddingRights as shouldBehaveLikeHyperCertMinterAddingRights } from "./HyperCertMinter.rights";
 import {
@@ -36,5 +37,6 @@ describe("Unit tests", function () {
     shouldBehaveLikeHyperCertMinterAddingWorkScopes();
     shouldBehaveLikeHyperCertMinterAddingRights();
     shouldBehaveLikeHyperCertMinterSplitAndMerge();
+    shouldBehaveLikeHypercertMinterIntegration();
   });
 });

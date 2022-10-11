@@ -87,7 +87,6 @@ const generateAndValidateSVG = async (
   await tokenInstance.addColors(["#F3556F", "#121933", "#FFBFCA"]); //
   await tokenInstance.addColors(["#5500FF", "#121933", "#FFCC00"]); //
 
-
   await tokenInstance.addBackground(SVGBackgrounds[0]);
   await tokenInstance.addBackground(SVGBackgrounds[1]);
   await tokenInstance.addBackground(SVGBackgrounds[2]);
@@ -139,7 +138,7 @@ const validate = async (svg: string, input: InputType, fraction: boolean = false
   expect(svgDoc.validationErrors.length).to.eq(0, svgDoc.validationErrors.join("\n"));
 };
 
-describe.only("Unit tests", function () {
+describe("Unit tests", function () {
   describe(HyperCertSVG, async function () {
     it("is an initializable contract", async () => {
       const tokenFactory = await ethers.getContractFactory(HyperCertSVG);
