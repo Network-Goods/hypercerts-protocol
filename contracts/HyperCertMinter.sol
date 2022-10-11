@@ -102,6 +102,7 @@ contract HyperCertMinter is Initializable, ERC3525SlotEnumerableUpgradeable, Acc
 
         __AccessControl_init();
         __UUPSUpgradeable_init();
+        __ERC3525Upgradeable_init();
 
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(UPGRADER_ROLE, msg.sender);
@@ -170,7 +171,7 @@ contract HyperCertMinter is Initializable, ERC3525SlotEnumerableUpgradeable, Acc
         uint256 total;
 
         uint256 amountsLength = amounts.length;
-        if (amounts.length == 1) revert AlreadyMinted(tokenId);
+        if (amountsLength == 1) revert AlreadyMinted(tokenId);
 
         for (uint256 i; i < amountsLength; i++) {
             total += amounts[i];
@@ -178,8 +179,7 @@ contract HyperCertMinter is Initializable, ERC3525SlotEnumerableUpgradeable, Acc
 
         if (total > balanceOf(tokenId) || total < balanceOf(tokenId)) revert InvalidInput();
 
-        uint256 len = amounts.length;
-        for (uint256 i = 1; i < len; i++) {
+        for (uint256 i = 1; i < amountsLength; i++) {
             _splitValue(tokenId, amounts[i]);
         }
     }

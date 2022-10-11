@@ -60,6 +60,7 @@ abstract contract ERC3525Upgradeable is
     //key: id
     mapping(uint256 => uint256) private _allTokensIndex;
     mapping(address => AddressData) private _addressData;
+    uint256 private tokenCounter;
 
     function supportsInterface(bytes4 interfaceId)
         public
@@ -74,6 +75,21 @@ abstract contract ERC3525Upgradeable is
             interfaceId == type(IERC3525MetadataUpgradeable).interfaceId ||
             interfaceId == type(IERC721EnumerableUpgradeable).interfaceId ||
             super.supportsInterface(interfaceId);
+    }
+
+    /*******************
+     * DEPLOY
+     ******************/
+
+    /// @notice Contract constructor logic
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
+    /// @notice Contract initialization logic
+    function __ERC3525Upgradeable_init() public initializer {
+        tokenCounter = 0;
     }
 
     /*******************
@@ -131,7 +147,7 @@ abstract contract ERC3525Upgradeable is
     }
 
     function totalSupply() public view virtual override returns (uint256) {
-        return _allTokens.length;
+        return tokenCounter;
     }
 
     function tokenByIndex(uint256 index_) public view virtual override returns (uint256) {
@@ -222,7 +238,7 @@ abstract contract ERC3525Upgradeable is
     ) public payable virtual override returns (uint256) {
         _spendAllowance(_msgSender(), fromTokenId_, value_);
 
-        uint256 newTokenId = _createDerivedTokenId(fromTokenId_);
+        uint256 newTokenId = _createOriginalTokenId();
         _mint(to_, newTokenId, ERC3525Upgradeable.slotOf(fromTokenId_));
         _transferValue(fromTokenId_, newTokenId, value_);
 
@@ -384,10 +400,12 @@ abstract contract ERC3525Upgradeable is
             revert ToZeroAddress();
         }
         if (fromToken_ == 0 || toToken_ == 0) {
-            revert InvalidID(tokenId);
+            uint256 falseId = fromToken_ == 0 ? fromToken_ : toToken_;
+            revert InvalidID(falseId);
         }
-        if (_exists(tokenId)) {
-            revert AlreadyMinted(tokenId);
+        if (!_exists(toToken_) || !_exists(fromToken_)) {
+            uint256 falseId = _exists(toToken_) ? fromToken_ : toToken_;
+            revert InvalidID(falseId);
         }
         if (slotFrom_ != slotTo_) {
             revert SlotsMismatch(slotFrom_, slotTo_);
@@ -672,17 +690,9 @@ abstract contract ERC3525Upgradeable is
      * TOKEN IDs
      ******************/
 
-    function _createOriginalTokenId() internal virtual returns (uint256) {
-        return _createDefaultTokenId();
-    }
-
-    function _createDerivedTokenId(uint256 fromTokenId_) internal virtual returns (uint256) {
-        fromTokenId_;
-        return _createDefaultTokenId();
-    }
-
-    function _createDefaultTokenId() private view returns (uint256) {
-        return totalSupply() + 1;
+    function _createOriginalTokenId() internal virtual returns (uint256 newId) {
+        newId = tokenCounter + 1;
+        tokenCounter += 1;
     }
 
     /*******************

@@ -23,5 +23,7 @@ export function shouldBehaveLikeHypercertMinterIntegration(): void {
     const secondData = encodeClaim(secondClaim);
 
     await expect(deployer.minter.mint(deployer.address, secondData)).to.emit(minter, "ImpactClaimed");
+    await expect(deployer.minter.split(7, [500, 500])).to.emit(minter, "TransferValue");
+
   });
 }
