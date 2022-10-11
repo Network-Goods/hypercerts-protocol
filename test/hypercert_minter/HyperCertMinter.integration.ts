@@ -4,7 +4,7 @@ import setupTest from "../setup";
 import { encodeClaim, newClaim } from "../utils";
 
 export function shouldBehaveLikeHypercertMinterIntegration(): void {
-  it.only("supports the full minting, splitting, merging, burning flow", async function () {
+  it("supports the full minting, splitting, merging, burning flow", async function () {
     const { deployer, minter } = await setupTest();
     const claim = await newClaim({ fractions: [100, 200, 300] });
     const data = encodeClaim(claim);
@@ -24,6 +24,5 @@ export function shouldBehaveLikeHypercertMinterIntegration(): void {
 
     await expect(deployer.minter.mint(deployer.address, secondData)).to.emit(minter, "ImpactClaimed");
     await expect(deployer.minter.split(7, [500, 500])).to.emit(minter, "TransferValue");
-
   });
 }
