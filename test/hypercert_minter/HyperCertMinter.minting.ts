@@ -6,7 +6,6 @@ import setupTest, { setupImpactScopes, setupWorkScopes } from "../setup";
 import {
   compareClaimAgainstInput,
   encodeClaim,
-  getClaimSlotID,
   getEncodedImpactClaim,
   newClaim,
   randomScopes,

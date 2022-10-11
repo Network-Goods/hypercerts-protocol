@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Ref: https://raw.githubusercontent.com/solv-finance/erc-3525/main/contracts/ERC3525SlotEnumerableUpgradeable.sol
 
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.4;
 
 import "./ERC3525Upgradeable.sol";
 import "./interfaces/IERC3525SlotEnumerableUpgradeable.sol";
@@ -155,11 +155,20 @@ contract ERC3525SlotEnumerableUpgradeable is ERC3525Upgradeable {
     }
 
     //TODO cleanup inheritance
-    function valueDecimals() external view virtual override returns (uint8) {}
+    // solhint-disable-next-line no-empty-blocks
+    function valueDecimals() external view virtual override returns (uint8) {
+        //empty block
+    }
 
-    function tokenURI(uint256 tokenId) external view virtual override returns (string memory) {}
+    // solhint-disable-next-line no-empty-blocks
+    function tokenURI(uint256 tokenId) external view virtual override returns (string memory) {
+        //empty block
+    }
 
-    function slotURI(uint256 _slot) external view virtual override returns (string memory) {}
+    // solhint-disable-next-line no-empty-blocks
+    function slotURI(uint256 _slot) external view virtual override returns (string memory) {
+        //empty block
+    }
 
     /**
      * @dev This empty reserved space is put in place to allow future versions to add new

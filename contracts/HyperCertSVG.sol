@@ -217,7 +217,8 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
                 abi.encodePacked(
                     abi.encodePacked(
                         '<path id="foreground-color-2" '
-                        'd="M435,777.83H115v-50H435v50Zm0-532.83H115v360H435V245Zm0-122.83H115v-50H435v50Z" style="fill: ',
+                        'd="M435,777.83H115v-50H435v50Zm0-532.83H115v360H435V245Zm0-122.83H115v-50H435v50Z"'
+                        ' style="fill: ',
                         colors.background,
                         '"/>'
                     ),

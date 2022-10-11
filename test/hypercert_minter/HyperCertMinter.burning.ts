@@ -36,7 +36,7 @@ export function shouldBehaveLikeHypercertMinterBurning(): void {
     await expect(minter.slotOf(tokenId)).to.be.revertedWith("NonExistentToken");
     expect(await minter.tokenSupplyInSlot(slot)).to.be.eq(0);
     await expect(minter.tokenURI(tokenId)).to.be.revertedWith("NonExistentToken");
-    await expect(minter.slotURI(slot)).to.be.revertedWith("NonExistentSlot"); 
+    await expect(minter.slotURI(slot)).to.be.revertedWith("NonExistentSlot");
   });
 
   it("prevents burning when the creator doesn't own the full slot", async function () {
