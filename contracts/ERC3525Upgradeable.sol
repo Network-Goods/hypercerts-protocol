@@ -88,6 +88,7 @@ abstract contract ERC3525Upgradeable is
     }
 
     /// @notice Contract initialization logic
+    // solhint-disable-next-line func-name-mixedcase
     function __ERC3525Upgradeable_init() public initializer {
         tokenCounter = 0;
     }

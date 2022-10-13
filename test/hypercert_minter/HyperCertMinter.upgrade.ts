@@ -3,7 +3,7 @@ import { ethers, getNamedAccounts, upgrades } from "hardhat";
 
 import { HyperCertMinterUpgrade } from "../../src/types";
 import setupTest, { setupImpactScopes, setupRights, setupTestMetadata, setupWorkScopes } from "../setup";
-import { getClaimSlotID, getEncodedImpactClaim, newClaim, validateMetadata } from "../utils";
+import { getEncodedImpactClaim, newClaim, validateMetadata } from "../utils";
 import { HyperCertMinter, HyperCertMinter_Upgrade, UPGRADER_ROLE } from "../wellKnown";
 
 export function shouldBehaveLikeHypercertMinterUpgrade(): void {
@@ -48,8 +48,6 @@ export function shouldBehaveLikeHypercertMinterUpgrade(): void {
     const { user } = await getNamedAccounts();
     const claim = await newClaim();
     const data = await getEncodedImpactClaim(claim);
-    const slot = await getClaimSlotID(claim);
-
     const { sft } = await setupTestMetadata();
 
     const HypercertMinterFactory = await ethers.getContractFactory(HyperCertMinter);
