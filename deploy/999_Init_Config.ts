@@ -11,7 +11,7 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const colorsSize = await read("HyperCertSVG", { from: deployer }, "colorsCounter");
 
-  if (colorsSize == 1) {
+  if (colorsSize == 0) {
     await execute("HyperCertSVG", { from: deployer, log: true }, "addColors", ["#F3556F", "#121933", "#D4BFFF"]); //
     await execute("HyperCertSVG", { from: deployer, log: true }, "addColors", ["#FFBFCA", "#FFFFFF", "#5500FF"]); //
     await execute("HyperCertSVG", { from: deployer, log: true }, "addColors", ["#25316D", "#121933", "#80E5D3"]); //

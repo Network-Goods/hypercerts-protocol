@@ -196,11 +196,11 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
     }
 
     function _getBackgroundIndex(string memory primaryScopeOfImpact) internal view returns (uint256 index) {
-        index = uint256(stringToBytes32(primaryScopeOfImpact)) % 10;
+        index = uint256(keccak256(abi.encode(primaryScopeOfImpact))) % 10;
     }
 
     function _getColorIndex(string memory primaryScopeOfImpact) internal view returns (uint256 index) {
-        index = uint256(stringToBytes32(primaryScopeOfImpact)) % colorsCounter;
+        index = uint256(keccak256(abi.encode(primaryScopeOfImpact))) % colorsCounter;
     }
 
     function _generateHeader(SVGParams memory params, SVGColors memory colors)

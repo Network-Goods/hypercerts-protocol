@@ -40,7 +40,6 @@ export const setupTestERC3525 = deployments.createFixture(
 
     // Contracts
     const sft: ERC3525 = await ethers.getContract(ERC3525);
-    await sft.initialize();
 
     // Account config
     const setupAddress = async (address: string) => {

@@ -23,7 +23,6 @@ describe("Unit tests", function () {
       // 0x80ac58cd is the ERC165 interface identifier for EIP721 - backward compatible with NFT
       expect(await tokenInstance.supportsInterface("0x80ac58cd")).to.be.true;
 
-      await expect(tokenInstance.initialize()).to.emit(tokenInstance, "Initialized").withArgs(1);
       await expect(tokenInstance.initialize()).to.be.revertedWith("Initializable: contract is already initialized");
     });
 

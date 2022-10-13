@@ -29,4 +29,4 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 
 export default deploy;
-deploy.tags = ["local", "staging"];
+deploy.tags = ["local", "staging", "svg"];
