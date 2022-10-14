@@ -15,9 +15,15 @@ export function shouldBehaveLikeSemiFungibleTokenMint(): void {
       await expect(sft.mintValue(user.address, 1, 1_000_000)).to.emit(sft, "TransferValue").withArgs(0, 1, 1_000_000);
       await expect(sft.mintValue(user.address, 1, 1_000_000)).to.emit(sft, "TransferValue").withArgs(0, 2, 1_000_000);
 
-      expect(await sft["tokenSupplyInSlot"](1)).to.be.eq("2");
-      expect(await sft["tokenInSlotByIndex"](1, 0)).to.be.eq("1");
-      expect(await sft["balanceOf(uint256)"](1)).to.be.eq("1000000");
+      expect(await sft.totalSupply()).to.be.eq(2);
+      expect(await sft.tokenByIndex(0)).to.be.eq(1);
+      expect(await sft.tokenByIndex(1)).to.be.eq(2);
+      expect(await sft.tokenOfOwnerByIndex(user.address, 0)).to.be.eq(1);
+      expect(await sft.tokenOfOwnerByIndex(user.address, 1)).to.be.eq(2);
+
+      expect(await sft["tokenSupplyInSlot"](1)).to.be.eq(2);
+      expect(await sft["tokenInSlotByIndex"](1, 0)).to.be.eq(1);
+      expect(await sft["balanceOf(uint256)"](1)).to.be.eq(1000000);
     });
 
     it("allows for minting another token in a slot with a given value", async function () {
@@ -30,6 +36,7 @@ export function shouldBehaveLikeSemiFungibleTokenMint(): void {
 
       await expect(sft.mintValue(user.address, 1, 2_000_000)).to.emit(sft, "TransferValue").withArgs(0, 2, 2_000_000);
 
+      expect(await sft.totalSupply()).to.be.eq(2);
       expect(await sft["tokenSupplyInSlot"](1)).to.be.eq("2");
       expect(await sft["tokenInSlotByIndex"](1, 0)).to.be.eq("1");
       expect(await sft["tokenInSlotByIndex"](1, 1)).to.be.eq("2");
