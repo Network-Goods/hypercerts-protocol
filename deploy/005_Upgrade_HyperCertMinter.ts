@@ -21,5 +21,5 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 
 export default deploy;
-deploy.tags = ["update"];
+deploy.tags = ["minter", "updateMinter"];
 deploy.dependencies = ["HyperCertMinter"];

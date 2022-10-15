@@ -130,16 +130,12 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
                     _generateBackgroundPattern(params.scopesOfImpact[0], colors_),
                     _generateHeader(params, colors_),
                     _generateName(params, colors_),
-                    _generateScopeOfImpact(params, colors_),
-                    _generateFooter(params, colors_),
+                    _generateDivider(colors_),
+                    _generateWorkperiod(params, colors_),
                     "</svg>"
                 )
             );
     }
-
-    /// 1: Primary
-    /// 2: Labels
-    /// 3: Backgrounds
 
     function _generateHyperCertFraction(SVGParams memory params) internal view virtual returns (string memory) {
         SVGColors memory colors_ = _generateColors(params.scopesOfImpact[0]);
@@ -152,9 +148,9 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
                     _generateBackgroundPattern(params.scopesOfImpact[0], colors_),
                     _generateHeader(params, colors_),
                     _generateName(params, colors_),
-                    _generateScopeOfImpact(params, colors_),
+                    _generateDivider(colors_),
+                    _generateWorkperiod(params, colors_),
                     _generateFraction(params, colors_),
-                    _generateFooter(params, colors_),
                     "</svg>"
                 )
             );
@@ -195,7 +191,7 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
         }
     }
 
-    function _getBackgroundIndex(string memory primaryScopeOfImpact) internal view returns (uint256 index) {
+    function _getBackgroundIndex(string memory primaryScopeOfImpact) internal pure returns (uint256 index) {
         index = uint256(keccak256(abi.encode(primaryScopeOfImpact))) % 10;
     }
 
@@ -209,9 +205,6 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
         virtual
         returns (string memory)
     {
-        (uint256 yearFrom, uint256 monthFrom, uint256 dayFrom) = DateTime.timestampToDate(params.workTimeframe[0]);
-        (uint256 yearTo, uint256 monthTo, uint256 dayTo) = DateTime.timestampToDate(params.workTimeframe[1]);
-
         return
             string(
                 abi.encodePacked(
@@ -222,27 +215,25 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
                         colors.background,
                         '"/>'
                     ),
-                    abi.encodePacked(
-                        string.concat(
-                            '<g id="divider-color" text-rendering="optimizeSpeed" font-size="10" fill="',
-                            colors.labels,
-                            '">'
-                        ),
-                        '<path id="divider-color-2" d="M156.35,514.59h237.31" ',
-                        string.concat(
-                            'style="fill: none; stroke: ',
-                            colors.primary,
-                            '; stroke-miterlimit: 10; stroke-width: 2px;"/>'
-                        ),
-                        '<text id="work-period-color" transform="translate(134.75 102.06)" '
-                        'style="font-family: Helvetica; font-size: 15px;">',
-                        '<tspan x="0" y="0" style="letter-spacing: -.05em;">Work Period: ',
-                        abi.encodePacked(yearFrom.toString(), "-", monthFrom.toString(), "-", dayFrom.toString()),
-                        " > ",
-                        abi.encodePacked(yearTo.toString(), "-", monthTo.toString(), "-", dayTo.toString()),
-                        "</tspan></text></g>"
-                    )
+                    _generateScopeOfImpact(params, colors)
                 )
+            );
+    }
+
+    function _generateScopeOfImpact(SVGParams memory params, SVGColors memory colors)
+        internal
+        pure
+        virtual
+        returns (string memory)
+    {
+        return
+            string.concat(
+                '<text id="scope-impact-color" x="50%" y="0%" dominant-baseline="middle" text-anchor="middle" transform="translate(0 102.06)" '
+                'style="font-family: Helvetica; font-size: 20px; fill: ',
+                colors.labels,
+                '">',
+                cutString(params.scopesOfImpact[0], 20),
+                "</text>"
             );
     }
 
@@ -267,6 +258,11 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
 
             while (currentLine < 3) {
                 strings.slice memory part = ogSlice.split(delim);
+
+                if (ogSlice.empty() && currentLine == 0) {
+                    allLines[currentLine] = cutString(params.name, 10);
+                    break;
+                }
 
                 if (part.empty()) {
                     line[lineEntry] = ogSlice;
@@ -315,67 +311,45 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
             );
     }
 
-    function stringToBytes32(string memory source) internal pure returns (bytes32 result) {
-        bytes memory tempEmptyStringTest = bytes(source);
-        if (tempEmptyStringTest.length == 0) {
-            return 0x0;
-        }
-
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            result := mload(add(source, 32))
-        }
-    }
-
-    function bytes32ToString(bytes32 _bytes32) internal pure returns (string memory) {
-        uint8 i = 0;
-        while (i < 27 && _bytes32[i] != 0) {
-            i++;
-        }
-        bytes memory bytesArray = new bytes(i);
-        for (i = 0; i < 27 && _bytes32[i] != 0; i++) {
-            bytesArray[i] = _bytes32[i];
-        }
-        string memory parsedString = string(bytesArray);
-        if (_bytes32[28] != 0) {
-            parsedString = string.concat(parsedString, "...");
-        }
-        return parsedString;
-    }
-
-    function _generateScopeOfImpact(SVGParams memory params, SVGColors memory colors)
+    function _generateWorkperiod(SVGParams memory params, SVGColors memory colors)
         internal
         pure
         virtual
         returns (string memory)
     {
-        string memory renderedText = "";
-        uint256 inputLength = params.scopesOfImpact.length;
-        if (inputLength > 3) inputLength = 3;
-        for (uint256 i = 0; i < inputLength; i++) {
-            bytes32 stringShort = stringToBytes32(params.scopesOfImpact[i]);
-            renderedText = string.concat(
-                renderedText,
-                '<tspan x="0" y="',
-                uint256(20 * i).toString(),
-                '">',
-                bytes32ToString(stringShort),
-                "</tspan>"
-            );
-        }
+        (uint256 yearFrom, uint256 monthFrom, uint256 dayFrom) = DateTime.timestampToDate(params.workTimeframe[0]);
+        (uint256 yearTo, uint256 monthTo, uint256 dayTo) = DateTime.timestampToDate(params.workTimeframe[1]);
 
         return
             string(
                 abi.encodePacked(
-                    string.concat(
-                        '<g id="description-color" text-rendering="optimizeSpeed" font-size="15" fill="',
+                    abi.encodePacked(
+                        '<g><text id="work-period-color" transform="translate(0 565)" dominant-baseline="middle" text-anchor="middle"  '
+                        'style="font-family: Helvetica; font-size: 20px; fill: ',
                         colors.labels,
-                        '">'
-                    ),
-                    '<text transform="translate(155 460)" style="font-family: Helvetica; font-size: 15px;">',
-                    renderedText,
-                    "</text></g>"
+                        '">',
+                        '<tspan x="50%" y="0" style="letter-spacing: -.05em;">',
+                        abi.encodePacked(yearFrom.toString(), "-", monthFrom.toString(), "-", dayFrom.toString()),
+                        " to ",
+                        abi.encodePacked(yearTo.toString(), "-", monthTo.toString(), "-", dayTo.toString()),
+                        "</tspan></text></g>"
+                    )
                 )
+            );
+    }
+
+    function _generateDivider(SVGColors memory colors) internal pure virtual returns (string memory) {
+        return
+            string.concat(
+                string.concat(
+                    '<g id="divider-color" text-rendering="optimizeSpeed" font-size="10" fill="',
+                    colors.labels,
+                    '">'
+                ),
+                '<path id="divider-color-2" d="M156.35,514.59h237.31" ',
+                'style="fill: none; stroke: ',
+                colors.primary,
+                '; stroke-miterlimit: 10; stroke-width: 2px;"/></g>'
             );
     }
 
@@ -389,39 +363,44 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
         return
             string(
                 abi.encodePacked(
-                    '<g id="fraction-color" text-rendering="optimizeSpeed" font-size="30">',
-                    '<text id="fraction-color-2" transform="translate(156.35 568.03)" ',
-                    string.concat('style="fill: ', colors.primary, '; font-family: Monaco">'),
-                    string.concat('<tspan x="0" y="0">', string(uint2decimal(percent, 2)), " %</tspan></text></g>")
+                    '<g id="fraction-color" text-rendering="optimizeSpeed" dominant-baseline="middle" text-anchor="middle" >',
+                    '<text id="fraction-color-2" x="50%" transform="translate(0 753)" ',
+                    string.concat('style="fill: ', colors.labels, '; font-family: Monaco; font-size: 20px">'),
+                    string.concat(string(uint2decimal(percent, 2)), " %</text></g>")
                 )
             );
     }
 
-    function _generateFooter(SVGParams memory params, SVGColors memory colors)
-        internal
-        pure
-        virtual
-        returns (string memory)
-    {
-        (uint256 yearFrom, uint256 monthFrom, uint256 dayFrom) = DateTime.timestampToDate(params.impactTimeframe[0]);
-        (uint256 yearTo, uint256 monthTo, uint256 dayTo) = DateTime.timestampToDate(params.impactTimeframe[1]);
-        return
-            string(
-                abi.encodePacked(
-                    string.concat(
-                        '<g id="impact-period-color" text-rendering="optimizeSpeed" font-size="10" fill="',
-                        colors.labels,
-                        '">'
-                    ),
-                    '<text id="impact-period-color-2" transform="translate(134.75 758)" '
-                    'style="font-family: Helvetica; font-size: 15px;">',
-                    '<tspan x="0" y="0" style="letter-spacing: -.05em;">Impact Period: ',
-                    abi.encodePacked(yearFrom.toString(), "-", monthFrom.toString(), "-", dayFrom.toString()),
-                    " > ",
-                    abi.encodePacked(yearTo.toString(), "-", monthTo.toString(), "-", dayTo.toString()),
-                    "</tspan></text></g>"
-                )
-            );
+    function stringToBytes32(string memory source) internal pure returns (bytes32 result) {
+        bytes memory tempEmptyStringTest = bytes(source);
+        if (tempEmptyStringTest.length == 0) {
+            return 0x0;
+        }
+
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            result := mload(add(source, 32))
+        }
+    }
+
+    function bytes32ToString(bytes32 _bytes32, uint8 cutoff) internal pure returns (string memory parsedString) {
+        uint8 i = 0;
+        while (i < cutoff && _bytes32[i] != 0) {
+            i++;
+        }
+        bytes memory bytesArray = new bytes(i);
+        for (i = 0; i < cutoff && _bytes32[i] != 0; i++) {
+            bytesArray[i] = _bytes32[i];
+        }
+        parsedString = string(bytesArray);
+    }
+
+    function cutString(string memory source, uint8 cutoff) internal pure returns (string memory cutString) {
+        bytes32 stringAsBytes = stringToBytes32(source);
+        cutString = bytes32ToString(stringAsBytes, cutoff);
+        if (stringAsBytes[cutoff] != 0) {
+            cutString = string.concat(cutString, "...");
+        }
     }
 
     function getPercent(uint256 part, uint256 whole) public pure returns (uint256 percent) {
@@ -431,7 +410,7 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
         return temp / 10;
     }
 
-    function uint2decimal(uint256 self, uint8 decimals) internal view returns (bytes memory) {
+    function uint2decimal(uint256 self, uint8 decimals) internal pure returns (bytes memory) {
         uint256 base = 10**decimals;
         string memory round = (self / base).toString();
         string memory fraction = (self % base).toString();
@@ -450,16 +429,6 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
     /*******************
      * ADMIN
      ******************/
-    /// @notice gets the current version of the contract
-    function version() public view virtual returns (uint256) {
-        return _version;
-    }
-
-    /// @notice Update the contract version number
-    /// @notice Only allowed for member of UPGRADER_ROLE
-    function updateVersion() external onlyRole(UPGRADER_ROLE) {
-        _version += 1;
-    }
 
     /// @notice Returns a flag indicating if the contract supports the specified interface
     /// @param interfaceId Id of the interface

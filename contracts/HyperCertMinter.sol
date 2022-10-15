@@ -331,7 +331,7 @@ contract HyperCertMinter is Initializable, ERC3525SlotEnumerableUpgradeable, Acc
         if (claim.workTimeframe[0] > claim.workTimeframe[1]) {
             revert InvalidTimeframe(claim.workTimeframe[0], claim.workTimeframe[1]);
         }
-        if (claim.impactTimeframe[0] > claim.impactTimeframe[1]) {
+        if (claim.impactTimeframe[0] > claim.impactTimeframe[1] && claim.impactTimeframe[0] != 0) {
             revert InvalidTimeframe(claim.impactTimeframe[0], claim.impactTimeframe[1]);
         }
         if (claim.workTimeframe[0] > claim.impactTimeframe[0]) {

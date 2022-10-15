@@ -69,6 +69,7 @@ const config: HardhatUserConfig = {
   },
   gasReporter: {
     currency: "USD",
+    coinmarketcap: process.env.CMC_API_KEY || "",
     enabled: process.env.REPORT_GAS ? true : false,
     excludeContracts: ["mocks"],
     src: "./contracts",
@@ -96,7 +97,7 @@ const config: HardhatUserConfig = {
     tests: "./test",
   },
   solidity: {
-    version: "0.8.16",
+    version: "0.8.17",
     settings: {
       metadata: {
         // Not including the metadata hash
@@ -108,6 +109,7 @@ const config: HardhatUserConfig = {
       optimizer: {
         enabled: true,
         runs: 200,
+        details: { yul: true },
       },
     },
   },

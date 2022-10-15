@@ -120,14 +120,10 @@ const validate = async (svg: string, input: InputType, fraction: boolean = false
       `Scope "${truncScope}" not found`,
     );
   });
-  expect(
-    svgDoc.find(`//*[@id='work-period-color']//*[text()='Work Period: ${formatTimeframe(input.workTimeframe)}']`)
-      .length,
-  ).to.eq(1, "Work period not found");
-  expect(
-    svgDoc.find(`//*[@id='impact-period-color']//*[text()='Impact Period: ${formatTimeframe(input.impactTimeframe)}']`)
-      .length,
-  ).to.eq(1, "Impact period not found");
+  expect(svgDoc.find(`//*[@id='work-period-color']//*[text()='${formatTimeframe(input.workTimeframe)}']`).length).to.eq(
+    1,
+    "Work period not found",
+  );
   if (fraction) {
     expect(svgDoc.find(`//*[@id='fraction-color']//*[text()='${formatFraction(input)}']`).length).to.eq(
       1,
