@@ -225,7 +225,7 @@ export const validateMetadata = async (metadata64: string, expected: string | Cl
 };
 
 const formatDate = (unix: number) => format(new Date(unix * 1000), "yyyy-M-d");
-const formatTimeframe = (timeframe: [number, number]) => `${formatDate(timeframe[0])} > ${formatDate(timeframe[1])}`;
+const formatTimeframe = (timeframe: [number, number]) => `${formatDate(timeframe[0])} to ${formatDate(timeframe[1])}`;
 const formatPercent = (units: number, totalUnits: number) => {
   const percentage = ((units / totalUnits) * 100).toLocaleString("en-us", {
     minimumFractionDigits: 2,
@@ -233,7 +233,7 @@ const formatPercent = (units: number, totalUnits: number) => {
   });
   return `${percentage} %`;
 };
-const truncate = (scope: string, maxLength: number = 30) =>
+const truncate = (scope: string, maxLength: number = 23) =>
   scope.length <= maxLength ? scope : `${scope.substring(0, maxLength - 3)}...`;
 
 export const validateSVG = async (svg: string, expected: SVGInput, fraction: boolean = false) => {
@@ -244,32 +244,26 @@ export const validateSVG = async (svg: string, expected: SVGInput, fraction: boo
   svgDoc.validate(xsdDoc);
 
   const nameParts = expected.name.split(" ");
+  const svgName = svgDoc.get("//*[@id='name-color']")?.text();
   for (let i = 0; i < Math.min(nameParts.length, 2); i++) {
-    expect(svgDoc.find(`//*[@id='name-color']//*[contains(text(), '${nameParts[i]}')]`).length).to.eq(
-      1,
-      `Name "${nameParts[i]}" not found: ${svg}`,
-    );
+    expect(svgName).to.contain(nameParts[i], `Name "${nameParts[i]}" not found: ${svg}`);
   }
-  expected.impactScopes.slice(0, 2).forEach(scope => {
-    const truncScope = truncate(scope);
-    expect(svgDoc.find(`//*[@id='description-color']//*[text()='${truncScope}']`).length).to.eq(
-      1,
-      `Scope "${truncScope}" not found: ${svg}`,
-    );
-  });
-  expect(
-    svgDoc.find(`//*[@id='work-period-color']//*[text()='Work Period: ${formatTimeframe(expected.workTimeframe)}']`)
-      .length,
-  ).to.eq(1, `Work period not found: ${svg}`);
-  expect(
-    svgDoc.find(
-      `//*[@id='impact-period-color']//*[text()='Impact Period: ${formatTimeframe(expected.impactTimeframe)}']`,
-    ).length,
-  ).to.eq(1, `Impact period not found: ${svg}`);
+
+  const truncScope = truncate(expected.impactScopes[0]);
+  expect(svgDoc.get("//*[@id='scope-impact-color']")?.text()).to.eq(
+    truncScope,
+    `Scope "${truncScope}" not found: ${svg}`,
+  );
+
+  expect(svgDoc.get("//*[@id='work-period-color']")?.text()).to.eq(
+    formatTimeframe(expected.workTimeframe),
+    `Work period not found: ${svg}`,
+  );
+
   if (fraction && expected.units) {
     const percentage = formatPercent(expected.units, expected.totalUnits);
-    expect(svgDoc.find(`//*[@id='fraction-color']//*[text()='${percentage}']`).length).to.eq(
-      1,
+    expect(svgDoc.get("//*[@id='fraction-color']")?.text()).to.eq(
+      percentage,
       `Percentage ${percentage} not found: ${svg}`,
     );
   }

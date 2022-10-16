@@ -941,6 +941,7 @@
                     <xs:enumeration value="reset" />
                     <xs:enumeration value="ideographic" />
                     <xs:enumeration value="lower" />
+                    <xs:enumeration value="middle" />
                     <xs:enumeration value="hanging" />
                     <xs:enumeration value="mathematical" />
                     <xs:enumeration value="inherit" />

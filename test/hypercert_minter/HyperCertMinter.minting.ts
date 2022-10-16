@@ -292,9 +292,10 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
 
     expect(await minter.tokenSupplyInSlot(claimID)).to.be.eq(50);
 
-    await validateMetadata(await minter.tokenURI(1), subScopeKeysForValues(claim, impactScopes), claim.fractions[0]);
-    await validateMetadata(await minter.tokenURI(50), subScopeKeysForValues(claim, impactScopes), claim.fractions[49]);
-    await validateMetadata(await minter.slotURI(claimID), subScopeKeysForValues(claim, impactScopes));
+    const claimSubbed = subScopeKeysForValues(claim, impactScopes);
+    await validateMetadata(await minter.tokenURI(1), claimSubbed, claim.fractions[0]);
+    await validateMetadata(await minter.tokenURI(50), claimSubbed, claim.fractions[49]);
+    await validateMetadata(await minter.slotURI(claimID), claimSubbed);
 
     const hypercert = await minter.getImpactCert(claimID);
 
