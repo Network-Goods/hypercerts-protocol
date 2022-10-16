@@ -4,23 +4,31 @@ import { ethers } from "hardhat";
 
 import setupTest, { setupImpactScopes, setupWorkScopes } from "../setup";
 import {
+  Claim,
   compareClaimAgainstInput,
   encodeClaim,
   getEncodedImpactClaim,
   newClaim,
   randomScopes,
+  subScopeKeysForValues,
   validateMetadata,
 } from "../utils";
-import { Rights, WorkScopes } from "../wellKnown";
+import { ImpactScopes, Rights, WorkScopes } from "../wellKnown";
 
 export function shouldBehaveLikeHypercertMinterMinting(): void {
+  it("should sub values for keys", async () => {
+    const claim = await newClaim();
+    const subbed = subScopeKeysForValues(claim, ImpactScopes);
+    expect(subbed.impactScopes[0]).to.equal("clean-air");
+  });
+
   it("anybody can mint an impact claim with 1 or more fractions - except zero-address", async function () {
     const { deployer, minter } = await setupTest();
 
-    const workScopes = Object.keys(WorkScopes);
+    const workScopes = Object.keys(WorkScopes).slice(0, 1);
     const claim1 = await newClaim({
       name: "Impact claim simple minting test",
-      workScopes: workScopes.slice(0, 1),
+      workScopes: workScopes,
       fractions: [100],
     });
     const data1 = encodeClaim(claim1);
@@ -55,8 +63,9 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
     expect(await minter.slotOf(1)).to.be.eq(claimID);
     expect(await minter.tokenSupplyInSlot(claimID)).to.be.eq(1);
     expect(await minter["balanceOf(uint256)"](1)).to.be.eq(100);
-    validateMetadata(await minter.tokenURI(1), claim1);
-    validateMetadata(await minter.slotURI(claimID), claim1);
+    const claim1Subbed = subScopeKeysForValues(claim1, ImpactScopes);
+    await validateMetadata(await minter.tokenURI(1), claim1Subbed, claim1.fractions[0]);
+    await validateMetadata(await minter.slotURI(claimID), claim1Subbed);
 
     await expect(deployer.minter.mint(ethers.constants.AddressZero, data1)).to.be.revertedWith("ToZeroAddress");
   });
@@ -64,8 +73,8 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
   it("anybody can mint an impact claim with multiple fractions - except zero-address", async function () {
     const { deployer, minter, user } = await setupTest();
 
-    const workScopes = Object.keys(WorkScopes);
-    const claim = await newClaim({ workScopes: workScopes.slice(1, 2), fractions: [50, 50] });
+    const workScopes = Object.keys(WorkScopes).slice(1, 2);
+    const claim = await newClaim({ workScopes, fractions: [50, 50] });
     const data = encodeClaim(claim);
     const claimID = 1;
 
@@ -144,9 +153,10 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
       .to.emit(minter, "Transfer")
       .withArgs(ethers.constants.AddressZero, user.address, 2);
 
-    validateMetadata(await minter.tokenURI(1), claim);
-    validateMetadata(await minter.tokenURI(2), claim);
-    validateMetadata(await minter.slotURI(claimID), claim);
+    const claimSubbed = subScopeKeysForValues(claim, ImpactScopes);
+    await validateMetadata(await minter.tokenURI(1), claimSubbed, claim.fractions[0]);
+    await validateMetadata(await minter.tokenURI(2), claimSubbed, claim.fractions[1]);
+    await validateMetadata(await minter.slotURI(claimID), claimSubbed);
 
     const cid = "ipfs://QmW2WQi7j6c7UgJTarActp7tDNikE4B2qXtFCfLPdsgaTQ/cat.jpg";
 
@@ -159,8 +169,9 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
       .to.emit(minter, "Transfer")
       .withArgs(ethers.constants.AddressZero, user.address, 3);
 
-    validateMetadata(await minter.tokenURI(3), claim2);
-    validateMetadata(await minter.slotURI(claimID2), claim2);
+    const claim2Subbed = subScopeKeysForValues(claim2, ImpactScopes);
+    await validateMetadata(await minter.tokenURI(3), claim2Subbed, claim2.fractions[2]);
+    await validateMetadata(await minter.slotURI(claimID2), claim2Subbed);
   });
 
   it("parses input data to create hypercert - minimal", async function () {
@@ -168,7 +179,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
 
     const impactScopes = randomScopes(1);
     const workScopes = randomScopes(1);
-    const options = {
+    const options = <Claim>{
       name: "Test minimal",
       description: "Light load testing",
       rights: Object.keys(Rights),
@@ -193,8 +204,8 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
       .to.emit(minter, "ImpactClaimed")
       .withArgs(claimID, user.address, claim.fractions);
 
-    validateMetadata(await minter.tokenURI(1), claim);
-    validateMetadata(await minter.slotURI(claimID), claim);
+    await validateMetadata(await minter.tokenURI(1), subScopeKeysForValues(claim, impactScopes), claim.fractions[0]);
+    await validateMetadata(await minter.slotURI(claimID), subScopeKeysForValues(claim, impactScopes));
 
     expect(await minter.tokenSupplyInSlot(claimID)).to.be.eq(1);
 
@@ -202,7 +213,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
 
     expect(hypercert.exists).to.be.true;
 
-    await compareClaimAgainstInput(hypercert, options);
+    await compareClaimAgainstInput(hypercert, claim);
   });
 
   it("parses input data to create hypercert - medium", async function () {
@@ -210,7 +221,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
 
     const impactScopes = randomScopes(50);
     const workScopes = randomScopes(50);
-    const options = {
+    const options = <Claim>{
       name: "Test medium",
       description: "Medium load testing",
       rights: Object.keys(Rights),
@@ -235,9 +246,9 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
       .to.emit(minter, "ImpactClaimed")
       .withArgs(claimID, user.address, claim.fractions);
 
-    validateMetadata(await minter.tokenURI(1), claim);
-    validateMetadata(await minter.tokenURI(25), claim);
-    validateMetadata(await minter.slotURI(claimID), claim);
+    await validateMetadata(await minter.tokenURI(1), subScopeKeysForValues(claim, impactScopes), claim.fractions[0]);
+    await validateMetadata(await minter.tokenURI(25), subScopeKeysForValues(claim, impactScopes), claim.fractions[24]);
+    await validateMetadata(await minter.slotURI(claimID), subScopeKeysForValues(claim, impactScopes));
 
     expect(await minter.tokenSupplyInSlot(claimID)).to.be.eq(25);
 
@@ -256,7 +267,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
 
     const impactScopes = randomScopes(100);
     const workScopes = randomScopes(100);
-    const options = {
+    const options = <Claim>{
       name: "Test high",
       description: "High load testing",
       rights: Object.keys(Rights),
@@ -281,9 +292,9 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
 
     expect(await minter.tokenSupplyInSlot(claimID)).to.be.eq(50);
 
-    validateMetadata(await minter.tokenURI(1), claim);
-    validateMetadata(await minter.tokenURI(50), claim);
-    validateMetadata(await minter.slotURI(claimID), claim);
+    await validateMetadata(await minter.tokenURI(1), subScopeKeysForValues(claim, impactScopes), claim.fractions[0]);
+    await validateMetadata(await minter.tokenURI(50), subScopeKeysForValues(claim, impactScopes), claim.fractions[49]);
+    await validateMetadata(await minter.slotURI(claimID), subScopeKeysForValues(claim, impactScopes));
 
     const hypercert = await minter.getImpactCert(claimID);
 
@@ -302,7 +313,7 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
     const n = 75;
     const impactScopes = randomScopes(n);
     const workScopes = randomScopes(n);
-    const options = {
+    const options = <Claim>{
       name: "Test limit",
       description: "Limit load testing",
       rights: Object.keys(Rights),
@@ -327,9 +338,10 @@ export function shouldBehaveLikeHypercertMinterMinting(): void {
 
     expect(await minter.tokenSupplyInSlot(claimID)).to.be.eq(n);
 
-    validateMetadata(await minter.tokenURI(1), claim);
-    validateMetadata(await minter.tokenURI(n), claim);
-    validateMetadata(await minter.slotURI(claimID), claim);
+    const claimSubbed = subScopeKeysForValues(claim, impactScopes);
+    await validateMetadata(await minter.tokenURI(1), claimSubbed, claim.fractions[0]);
+    await validateMetadata(await minter.tokenURI(n), claimSubbed, claim.fractions[n - 1]);
+    await validateMetadata(await minter.slotURI(claimID), claimSubbed);
 
     const hypercert = await minter.getImpactCert(claimID);
 

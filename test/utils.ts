@@ -1,14 +1,36 @@
 import { ParamType } from "@ethersproject/abi";
 import { expect } from "chai";
+import { format } from "date-fns";
 import { BigNumber, utils } from "ethers";
+import { promises as fs } from "fs";
 import { ethers, getNamedAccounts } from "hardhat";
+import { parseXml } from "libxmljs";
 
+import { HyperCertMinter } from "../src/types";
 import { DataApplicationJson, ImpactScopes, LoremIpsum, Rights, WorkScopes } from "./wellKnown";
+
+interface Dictionary<T> {
+  [key: string]: T;
+}
+
+class Cached<T> {
+  _result?: T;
+  _init: () => T;
+  constructor(initializer: () => T) {
+    this._init = initializer;
+  }
+  value() {
+    if (!this._result) {
+      this._result = this._init();
+    }
+    return this._result;
+  }
+}
 
 export type Claim = {
   rights: string[];
-  workTimeframe: number[];
-  impactTimeframe: number[];
+  workTimeframe: [number, number];
+  impactTimeframe: [number, number];
   contributors: string[];
   workScopes: string[];
   impactScopes: string[];
@@ -17,6 +39,30 @@ export type Claim = {
   uri: string;
   version: number;
   fractions: number[];
+};
+
+type Metadata = {
+  name: string;
+  description: string;
+  external_url: string;
+  image: string;
+  properties: Dictionary<MetadataProperty>;
+};
+
+type MetadataProperty = {
+  name: string;
+  description: string;
+  value: number | string;
+  is_intrinsic: boolean;
+};
+
+export type SVGInput = {
+  name: string;
+  impactScopes: string[];
+  workTimeframe: [number, number];
+  impactTimeframe: [number, number];
+  units?: number;
+  totalUnits: number;
 };
 
 export const newClaim = async (claim?: Partial<Claim>) => {
@@ -96,21 +142,24 @@ export const hash256 = (
 
 export const toHashMap = (array: string[]) => Object.fromEntries(array.map(s => [hash256(["string"], [s]), s]));
 
-export const randomScopes = (limit?: number) => {
-  const loremIpsum = LoremIpsum.split(/[\s,.]+/).map(s => s.toLowerCase());
-  const l = loremIpsum.length;
-  const nextIndex = () => Math.floor(Math.random() * l);
-  const nextScope = () => `${loremIpsum[nextIndex()]}-${loremIpsum[nextIndex()]}`;
+const loremIpsumCache = new Cached(() => LoremIpsum.split(/[\s,.]+/).map(s => s.toLowerCase()));
 
+const randomWord = () => {
+  const loremIpsum = loremIpsumCache.value();
+  const i = Math.floor(Math.random() * loremIpsum.length);
+  return loremIpsum[i];
+};
+
+export const randomScopes = (limit: number) => {
   const scopes = [];
-  for (let i = 0; i < (limit ?? l); i++) {
-    scopes.push(nextScope());
+  for (let i = 0; i < limit; i++) {
+    scopes.push(`${randomWord()}-${randomWord()}`);
   }
 
   return toHashMap(scopes);
 };
 
-export const compareClaimAgainstInput = async (claim: HypercertMinter.ClaimStructOutput, options: Claim) => {
+export const compareClaimAgainstInput = async (claim: HyperCertMinter.ClaimStructOutput, options: Claim) => {
   expect(claim.rights).to.be.eql(options.rights);
   expect(claim.version).to.be.eq(options.version);
 
@@ -129,26 +178,30 @@ export const decode64 = (value: string, header: boolean = true) => {
   return utils.toUtf8String(utils.base64.decode(base64String()));
 };
 
-interface Dictionary<T> {
-  [key: string]: T;
-}
+export const subScopeKeysForValues = (claim: Claim, impactScopes: Dictionary<string> | string[]) => {
+  const isArray = (obj: Dictionary<string> | string[]): obj is string[] => typeof obj["slice"] === "function";
+  const getValues = (scopes: Dictionary<string> | string[]) => (isArray(scopes) ? scopes : Object.values(scopes));
 
-type Metadata = {
-  name: string;
-  description: string;
-  external_url: string;
-  image: string;
-  properties: Dictionary<MetadataProperty>;
+  return {
+    rights: claim.rights,
+    workTimeframe: claim.workTimeframe,
+    impactTimeframe: claim.impactTimeframe,
+    contributors: claim.contributors,
+    name: claim.name,
+    description: claim.description,
+    uri: claim.uri,
+    version: claim.version,
+    fractions: claim.fractions,
+    impactScopes: getValues(impactScopes),
+    workScopes: claim.workScopes,
+  };
 };
 
-type MetadataProperty = {
-  name: string;
-  description: string;
-  value: number | string;
-  is_intrinsic: boolean;
+const sum = (series: number[]) => {
+  return series.reduce((previousValue, currentValue) => previousValue + currentValue);
 };
 
-export const validateMetadata = (metadata64: string, expected?: string | Claim) => {
+export const validateMetadata = async (metadata64: string, expected: string | Claim, units?: number) => {
   expect(metadata64.startsWith(DataApplicationJson)).to.be.true;
   const metadataJson = decode64(metadata64);
   if (typeof expected === "string") expect(metadataJson).to.include(expected);
@@ -158,6 +211,11 @@ export const validateMetadata = (metadata64: string, expected?: string | Claim) 
 
       expect(metadata.name).to.eq(expected.name);
       expect(metadata.description).to.eq(expected.description);
+      await validateSVG(
+        decode64(metadata.image),
+        { ...expected, units, totalUnits: sum(expected.fractions) },
+        units !== undefined,
+      );
       expect(metadata.external_url).to.eq(expected.uri);
     } catch (error) {
       console.error(error, metadataJson);
@@ -166,4 +224,55 @@ export const validateMetadata = (metadata64: string, expected?: string | Claim) 
   }
 };
 
-//TODO check SVG strings
+const formatDate = (unix: number) => format(new Date(unix * 1000), "yyyy-M-d");
+const formatTimeframe = (timeframe: [number, number]) => `${formatDate(timeframe[0])} > ${formatDate(timeframe[1])}`;
+const formatPercent = (units: number, totalUnits: number) => {
+  const percentage = ((units / totalUnits) * 100).toLocaleString("en-us", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+  return `${percentage} %`;
+};
+const truncate = (scope: string, maxLength: number = 30) =>
+  scope.length <= maxLength ? scope : `${scope.substring(0, maxLength - 3)}...`;
+
+export const validateSVG = async (svg: string, expected: SVGInput, fraction: boolean = false) => {
+  const baseUrl = "src/xsd/";
+  const xsd = await fs.readFile(`${baseUrl}svg.xsd`, { encoding: "utf-8" });
+  const xsdDoc = parseXml(xsd, { baseUrl });
+  const svgDoc = parseXml(svg);
+  svgDoc.validate(xsdDoc);
+
+  const nameParts = expected.name.split(" ");
+  for (let i = 0; i < Math.min(nameParts.length, 2); i++) {
+    expect(svgDoc.find(`//*[@id='name-color']//*[contains(text(), '${nameParts[i]}')]`).length).to.eq(
+      1,
+      `Name "${nameParts[i]}" not found: ${svg}`,
+    );
+  }
+  expected.impactScopes.slice(0, 2).forEach(scope => {
+    const truncScope = truncate(scope);
+    expect(svgDoc.find(`//*[@id='description-color']//*[text()='${truncScope}']`).length).to.eq(
+      1,
+      `Scope "${truncScope}" not found: ${svg}`,
+    );
+  });
+  expect(
+    svgDoc.find(`//*[@id='work-period-color']//*[text()='Work Period: ${formatTimeframe(expected.workTimeframe)}']`)
+      .length,
+  ).to.eq(1, `Work period not found: ${svg}`);
+  expect(
+    svgDoc.find(
+      `//*[@id='impact-period-color']//*[text()='Impact Period: ${formatTimeframe(expected.impactTimeframe)}']`,
+    ).length,
+  ).to.eq(1, `Impact period not found: ${svg}`);
+  if (fraction && expected.units) {
+    const percentage = formatPercent(expected.units, expected.totalUnits);
+    expect(svgDoc.find(`//*[@id='fraction-color']//*[text()='${percentage}']`).length).to.eq(
+      1,
+      `Percentage ${percentage} not found: ${svg}`,
+    );
+  }
+
+  expect(svgDoc.validationErrors.length).to.eq(0, svgDoc.validationErrors.join("\n"));
+};
