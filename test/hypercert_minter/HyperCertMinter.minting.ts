@@ -16,12 +16,6 @@ import {
 import { ImpactScopes, Rights, WorkScopes } from "../wellKnown";
 
 export function shouldBehaveLikeHypercertMinterMinting(): void {
-  it("should sub values for keys", async () => {
-    const claim = await newClaim();
-    const subbed = subScopeKeysForValues(claim, ImpactScopes);
-    expect(subbed.impactScopes[0]).to.equal("clean-air");
-  });
-
   it("anybody can mint an impact claim with 1 or more fractions - except zero-address", async function () {
     const { deployer, minter } = await setupTest();
 
