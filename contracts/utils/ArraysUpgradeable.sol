@@ -27,18 +27,6 @@ library ArraysUpgradeable {
         return string(abi.encodePacked('["', uint256(array[0]).toString(), '","', uint256(array[1]).toString(), '"]'));
     }
 
-    function toCsv(uint256[] memory array) internal pure returns (string memory) {
-        uint256 len = array.length;
-        string memory result;
-        for (uint256 i = 0; i < len; i++) {
-            string memory s = array[i].toString();
-            if (bytes(result).length == 0) result = s;
-            else result = string(abi.encodePacked(result, ",", s));
-        }
-
-        return result;
-    }
-
     function toCsv(string[] memory array) internal pure returns (string memory) {
         uint256 len = array.length;
         string memory result;

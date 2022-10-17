@@ -413,28 +413,6 @@ contract HyperCertMetadata is IHyperCertMetadata, Initializable, AccessControlUp
     function _propertyString(
         string memory name_,
         string memory description_,
-        uint256[] memory array_,
-        bool isIntrinsic_
-    ) internal pure virtual returns (string memory) {
-        return
-            string(
-                abi.encodePacked(
-                    '{"name":"',
-                    name_,
-                    '","description":"',
-                    description_,
-                    '","value":"',
-                    array_.toCsv(),
-                    '","is_intrinsic":"',
-                    isIntrinsic_.toString(),
-                    '"}'
-                )
-            );
-    }
-
-    function _propertyString(
-        string memory name_,
-        string memory description_,
         uint64[2] memory array_,
         bool isIntrinsic_
     ) internal pure virtual returns (string memory) {
