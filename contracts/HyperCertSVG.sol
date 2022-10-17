@@ -156,7 +156,7 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
             );
     }
 
-    function _generateBackgroundPattern(string memory primaryScopeOfImpact, SVGColors memory colors)
+    function _generateBackgroundPattern(string memory primaryScopeOfImpact, SVGColors memory colors_)
         internal
         view
         returns (string memory background)
@@ -170,13 +170,13 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
             string.concat(
                 string.concat(
                     '<rect id="background-color-2" x=".5" y="0" width="550" height="850" rx="32" ry="32" style="fill: ',
-                    colors.background,
+                    colors_.background,
                     '"/>'
                 ),
                 '<g id="graphic-color"><path id="graphic-color-2" d="',
                 backgroundPattern,
                 '" style="fill: none; stroke: ',
-                colors.primary,
+                colors_.primary,
                 '; stroke-miterlimit: 10; stroke-width: 2px;"/></g>'
             );
     }
@@ -199,7 +199,7 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
         index = uint256(keccak256(abi.encode(primaryScopeOfImpact))) % colorsCounter;
     }
 
-    function _generateHeader(SVGParams memory params, SVGColors memory colors)
+    function _generateHeader(SVGParams memory params, SVGColors memory colors_)
         internal
         pure
         virtual
@@ -212,15 +212,15 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
                         '<path id="foreground-color-2" '
                         'd="M435,777.83H115v-50H435v50Zm0-532.83H115v360H435V245Zm0-122.83H115v-50H435v50Z"'
                         ' style="fill: ',
-                        colors.background,
+                        colors_.background,
                         '"/>'
                     ),
-                    _generateScopeOfImpact(params, colors)
+                    _generateScopeOfImpact(params, colors_)
                 )
             );
     }
 
-    function _generateScopeOfImpact(SVGParams memory params, SVGColors memory colors)
+    function _generateScopeOfImpact(SVGParams memory params, SVGColors memory colors_)
         internal
         pure
         virtual
@@ -228,9 +228,10 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
     {
         return
             string.concat(
-                '<text id="scope-impact-color" x="50%" y="0%" dominant-baseline="middle" text-anchor="middle" transform="translate(0 102.06)" '
+                '<text id="scope-impact-color" x="50%" y="0%" dominant-baseline="middle" '
+                'text-anchor="middle" transform="translate(0 102.06)" '
                 'style="font-family: Helvetica; font-size: 20px; fill: ',
-                colors.labels,
+                colors_.labels,
                 '">',
                 cutString(params.scopesOfImpact[0], 20),
                 "</text>"
@@ -238,7 +239,7 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
     }
 
     //TODO ugly string manipulation
-    function _generateName(SVGParams memory params, SVGColors memory colors)
+    function _generateName(SVGParams memory params, SVGColors memory colors_)
         internal
         pure
         virtual
@@ -302,7 +303,7 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
                     '<g id="name-color" text-rendering="optimizeSpeed" font-size="30">',
                     abi.encodePacked(
                         '<text id="name-color-2" transform="translate(156.35 300)" ',
-                        string.concat('style="fill: ', colors.primary, '; font-family: Monaco;">'),
+                        string.concat('style="fill: ', colors_.primary, '; font-family: Monaco;">'),
                         renderedText,
                         "</text>"
                     ),
@@ -311,7 +312,7 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
             );
     }
 
-    function _generateWorkperiod(SVGParams memory params, SVGColors memory colors)
+    function _generateWorkperiod(SVGParams memory params, SVGColors memory colors_)
         internal
         pure
         virtual
@@ -324,9 +325,10 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
             string(
                 abi.encodePacked(
                     abi.encodePacked(
-                        '<g><text id="work-period-color" transform="translate(0 565)" dominant-baseline="middle" text-anchor="middle"  '
+                        '<g><text id="work-period-color" transform="translate(0 565)" '
+                        'dominant-baseline="middle" text-anchor="middle"  '
                         'style="font-family: Helvetica; font-size: 20px; fill: ',
-                        colors.labels,
+                        colors_.labels,
                         '">',
                         '<tspan x="50%" y="0" style="letter-spacing: -.05em;">',
                         abi.encodePacked(yearFrom.toString(), "-", monthFrom.toString(), "-", dayFrom.toString()),
@@ -338,22 +340,22 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
             );
     }
 
-    function _generateDivider(SVGColors memory colors) internal pure virtual returns (string memory) {
+    function _generateDivider(SVGColors memory colors_) internal pure virtual returns (string memory) {
         return
             string.concat(
                 string.concat(
                     '<g id="divider-color" text-rendering="optimizeSpeed" font-size="10" fill="',
-                    colors.labels,
+                    colors_.labels,
                     '">'
                 ),
                 '<path id="divider-color-2" d="M156.35,514.59h237.31" ',
                 'style="fill: none; stroke: ',
-                colors.primary,
+                colors_.primary,
                 '; stroke-miterlimit: 10; stroke-width: 2px;"/></g>'
             );
     }
 
-    function _generateFraction(SVGParams memory params, SVGColors memory colors)
+    function _generateFraction(SVGParams memory params, SVGColors memory colors_)
         internal
         view
         virtual
@@ -363,9 +365,10 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
         return
             string(
                 abi.encodePacked(
-                    '<g id="fraction-color" text-rendering="optimizeSpeed" dominant-baseline="middle" text-anchor="middle" >',
+                    '<g id="fraction-color" text-rendering="optimizeSpeed" '
+                    'dominant-baseline="middle" text-anchor="middle" >',
                     '<text id="fraction-color-2" x="50%" transform="translate(0 753)" ',
-                    string.concat('style="fill: ', colors.labels, '; font-family: Monaco; font-size: 20px">'),
+                    string.concat('style="fill: ', colors_.labels, '; font-family: Monaco; font-size: 20px">'),
                     string.concat(string(uint2decimal(percent, 2)), " %</text></g>")
                 )
             );
@@ -395,11 +398,11 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
         parsedString = string(bytesArray);
     }
 
-    function cutString(string memory source, uint8 cutoff) internal pure returns (string memory cutString) {
+    function cutString(string memory source, uint8 cutoff) internal pure returns (string memory cutString_) {
         bytes32 stringAsBytes = stringToBytes32(source);
-        cutString = bytes32ToString(stringAsBytes, cutoff);
+        cutString_ = bytes32ToString(stringAsBytes, cutoff);
         if (stringAsBytes[cutoff] != 0) {
-            cutString = string.concat(cutString, "...");
+            cutString_ = string.concat(cutString_, "...");
         }
     }
 
