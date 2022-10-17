@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 
 import setupTest from "../setup";
-import { encodeClaim, newClaim, validateMetadata } from "../utils";
+import { encodeClaim, newClaim } from "../utils";
 
 export function shouldBehaveLikeHypercertMinterBurning(): void {
   it("allows burning when the creator owns the full slot", async function () {
@@ -15,12 +15,10 @@ export function shouldBehaveLikeHypercertMinterBurning(): void {
     await expect(deployer.minter.mint(deployer.address, data)).to.emit(minter, "ImpactClaimed");
 
     expect(await minter["balanceOf(address)"](deployer.address)).to.equal(1);
-    expect(await minter["balanceOf(uint256)"](tokenId)).to.equal(100);
+    expect(await minter["balanceOf(uint256)"](tokenId)).to.equal(claim.fractions[0]);
     expect(await minter.ownerOf(tokenId)).to.be.eq(deployer.address);
     expect(await minter.slotOf(1)).to.be.eq(slot);
     expect(await minter.tokenSupplyInSlot(slot)).to.be.eq(1);
-    validateMetadata(await minter.tokenURI(1), claim);
-    validateMetadata(await minter.slotURI(slot), claim);
 
     await expect(deployer.minter.burn(tokenId))
       .to.emit(minter, "Transfer")
