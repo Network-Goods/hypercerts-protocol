@@ -3,8 +3,8 @@ import { ethers, getNamedAccounts, upgrades } from "hardhat";
 
 import { HyperCertMinterUpgrade } from "../../src/types";
 import setupTest, { setupImpactScopes, setupRights, setupTestMetadata, setupWorkScopes } from "../setup";
-import { getEncodedImpactClaim, newClaim, validateMetadata } from "../utils";
-import { HyperCertMinter, HyperCertMinter_Upgrade, UPGRADER_ROLE } from "../wellKnown";
+import { getEncodedImpactClaim, newClaim, subScopeKeysForValues, validateMetadata } from "../utils";
+import { HyperCertMinter, HyperCertMinter_Upgrade, ImpactScopes, UPGRADER_ROLE } from "../wellKnown";
 
 export function shouldBehaveLikeHypercertMinterUpgrade(): void {
   it("supports upgrader role", async function () {
@@ -63,8 +63,9 @@ export function shouldBehaveLikeHypercertMinterUpgrade(): void {
     await setupRights(proxyWithUser);
     await setupWorkScopes(proxyWithUser);
     await proxyWithUser.mint(user, data);
-    validateMetadata(await proxyWithUser.tokenURI(1), claim);
-    validateMetadata(await proxyWithUser.slotURI(1), claim);
+    const claimSubbed = subScopeKeysForValues(claim, ImpactScopes);
+    await validateMetadata(await proxyWithUser.tokenURI(1), claimSubbed, claim.fractions[0]);
+    await validateMetadata(await proxyWithUser.slotURI(1), claimSubbed);
 
     const upgrade = await upgrades.upgradeProxy(proxy, UpgradeFactory, {
       call: "updateVersion",
@@ -72,8 +73,8 @@ export function shouldBehaveLikeHypercertMinterUpgrade(): void {
 
     expect(await upgrade.mockedUpgradeFunction()).to.be.true;
 
-    validateMetadata(await upgrade.tokenURI(1), claim);
-    validateMetadata(await upgrade.slotURI(1), claim);
+    await validateMetadata(await upgrade.tokenURI(1), claimSubbed, claim.fractions[0]);
+    await validateMetadata(await upgrade.slotURI(1), claimSubbed);
 
     const upgradeWithUser = await ethers.getContractAt(HyperCertMinter_Upgrade, upgrade.address, user);
     await expect(upgradeWithUser.split(1, [50, 50]))

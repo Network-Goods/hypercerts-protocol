@@ -2,9 +2,9 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 
 import setupTest from "../setup";
-import { encodeClaim, newClaim, validateMetadata } from "../utils";
+import { encodeClaim, newClaim, subScopeKeysForValues, validateMetadata } from "../utils";
+import { ImpactScopes } from "../wellKnown";
 
-// TODO looping fractions
 export function shouldBehaveLikeHypercertMinterSplitAndMerge(): void {
   it("should allow fraction owner to split a cert into new fractions - 1-to-many", async function () {
     const { user, minter } = await setupTest();
@@ -17,9 +17,10 @@ export function shouldBehaveLikeHypercertMinterSplitAndMerge(): void {
     await expect(user.minter.split(1, [50])).to.be.revertedWith("AlreadyMinted(1)");
     await expect(user.minter.split(1, [100, 50])).to.be.revertedWith("InvalidInput()");
     await expect(user.minter.split(1, [20, 50])).to.be.revertedWith("InvalidInput()");
-    await expect(user.minter.split(2, [50, 30, 10, 5, 5])).to.be.revertedWith("NonExistentToken(2)");
+    const fractions4 = [50, 30, 10, 5, 5];
+    await expect(user.minter.split(2, fractions4)).to.be.revertedWith("NonExistentToken(2)");
 
-    await expect(user.minter.split(1, [50, 30, 10, 5, 5]))
+    await expect(user.minter.split(1, fractions4))
       .to.emit(minter, "Transfer")
       .withArgs(ethers.constants.AddressZero, user.address, 2)
       .to.emit(minter, "SlotChanged")
@@ -37,32 +38,17 @@ export function shouldBehaveLikeHypercertMinterSplitAndMerge(): void {
       .to.emit(minter, "SlotChanged")
       .withArgs(5, 0, slot);
 
-    expect(await minter.ownerOf(1)).to.be.eq(user.address);
-    expect(await minter.ownerOf(2)).to.be.eq(user.address);
-    expect(await minter.ownerOf(3)).to.be.eq(user.address);
-    expect(await minter.ownerOf(4)).to.be.eq(user.address);
-    expect(await minter.ownerOf(5)).to.be.eq(user.address);
-
-    expect(await minter.slotOf(1)).to.be.eq(slot);
-    expect(await minter.slotOf(2)).to.be.eq(slot);
-    expect(await minter.slotOf(3)).to.be.eq(slot);
-    expect(await minter.slotOf(4)).to.be.eq(slot);
-    expect(await minter.slotOf(5)).to.be.eq(slot);
+    const claimSubbed = subScopeKeysForValues(claim, ImpactScopes);
+    for (let i = 1; i <= fractions4.length; i++) {
+      expect(await minter.ownerOf(i)).to.be.eq(user.address);
+      expect(await minter.slotOf(i)).to.be.eq(slot);
+      const units = fractions4[i - 1];
+      expect(await minter["balanceOf(uint256)"](i)).to.be.eq(units);
+      await validateMetadata(await minter.tokenURI(i), claimSubbed, units);
+    }
 
     //TODO tokenSupply
     expect(await minter.tokenSupplyInSlot(slot)).to.be.eq(5);
-
-    expect(await minter["balanceOf(uint256)"](1)).to.be.eq("50");
-    expect(await minter["balanceOf(uint256)"](2)).to.be.eq("30");
-    expect(await minter["balanceOf(uint256)"](3)).to.be.eq("10");
-    expect(await minter["balanceOf(uint256)"](4)).to.be.eq("5");
-    expect(await minter["balanceOf(uint256)"](5)).to.be.eq("5");
-
-    validateMetadata(await minter.tokenURI(1), claim);
-    validateMetadata(await minter.tokenURI(2), claim);
-    validateMetadata(await minter.tokenURI(3), claim);
-    validateMetadata(await minter.tokenURI(4), claim);
-    validateMetadata(await minter.tokenURI(5), claim);
   });
 
   it("should allow fraction owner to merge a cert fraction into an existing fraction", async function () {
