@@ -6,6 +6,7 @@ pragma solidity ^0.8.14;
 import "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
 import "./lib/DateTime.sol";
 import "./lib/strings.sol";
+import "hardhat/console.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
@@ -132,6 +133,7 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
                     _generateName(params, colors_),
                     _generateDivider(colors_),
                     _generateWorkperiod(params, colors_),
+                    _generateFooter(colors_),
                     "</svg>"
                 )
             );
@@ -183,7 +185,7 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
 
     function _generateColors(string memory primaryScopeOfImpact) internal view returns (SVGColors memory _colors) {
         if (colorsCounter == 0) {
-            return _colors = SVGColors({ primary: "yellow", labels: "green", background: "purple" });
+            return _colors = SVGColors({ primary: "#F3556F", labels: "#121933", background: "#D4BFFF" });
         }
         _colors = colors[_getColorIndex(primaryScopeOfImpact)];
         if (bytes(_colors.primary).length == 0) {
@@ -229,8 +231,8 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
         return
             string.concat(
                 '<text id="scope-impact-color" x="50%" y="0%" dominant-baseline="middle" '
-                'text-anchor="middle" transform="translate(0 102.06)" '
-                'style="font-family: Helvetica; font-size: 20px; fill: ',
+                'text-anchor="middle" transform="translate(0 100)" '
+                'style="font-family: Helvetica; font-size: 25px; fill: ',
                 colors_.labels,
                 '">',
                 cutString(params.scopesOfImpact[0], 20),
@@ -241,7 +243,7 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
     //TODO ugly string manipulation
     function _generateName(SVGParams memory params, SVGColors memory colors_)
         internal
-        pure
+        view
         virtual
         returns (string memory)
     {
@@ -260,31 +262,92 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
             while (currentLine < 3) {
                 strings.slice memory part = ogSlice.split(delim);
 
-                if (ogSlice.empty() && currentLine == 0) {
-                    allLines[currentLine] = cutString(params.name, 10);
-                    break;
-                }
+                console.log("Part: ", part.toString());
 
-                if (part.empty()) {
-                    line[lineEntry] = ogSlice;
-                    allLines[currentLine] = " ".toSlice().join(line);
-                    break;
-                }
+                // Last or long word
+                if (ogSlice.empty()) {
+                    if (lineLength == 0) {
+                        if (part.len() < 13) {
+                            allLines[currentLine] = part.toString();
+                            break;
+                        } else {
+                            (string memory left, string memory right) = splitString(part.toString(), 13);
+                            allLines[currentLine] = left;
+                            currentLine += 1;
+                            ogSlice = right.toSlice();
+                            continue;
+                        }
+                    }
 
-                if (lineLength + part.len() > 10) {
-                    if (currentLine == 2) line[lineEntry] = "...".toSlice();
-                    allLines[currentLine] = " ".toSlice().join(line);
+                    if (lineLength > 0) {
+                        if (lineLength + part.len() < 13) {
+                            line[lineEntry] = part;
+                            allLines[currentLine] = " ".toSlice().join(line);
+                            break;
+                        } else {
+                            if (currentLine == 2) {
+                                line[lineEntry] = cutString(part.toString(), (13 + lineLength) - part.len()).toSlice();
+                                allLines[currentLine] = " ".toSlice().join(line);
+                                break;
+                            } else {
+                                allLines[currentLine] = " ".toSlice().join(line);
+                                currentLine += 1;
 
-                    currentLine += 1;
+                                (string memory left, string memory right) = splitString(part.toString(), 13);
 
-                    line = new strings.slice[](6);
-                    line[0] = part;
-                    lineLength = part.len();
-                    lineEntry = 1;
+                                if (currentLine == 2) {
+                                    allLines[currentLine] = cutString(left, 10);
+                                } else {
+                                    allLines[currentLine] = left;
+                                    currentLine += 1;
+                                    allLines[currentLine] = cutString(right, 10);
+                                }
+
+                                break;
+                            }
+                        }
+                    }
                 } else {
-                    lineLength += part.len();
-                    line[lineEntry] = part;
-                    lineEntry += 1;
+                    if (lineLength == 0) {
+                        if (part.len() > 13) {
+                            (string memory left, string memory right) = splitString(part.toString(), 13);
+                            allLines[currentLine] = left;
+                            currentLine += 1;
+                            ogSlice = string.concat(right, " ", ogSlice.toString()).toSlice();
+                            continue;
+                        } else {
+                            line[lineEntry] = part;
+                            lineEntry += 1;
+                            lineLength += part.len();
+                        }
+                    } else if (lineLength + part.len() > 13) {
+                        if (currentLine == 2) {
+                            line[lineEntry] = "...".toSlice();
+                            allLines[currentLine] = " ".toSlice().join(line);
+                            break;
+                        } else {
+                            if (part.len() > 13) {
+                                (string memory left, string memory right) = splitString(part.toString(), 13);
+                                allLines[currentLine] = " ".toSlice().join(line);
+                                line = new strings.slice[](6);
+                                lineEntry = 0;
+
+                                currentLine += 1;
+                                if (currentLine == 2) {
+                                    allLines[currentLine] = cutString(left, 10);
+                                    currentLine += 1;
+                                } else {
+                                    allLines[currentLine] = left;
+                                    currentLine += 1;
+                                    ogSlice = string.concat(right, " ", ogSlice.toString()).toSlice();
+                                }
+                            }
+                        }
+                    } else {
+                        line[lineEntry] = part;
+                        lineEntry += 1;
+                        lineLength += part.len();
+                    }
                 }
             }
 
@@ -327,7 +390,7 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
                     abi.encodePacked(
                         '<g><text id="work-period-color" transform="translate(0 565)" '
                         'dominant-baseline="middle" text-anchor="middle"  '
-                        'style="font-family: Helvetica; font-size: 20px; fill: ',
+                        'style="font-family: Helvetica; font-size: 25px; fill: ',
                         colors_.labels,
                         '">',
                         '<tspan x="50%" y="0" style="letter-spacing: -.05em;">',
@@ -367,9 +430,22 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
                 abi.encodePacked(
                     '<g id="fraction-color" text-rendering="optimizeSpeed" '
                     'dominant-baseline="middle" text-anchor="middle" >',
-                    '<text id="fraction-color-2" x="50%" transform="translate(0 753)" ',
-                    string.concat('style="fill: ', colors_.labels, '; font-family: Monaco; font-size: 20px">'),
+                    '<text id="fraction-color-2" x="50%" transform="translate(0 755)" ',
+                    string.concat('style="fill: ', colors_.labels, '; font-family: Monaco; font-size: 25px">'),
                     string.concat(string(uint2decimal(percent, 2)), " %</text></g>")
+                )
+            );
+    }
+
+    function _generateFooter(SVGColors memory colors_) internal pure virtual returns (string memory) {
+        return
+            string(
+                abi.encodePacked(
+                    '<g id="fraction-color" text-rendering="optimizeSpeed" '
+                    'dominant-baseline="middle" text-anchor="middle" >',
+                    '<text id="fraction-color-2" x="50%" transform="translate(0 755)" ',
+                    string.concat('style="fill: ', colors_.labels, '; font-family: Monaco; font-size: 25px">'),
+                    string.concat("Hypercert", "</text></g>")
                 )
             );
     }
@@ -386,7 +462,7 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
         }
     }
 
-    function bytes32ToString(bytes32 _bytes32, uint8 cutoff) internal pure returns (string memory parsedString) {
+    function bytes32ToString(bytes32 _bytes32, uint256 cutoff) internal pure returns (string memory parsedString) {
         uint8 i = 0;
         while (i < cutoff && _bytes32[i] != 0) {
             i++;
@@ -398,7 +474,7 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
         parsedString = string(bytesArray);
     }
 
-    function cutString(string memory source, uint8 cutoff) internal pure returns (string memory cutString_) {
+    function cutString(string memory source, uint256 cutoff) internal pure returns (string memory cutString_) {
         bytes32 stringAsBytes = stringToBytes32(source);
         cutString_ = bytes32ToString(stringAsBytes, cutoff);
         if (stringAsBytes[cutoff] != 0) {
@@ -406,9 +482,20 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
         }
     }
 
+    function splitString(string memory source, uint256 cutoff)
+        internal
+        view
+        returns (string memory cutString_, string memory leftOver_)
+    {
+        bytes32 stringAsBytes = stringToBytes32(source);
+        cutString_ = bytes32ToString(stringAsBytes, cutoff);
+        strings.slice memory leftOverSlice = source.toSlice().beyond(cutString_.toSlice());
+        leftOver_ = leftOverSlice.toString();
+    }
+
     function getPercent(uint256 part, uint256 whole) public pure returns (uint256 percent) {
         uint256 numerator = part * 100000;
-        require(numerator > part, "Overflow"); // Should use SafeMath throughout if this was a real implementation.
+        require(numerator > part, "Overflow");
         uint256 temp = numerator / whole + 5; // proper rounding up
         return temp / 10;
     }

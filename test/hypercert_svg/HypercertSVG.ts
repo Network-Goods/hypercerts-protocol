@@ -52,6 +52,24 @@ const input4: SVGInput = {
   totalUnits: 1000,
 };
 
+const input5: SVGInput = {
+  name: "TestSVG_XL: OneTwoThreeFourFiveSixSevenEightNine",
+  impactScopes: Object.values(randomScopes(200)),
+  workTimeframe: [1640998800, 1643590800],
+  impactTimeframe: [1643677200, 1646010000],
+  units: 500,
+  totalUnits: 1000,
+};
+
+const input6: SVGInput = {
+  name: "Supercalifragilisticexpialidocious",
+  impactScopes: Object.values(randomScopes(200)),
+  workTimeframe: [1640998800, 1643590800],
+  impactTimeframe: [1643677200, 1646010000],
+  units: 500,
+  totalUnits: 1000,
+};
+
 const BASE_PATH = "test/hypercert_svg/";
 
 const generateAndValidateSVG = async (
@@ -88,7 +106,7 @@ const generateAndValidateSVG = async (
 };
 
 describe("Unit tests", function () {
-  describe(HyperCertSVG, async function () {
+  describe.only(HyperCertSVG, async function () {
     it("is an initializable contract", async () => {
       const tokenFactory = await ethers.getContractFactory(HyperCertSVG);
       const tokenInstance = <SVG>await tokenFactory.deploy();
@@ -124,7 +142,7 @@ describe("Unit tests", function () {
       });
     });
 
-    const data = [input1, input2, input3, input4];
+    const data = [input1, input2, input3, input4, input5, input6];
 
     data.forEach(input => {
       it(`should generate valid hypercert SVG (${input.name})`, async () => {
