@@ -432,7 +432,7 @@ abstract contract ERC3525Upgradeable is
         TokenData storage tokenData = _allTokens[_allTokensIndex[tokenId_]];
         address owner = tokenData.owner;
 
-        if (msg.sender != owner) {
+        if (!_isApprovedOrOwner(_msgSender(), tokenId_)) {
             revert NotApprovedOrOwner();
         }
 
