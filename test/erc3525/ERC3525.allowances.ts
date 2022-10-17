@@ -54,25 +54,5 @@ export function shouldBehaveLikeSemiFungibleTokenAllowances(): void {
       await expect(anon.sft.transfer(1, 2, 500_001)).to.be.revertedWith("InsufficientAllowance");
       await expect(anon.sft.transfer(1, 2, 500_000)).to.emit(sft, "TransferValue").withArgs(1, 2, 500_000);
     });
-
-    it("allows approval for all", async function () {
-      const { sft, user, anon } = await setupTestERC3525();
-
-      await user.sft.mintValue(user.address, 1, 1_000_000);
-      expect(await sft.isApprovedForAll(user.address, anon.address)).to.be.false;
-
-      // Custom errors
-      await expect(user.sft.setApprovalForAll(user.address, true)).to.be.revertedWith("InvalidApproval");
-
-      await expect(anon.sft.burn(1)).to.be.revertedWith("NotApprovedOrOwner");
-
-      await expect(user.sft.setApprovalForAll(anon.address, true))
-        .to.emit(sft, "ApprovalForAll")
-        .withArgs(user.address, anon.address, true);
-
-      expect(await sft.isApprovedForAll(user.address, anon.address)).to.be.true;
-
-      await expect(anon.sft.burn(1)).to.emit(sft, "Transfer").withArgs(1, user.address, ethers.constants.AddressZero);
-    });
   });
 }

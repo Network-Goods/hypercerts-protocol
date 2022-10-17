@@ -9,9 +9,12 @@ export function shouldBehaveLikeSemiFungibleTokenBurn(): void {
 
       await sft.mintValue(user.address, 1, 1_000_000);
 
-      await expect(sft.burn(1)).to.be.revertedWith("NotApprovedOrOwner");
+      const tokenId = 1;
+      await expect(sft.burn(tokenId)).to.be.revertedWith("NotApprovedOrOwner");
       //TODO check token allocation enumeration
-      await expect(user.sft.burn(1)).to.emit(sft, "SlotChanged").withArgs(1, 1, 0);
+      await expect(user.sft.burn(tokenId)).to.emit(sft, "SlotChanged").withArgs(1, 1, 0);
+
+      await expect(sft.ownerOf(tokenId)).to.be.revertedWith("NonExistentToken");
     });
 
     it("does not allow burning other tokens in the same slot the caller does not own", async function () {
