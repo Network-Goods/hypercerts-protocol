@@ -106,7 +106,7 @@ const generateAndValidateSVG = async (
 };
 
 describe("Unit tests", function () {
-  describe.only(HyperCertSVG, async function () {
+  describe(HyperCertSVG, async function () {
     it("is an initializable contract", async () => {
       const tokenFactory = await ethers.getContractFactory(HyperCertSVG);
       const tokenInstance = <SVG>await tokenFactory.deploy();
