@@ -25,4 +25,19 @@ export function shouldBehaveLikeHypercertMinterIntegration(): void {
     await expect(deployer.minter.mint(deployer.address, secondData)).to.emit(minter, "ImpactClaimed");
     await expect(deployer.minter.split(7, [500, 500])).to.emit(minter, "TransferValue");
   });
+
+  it("supports minting the same claim after it's been burned", async function () {
+    const { deployer, minter, user, anon } = await setupTest();
+    const claim = await newClaim({ contributors: [deployer.address, user.address, anon.address], fractions: [100] });
+    const data = encodeClaim(claim);
+
+    await expect(deployer.minter.mint(deployer.address, data)).to.emit(minter, "ImpactClaimed");
+    expect(await deployer.minter["balanceOf(uint256)"](1)).to.be.eq("100");
+
+    await expect(deployer.minter.mint(deployer.address, data)).to.be.revertedWith("ConflictingClaim()");
+
+    await expect(deployer.minter.burn(1)).to.emit(minter, "SlotChanged");
+
+    await expect(deployer.minter.mint(deployer.address, data)).to.emit(minter, "ImpactClaimed");
+  });
 }
