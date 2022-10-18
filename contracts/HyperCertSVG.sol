@@ -241,6 +241,7 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
     }
 
     //TODO ugly string manipulation
+    /* solhint-disable code-complexity */
     function _generateName(SVGParams memory params, SVGColors memory colors_)
         internal
         view
@@ -261,8 +262,6 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
 
             while (currentLine < 3) {
                 strings.slice memory part = ogSlice.split(delim);
-
-                console.log("Part: ", part.toString());
 
                 // Last or long word
                 if (ogSlice.empty()) {
@@ -374,6 +373,8 @@ contract HyperCertSVG is Initializable, AccessControlUpgradeable, UUPSUpgradeabl
                 )
             );
     }
+
+    /* solhint-enable code-complexity */
 
     function _generateWorkperiod(SVGParams memory params, SVGColors memory colors_)
         internal
