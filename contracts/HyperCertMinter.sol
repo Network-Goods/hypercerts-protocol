@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.4;
+pragma solidity ^0.8.14;
 
-import "./ERC3525Upgradeable.sol";
-import "./interfaces/IHypercertMetadata.sol";
+import "./ERC3525SlotEnumerableUpgradeable.sol";
+import "./interfaces/IHyperCertMetadata.sol";
 import "./utils/ArraysUpgradeable.sol";
 import "./utils/StringsExtensions.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
@@ -14,15 +14,16 @@ error DuplicateScope();
 error InvalidScope();
 error InvalidTimeframe(uint64 from, uint64 to);
 error ConflictingClaim();
+error InvalidInput();
 
 /// @title Hypercertificate minting logic
 /// @notice Contains functions and events to initialize and issue a hypercertificate
 /// @author bitbeckers, mr_bluesky
-contract HypercertMinter is Initializable, ERC3525Upgradeable, AccessControlUpgradeable, UUPSUpgradeable {
-    using ArraysUpgradeable for uint8[];
+contract HyperCertMinter is Initializable, ERC3525SlotEnumerableUpgradeable, AccessControlUpgradeable, UUPSUpgradeable {
+    using ArraysUpgradeable for uint64[];
 
     /// @notice Contract name
-    string public constant NAME = "Hypercerts";
+    string public constant NAME = "HyperCerts";
     /// @notice Token symbol
     string public constant SYMBOL = "HCRT";
     /// @notice Token value decimals
@@ -32,7 +33,7 @@ contract HypercertMinter is Initializable, ERC3525Upgradeable, AccessControlUpgr
     /// @notice Current version of the contract
     uint16 internal _version;
     /// @notice Hypercert metadata contract
-    address internal _metadata;
+    IHyperCertMetadata internal _metadata;
 
     /// @notice Mapping of id's to work-scopes
     mapping(bytes32 => string) public workScopes;
@@ -41,7 +42,7 @@ contract HypercertMinter is Initializable, ERC3525Upgradeable, AccessControlUpgr
     /// @notice Mapping of id's to rights
     mapping(bytes32 => string) public rights;
     mapping(address => mapping(bytes32 => bool)) internal _contributorImpacts;
-    mapping(uint256 => Claim) internal _impactCerts;
+    mapping(uint256 => Claim) internal _hyperCerts;
 
     struct Claim {
         bytes32 claimHash;
@@ -57,6 +58,7 @@ contract HypercertMinter is Initializable, ERC3525Upgradeable, AccessControlUpgr
         string name;
         string description;
         string uri;
+        address minter;
     }
 
     /*******************
@@ -67,7 +69,7 @@ contract HypercertMinter is Initializable, ERC3525Upgradeable, AccessControlUpgr
     /// @param id Id of the claimed impact.
     /// @param minter Address of cert minter.
     /// @param fractions Units of tokens issued under the hypercert.
-    event ImpactClaimed(uint256 id, address minter, uint8[] fractions);
+    event ImpactClaimed(uint256 id, address minter, uint64[] fractions);
 
     /// @notice Emitted when a new impact scope is added.
     /// @param id Id of the impact scope.
@@ -96,11 +98,11 @@ contract HypercertMinter is Initializable, ERC3525Upgradeable, AccessControlUpgr
 
     /// @notice Contract initialization logic
     function initialize(address metadataAddress) public initializer {
-        _metadata = metadataAddress;
+        _metadata = IHyperCertMetadata(metadataAddress);
 
-        __ERC721Burnable_init();
         __AccessControl_init();
         __UUPSUpgradeable_init();
+        __ERC3525Upgradeable_init();
 
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(UPGRADER_ROLE, msg.sender);
@@ -142,32 +144,63 @@ contract HypercertMinter is Initializable, ERC3525Upgradeable, AccessControlUpgr
     /// @param data Data representing the parameters of the claim
     function mint(address account, bytes calldata data) public virtual {
         // Parse data to get Claim
-        (Claim memory claim, uint8[] memory fractions) = _parseData(data);
+        (Claim memory claim, uint64[] memory fractions) = _parseData(data);
+        claim.minter = msg.sender;
 
         _authorizeMint(account, claim);
 
         // Check on overlapping contributor-claims and store if success
         _storeContributorsClaims(claim.claimHash, claim.contributors);
 
-        uint256 slot = uint256(claim.claimHash);
+        uint256 slot = slotCount() + 1;
         // Store impact cert
-        _impactCerts[slot] = claim;
+        _hyperCerts[slot] = claim;
 
         // Mint impact cert
         uint256 len = fractions.length;
         for (uint256 i = 0; i < len; i++) {
-            uint256 tokenID = _getNewTokenId(0);
-            _mintValue(account, tokenID, slot, fractions[i]);
+            _mintValue(account, slot, fractions[i]);
         }
 
         emit ImpactClaimed(slot, account, fractions);
+    }
+
+    function split(uint256 tokenId, uint256[] calldata amounts) public {
+        if (!_exists(tokenId)) revert NonExistentToken(tokenId);
+
+        uint256 total;
+
+        uint256 amountsLength = amounts.length;
+        if (amountsLength == 1) revert AlreadyMinted(tokenId);
+
+        for (uint256 i; i < amountsLength; i++) {
+            total += amounts[i];
+        }
+
+        if (total > balanceOf(tokenId) || total < balanceOf(tokenId)) revert InvalidInput();
+
+        for (uint256 i = 1; i < amountsLength; i++) {
+            _splitValue(tokenId, amounts[i]);
+        }
+    }
+
+    function merge(uint256[] memory tokenIds) public {
+        uint256 len = tokenIds.length;
+        uint256 targetTokenId = tokenIds[len - 1];
+        for (uint256 i = 0; i < len; i++) {
+            uint256 tokenId = tokenIds[i];
+            if (tokenId != targetTokenId) {
+                _mergeValue(tokenId, targetTokenId);
+                _burn(tokenId);
+            }
+        }
     }
 
     /// @notice Gets the impact claim with the specified id
     /// @param claimID Id of the claim
     /// @return The claim, if it doesn't exist with default values
     function getImpactCert(uint256 claimID) public view returns (Claim memory) {
-        return _impactCerts[claimID];
+        return _hyperCerts[claimID];
     }
 
     /// @notice gets the current version of the contract
@@ -187,17 +220,17 @@ contract HypercertMinter is Initializable, ERC3525Upgradeable, AccessControlUpgr
     function supportsInterface(bytes4 interfaceId)
         public
         view
-        override(ERC3525Upgradeable, AccessControlUpgradeable)
+        override(ERC3525SlotEnumerableUpgradeable, AccessControlUpgradeable)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
     }
 
-    function name() public pure override(ERC721Upgradeable, IERC721MetadataUpgradeable) returns (string memory) {
+    function name() public pure override returns (string memory) {
         return NAME;
     }
 
-    function symbol() public pure override(ERC721Upgradeable, IERC721MetadataUpgradeable) returns (string memory) {
+    function symbol() public pure override returns (string memory) {
         return SYMBOL;
     }
 
@@ -214,17 +247,41 @@ contract HypercertMinter is Initializable, ERC3525Upgradeable, AccessControlUpgr
         return keccak256(abi.encode(workTimeframe_, workScopes_, impactTimeframe_, impactScopes_));
     }
 
-    function slotURI(uint256 slotId_) external view returns (string memory) {
-        return IHypercertMetadata(_metadata).generateSlotURI(slotId_);
+    function slotURI(uint256 slotId_) external view override returns (string memory) {
+        if (!_hyperCerts[slotId_].exists) {
+            revert NonExistentSlot(slotId_);
+        }
+        return _metadata.generateSlotURI(slotId_);
     }
 
-    function tokenURI(uint256 tokenId_)
-        public
-        view
-        override(ERC721Upgradeable, IERC721MetadataUpgradeable)
-        returns (string memory)
-    {
-        return IHypercertMetadata(_metadata).generateTokenURI(slotOf(tokenId_), tokenId_);
+    function tokenURI(uint256 tokenId_) public view override returns (string memory) {
+        return _metadata.generateTokenURI(slotOf(tokenId_), tokenId_);
+    }
+
+    function contractURI() public view override returns (string memory) {
+        return _metadata.generateContractURI();
+    }
+
+    function burn(uint256 tokenId_) public {
+        Claim storage claim = _hyperCerts[slotOf(tokenId_)];
+        if (msg.sender != claim.minter) {
+            revert NotApprovedOrOwner();
+        }
+
+        if (balanceOf(tokenId_) != claim.totalUnits) {
+            revert InsufficientBalance(claim.totalUnits, balanceOf(tokenId_));
+        }
+
+        _burn(tokenId_);
+        claim.exists = false;
+    }
+
+    function donate(uint256 tokenId_) public {
+        if (msg.sender == ownerOf(tokenId_)) {
+            revert NotApprovedOrOwner();
+        }
+
+        _burn(tokenId_);
     }
 
     /*******************
@@ -274,7 +331,7 @@ contract HypercertMinter is Initializable, ERC3525Upgradeable, AccessControlUpgr
         if (claim.workTimeframe[0] > claim.workTimeframe[1]) {
             revert InvalidTimeframe(claim.workTimeframe[0], claim.workTimeframe[1]);
         }
-        if (claim.impactTimeframe[0] > claim.impactTimeframe[1]) {
+        if (claim.impactTimeframe[0] > claim.impactTimeframe[1] && claim.impactTimeframe[0] != 0) {
             revert InvalidTimeframe(claim.impactTimeframe[0], claim.impactTimeframe[1]);
         }
         if (claim.workTimeframe[0] > claim.impactTimeframe[0]) {
@@ -303,7 +360,7 @@ contract HypercertMinter is Initializable, ERC3525Upgradeable, AccessControlUpgr
     /// @dev This function is overridable in order to support future schema changes
     /// @return claim The parsed Claim struct
     /// @return Claim metadata URI
-    function _parseData(bytes calldata data) internal pure virtual returns (Claim memory claim, uint8[] memory) {
+    function _parseData(bytes calldata data) internal pure virtual returns (Claim memory claim, uint64[] memory) {
         if (data.length == 0) {
             revert EmptyInput();
         }
@@ -318,10 +375,10 @@ contract HypercertMinter is Initializable, ERC3525Upgradeable, AccessControlUpgr
             string memory name_,
             string memory description_,
             string memory uri_,
-            uint8[] memory fractions
+            uint64[] memory fractions
         ) = abi.decode(
                 data,
-                (bytes32[], bytes32[], bytes32[], uint64[2], uint64[2], address[], string, string, string, uint8[])
+                (bytes32[], bytes32[], bytes32[], uint64[2], uint64[2], address[], string, string, string, uint64[])
             );
 
         claim.claimHash = getHash(workTimeframe, workScopes_, impactTimeframe, impactScopes_);
@@ -359,5 +416,16 @@ contract HypercertMinter is Initializable, ERC3525Upgradeable, AccessControlUpgr
     /// @return true, if the key exists in the mapping
     function _hasKey(mapping(bytes32 => string) storage map, bytes32 key) internal view returns (bool) {
         return (bytes(map[key]).length > 0);
+    }
+
+    function _msgSender() internal view override(ContextUpgradeable, ERC3525Upgradeable) returns (address sender) {
+        return msg.sender;
+    }
+
+    function setMetadataGenerator(address metadataGenerator) external onlyRole(UPGRADER_ROLE) {
+        if (metadataGenerator == address(0)) {
+            revert ToZeroAddress();
+        }
+        _metadata = IHyperCertMetadata(metadataGenerator);
     }
 }

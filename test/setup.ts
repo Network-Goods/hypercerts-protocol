@@ -1,22 +1,36 @@
 import { expect } from "chai";
 import { deployments } from "hardhat";
 
-import { ERC3525_Testing, HypercertMinter, HypercertMinterUpgrade } from "../src/types";
-import { ERC3525, HypercertMinter_Current, ImpactScopes, Rights, WorkScopes } from "./wellKnown";
+import {
+  ERC3525_Testing,
+  HyperCertMinter,
+  HyperCertMinterUpgrade,
+  HyperCertMetadata as Metadata,
+  HyperCertSVG as SVG,
+} from "../src/types";
+import {
+  ERC3525,
+  HyperCertMetadata,
+  HyperCertMinter_Current,
+  HyperCertSVG,
+  ImpactScopes,
+  Rights,
+  WorkScopes,
+} from "./wellKnown";
 
-export type HypercertContract = HypercertMinter | HypercertMinterUpgrade;
+export type HyperCertContract = HyperCertMinter | HyperCertMinterUpgrade;
 export type ERC3525 = ERC3525_Testing;
 
-export type AddressedHypercertMinterContract = {
+export type AddressedHyperCertMinterContract = {
   address: string;
-  minter: HypercertContract;
+  minter: HyperCertContract;
 };
 
-export type HypercertCollection = {
-  minter: HypercertContract;
-  deployer: AddressedHypercertMinterContract;
-  user: AddressedHypercertMinterContract;
-  anon: AddressedHypercertMinterContract;
+export type HyperCertCollection = {
+  minter: HyperCertContract;
+  deployer: AddressedHyperCertMinterContract;
+  user: AddressedHyperCertMinterContract;
+  anon: AddressedHyperCertMinterContract;
 };
 
 export const setupTestERC3525 = deployments.createFixture(
@@ -26,7 +40,6 @@ export const setupTestERC3525 = deployments.createFixture(
 
     // Contracts
     const sft: ERC3525 = await ethers.getContract(ERC3525);
-    await sft.initialize();
 
     // Account config
     const setupAddress = async (address: string) => {
@@ -46,8 +59,58 @@ export const setupTestERC3525 = deployments.createFixture(
   },
 );
 
+export const setupTestMetadata = deployments.createFixture(
+  async ({ deployments, getNamedAccounts, ethers }, _options) => {
+    await deployments.fixture(); // ensure you start from a fresh deployments
+    const { deployer, user, anon } = await getNamedAccounts();
+
+    // Contracts
+    const sft = <Metadata>await ethers.getContract(HyperCertMetadata);
+
+    // Account config
+    const setupAddress = async (address: string) => {
+      return {
+        address: address,
+        sft: <Metadata>await ethers.getContract(HyperCertMetadata, address),
+      };
+    };
+
+    // Struct
+    return {
+      sft,
+      deployer: await setupAddress(deployer),
+      user: await setupAddress(user),
+      anon: await setupAddress(anon),
+    };
+  },
+);
+
+export const setupTestSVG = deployments.createFixture(async ({ deployments, getNamedAccounts, ethers }, _options) => {
+  await deployments.fixture(); // ensure you start from a fresh deployments
+  const { deployer, user, anon } = await getNamedAccounts();
+
+  // Contracts
+  const sft = <SVG>await ethers.getContract(HyperCertSVG);
+
+  // Account config
+  const setupAddress = async (address: string) => {
+    return {
+      address: address,
+      sft: <SVG>await ethers.getContract(HyperCertSVG, address),
+    };
+  };
+
+  // Struct
+  return {
+    sft,
+    deployer: await setupAddress(deployer),
+    user: await setupAddress(user),
+    anon: await setupAddress(anon),
+  };
+});
+
 const setupTest = deployments.createFixture<
-  HypercertCollection,
+  HyperCertCollection,
   {
     impactScopes?: {
       [k: string]: string;
@@ -64,13 +127,13 @@ const setupTest = deployments.createFixture<
   const { deployer, user, anon } = await getNamedAccounts();
 
   // Contracts
-  const minter: HypercertContract = await ethers.getContract(HypercertMinter_Current);
+  const minter: HyperCertContract = await ethers.getContract(HyperCertMinter_Current);
 
   // Account config
   const setupAddress = async (address: string) => {
     return {
       address: address,
-      minter: <HypercertContract>await ethers.getContract(HypercertMinter_Current, address),
+      minter: <HyperCertContract>await ethers.getContract(HyperCertMinter_Current, address),
     };
   };
 
@@ -88,8 +151,8 @@ const setupTest = deployments.createFixture<
 });
 
 export const setupImpactScopes = async (
-  contract: HypercertContract,
-  contractAtAddress?: HypercertContract,
+  contract: HyperCertContract,
+  contractAtAddress?: HyperCertContract,
   impactScopes = ImpactScopes,
 ) => {
   for (const [hash, text] of Object.entries(impactScopes)) {
@@ -100,8 +163,8 @@ export const setupImpactScopes = async (
 };
 
 export const setupRights = async (
-  contract: HypercertContract,
-  contractAtAddress?: HypercertContract,
+  contract: HyperCertContract,
+  contractAtAddress?: HyperCertContract,
   rights = Rights,
 ) => {
   for (const [hash, text] of Object.entries(rights)) {
@@ -112,8 +175,8 @@ export const setupRights = async (
 };
 
 export const setupWorkScopes = async (
-  contract: HypercertContract,
-  contractAtAddress?: HypercertContract,
+  contract: HyperCertContract,
+  contractAtAddress?: HyperCertContract,
   workScopes = WorkScopes,
 ) => {
   for (const [hash, text] of Object.entries(workScopes)) {

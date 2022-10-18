@@ -1,11 +1,13 @@
 import { expect } from "chai";
 import { ethers, getNamedAccounts } from "hardhat";
 
-import { ERC3525Upgradeable, ERC3525_Testing } from "../../src/types";
+import { ERC3525_Testing } from "../../src/types";
 import { ERC3525 } from "../wellKnown";
 import { shouldBehaveLikeSemiFungibleTokenAllowances } from "./ERC3525.allowances";
+import { shouldBehaveLikeSemiFungibleTokenApprovals } from "./ERC3525.approvals";
 import { shouldBehaveLikeSemiFungibleTokenBurn } from "./ERC3525.burn";
 import { shouldBehaveLikeSemiFungibleTokenMint } from "./ERC3525.mint";
+import { shouldBehaveLikeSemiFungibleTokenMiscellaneous } from "./ERC3525.miscellaneous";
 import { shouldBehaveLikeSemiFungibleTokenTransfer } from "./ERC3525.transfer";
 
 describe("Unit tests", function () {
@@ -23,13 +25,12 @@ describe("Unit tests", function () {
       // 0x80ac58cd is the ERC165 interface identifier for EIP721 - backward compatible with NFT
       expect(await tokenInstance.supportsInterface("0x80ac58cd")).to.be.true;
 
-      await expect(tokenInstance.initialize()).to.emit(tokenInstance, "Initialized").withArgs(1);
       await expect(tokenInstance.initialize()).to.be.revertedWith("Initializable: contract is already initialized");
     });
 
     it("supports enumerable slots", async () => {
       const tokenFactory = await ethers.getContractFactory(ERC3525);
-      const tokenInstance = <ERC3525Upgradeable>await tokenFactory.deploy();
+      const tokenInstance = await tokenFactory.deploy();
 
       // 0x3b741b9e is the ERC165 interface identifier for IERC3525SlotEnumerable
       expect(await tokenInstance.supportsInterface("0x3b741b9e")).to.be.true;
@@ -52,7 +53,7 @@ describe("Unit tests", function () {
         .true;
       expect(await tokenInstance.slotURI(0).then((res: string) => res.startsWith(`data:application/json;`))).to.be.true;
 
-      await tokenInstance.mintValue(deployer, 1, 12345, 10000);
+      await tokenInstance.mintValue(deployer, 12345, 10000);
       expect(await tokenInstance.tokenURI(1).then((res: string) => res.startsWith(`data:application/json;`))).to.be
         .true;
     });
@@ -61,5 +62,7 @@ describe("Unit tests", function () {
     shouldBehaveLikeSemiFungibleTokenTransfer();
     shouldBehaveLikeSemiFungibleTokenBurn();
     shouldBehaveLikeSemiFungibleTokenAllowances();
+    shouldBehaveLikeSemiFungibleTokenApprovals();
+    shouldBehaveLikeSemiFungibleTokenMiscellaneous();
   });
 });

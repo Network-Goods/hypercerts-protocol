@@ -1,3 +1,5 @@
 # directories
 **/artifacts
 **/node_modules
+**/mocks
+**/lib

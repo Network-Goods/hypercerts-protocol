@@ -3,7 +3,7 @@ import { expect } from "chai";
 import setupTest, { setupImpactScopes, setupWorkScopes } from "../setup";
 import { ImpactScopes, WorkScopes } from "../wellKnown";
 
-export function shouldBehaveLikeHypercertMinterAddingImpactScopes(): void {
+export function shouldBehaveLikeHyperCertMinterAddingImpactScopes(): void {
   it("should allow anyone to add new impact scopes", async function () {
     const { anon, minter } = await setupTest({ impactScopes: {} });
     await setupImpactScopes(anon.minter, minter);
@@ -30,7 +30,7 @@ export function shouldBehaveLikeHypercertMinterAddingImpactScopes(): void {
   });
 }
 
-export function shouldBehaveLikeHypercertMinterAddingWorkScopes(): void {
+export function shouldBehaveLikeHyperCertMinterAddingWorkScopes(): void {
   it("should allow anyone to add new work scopes", async function () {
     const { anon, minter } = await setupTest({ workScopes: {} });
     await setupWorkScopes(anon.minter, minter);

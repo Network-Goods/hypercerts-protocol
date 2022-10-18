@@ -69,6 +69,7 @@ const config: HardhatUserConfig = {
   },
   gasReporter: {
     currency: "USD",
+    coinmarketcap: process.env.CMC_API_KEY || "",
     enabled: process.env.REPORT_GAS ? true : false,
     excludeContracts: ["mocks"],
     src: "./contracts",
@@ -86,8 +87,8 @@ const config: HardhatUserConfig = {
       chainId: chainIds.hardhat,
       saveDeployments: true,
     },
-    goerli: getChainConfig("goerli"),
-    mainnet: getChainConfig("mainnet"),
+    goerli: { ...getChainConfig("goerli"), tags: ["staging"] },
+    mainnet: { ...getChainConfig("mainnet"), tags: ["production"] },
   },
   paths: {
     artifacts: "./artifacts",
@@ -96,7 +97,7 @@ const config: HardhatUserConfig = {
     tests: "./test",
   },
   solidity: {
-    version: "0.8.16",
+    version: "0.8.17",
     settings: {
       metadata: {
         // Not including the metadata hash
@@ -107,7 +108,8 @@ const config: HardhatUserConfig = {
       // https://hardhat.org/hardhat-network/#solidity-optimizer-support
       optimizer: {
         enabled: true,
-        runs: 800,
+        runs: 200,
+        details: { yul: true },
       },
     },
   },

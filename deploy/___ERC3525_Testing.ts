@@ -11,3 +11,4 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
 export default deploy;
 deploy.tags = ["local"];
+deploy.skip = async hre => hre.network.name !== "hardhat";
