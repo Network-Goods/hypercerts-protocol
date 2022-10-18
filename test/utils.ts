@@ -209,7 +209,7 @@ export const validateMetadata = async (metadata64: string, expected: string | Cl
     try {
       const metadata = <Metadata>JSON.parse(metadataJson);
 
-      expect(metadata.name).to.eq(expected.name);
+      expect(metadata.name).to.eq(expected.name); //slice because of string splitting
       expect(metadata.description).to.eq(expected.description);
       await validateSVG(
         decode64(metadata.image),
@@ -246,7 +246,7 @@ export const validateSVG = async (svg: string, expected: SVGInput, fraction: boo
   const nameParts = expected.name.split(" ");
   const svgName = svgDoc.get("//*[@id='name-color']")?.text();
   for (let i = 0; i < Math.min(nameParts.length, 2); i++) {
-    expect(svgName).to.contain(nameParts[i].substring(0, 13), `Name "${nameParts[i]}" not found: ${svg}`);
+    expect(svgName).to.contain(nameParts[i].substring(0, 10), `Name "${nameParts[i]}" not found: ${svg}`);
   }
 
   const truncScope = truncate(expected.impactScopes[0]);

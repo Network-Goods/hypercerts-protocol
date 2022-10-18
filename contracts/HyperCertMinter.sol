@@ -263,7 +263,8 @@ contract HyperCertMinter is Initializable, ERC3525SlotEnumerableUpgradeable, Acc
     }
 
     function burn(uint256 tokenId_) public {
-        Claim storage claim = _hyperCerts[slotOf(tokenId_)];
+        uint256 claimId = slotOf(tokenId_);
+        Claim storage claim = _hyperCerts[claimId];
         if (msg.sender != claim.minter) {
             revert NotApprovedOrOwner();
         }
@@ -272,6 +273,7 @@ contract HyperCertMinter is Initializable, ERC3525SlotEnumerableUpgradeable, Acc
             revert InsufficientBalance(claim.totalUnits, balanceOf(tokenId_));
         }
 
+        _clearContributorsClaims(claim.claimHash, claim.contributors);
         _burn(tokenId_);
         claim.exists = false;
     }
@@ -407,6 +409,16 @@ contract HyperCertMinter is Initializable, ERC3525SlotEnumerableUpgradeable, Acc
                 revert ConflictingClaim();
             }
             _contributorImpacts[creators[i]][claimHash] = true;
+        }
+    }
+
+    /// @notice Stores contributor claims in the `contributorImpacts` mapping; guards against overlapping claims
+    /// @param claimHash ID of hypercert
+    /// @param contributors Array of addresses for contributors
+    function _clearContributorsClaims(bytes32 claimHash, address[] memory contributors) internal {
+        uint256 len = contributors.length;
+        for (uint256 i = 0; i < len; i++) {
+            _contributorImpacts[contributors[i]][claimHash] = false;
         }
     }
 
