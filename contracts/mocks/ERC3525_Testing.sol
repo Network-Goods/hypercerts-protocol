@@ -25,7 +25,7 @@ contract ERC3525_Testing is ERC3525SlotEnumerableUpgradeable {
         _burn(tokenId_);
     }
 
-    function transfer(
+    function transferValue(
         uint256 fromTokenId_,
         uint256 toTokenId_,
         uint256 value_
@@ -38,7 +38,7 @@ contract ERC3525_Testing is ERC3525SlotEnumerableUpgradeable {
         uint256 tokenId_,
         uint256 value_
     ) public {
-        spendAllowance(operator_, tokenId_, value_);
+        _spendAllowance(operator_, tokenId_, value_);
     }
 
     function approveValue(
@@ -47,6 +47,10 @@ contract ERC3525_Testing is ERC3525SlotEnumerableUpgradeable {
         uint256 value_
     ) public {
         _approveValue(tokenId_, to_, value_);
+    }
+
+    function isApprovedOrOwner(address operator_, uint256 tokenId_) public view virtual returns (bool) {
+        return _isApprovedOrOwner(operator_, tokenId_);
     }
 
     function slotURI(

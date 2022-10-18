@@ -21,17 +21,17 @@ export function shouldBehaveLikeSemiFungibleTokenTransfer(): void {
     it("allows for transfering values between tokens with identical slots", async function () {
       const { sft, user } = await setupTestERC3525();
 
-      await expect(sft.transfer(1, 2, 1_234_5678)).to.be.revertedWith("NonExistentToken(1)");
+      await expect(sft.transferValue(1, 2, 1_234_5678)).to.be.revertedWith("NonExistentToken(1)");
 
       await sft.mintValue(user.address, 0, 1_000_000);
 
-      await expect(sft.transfer(1, 2, 500_000)).to.be.revertedWith("NonExistentToken(2)");
+      await expect(sft.transferValue(1, 2, 500_000)).to.be.revertedWith("NonExistentToken(2)");
 
       await sft.mintValue(user.address, 0, 2_000_000);
 
-      await expect(sft.transfer(1, 2, 8_796_543)).to.be.revertedWith("InsufficientBalance(8796543, 1000000)");
+      await expect(sft.transferValue(1, 2, 8_796_543)).to.be.revertedWith("InsufficientBalance(8796543, 1000000)");
 
-      await expect(sft.transfer(1, 2, 500_000)).to.emit(sft, "TransferValue").withArgs(1, 2, 500_000);
+      await expect(sft.transferValue(1, 2, 500_000)).to.emit(sft, "TransferValue").withArgs(1, 2, 500_000);
 
       expect(await sft["balanceOf(uint256)"](1)).to.be.eq("500000");
       expect(await sft["balanceOf(uint256)"](2)).to.be.eq("2500000");
@@ -42,7 +42,7 @@ export function shouldBehaveLikeSemiFungibleTokenTransfer(): void {
       await sft.mintValue(user.address, 1, 1_000_000);
       await sft.mintValue(user.address, 2, 2_000_000);
 
-      await expect(sft.transfer(1, 2, 500_000)).to.be.revertedWith("SlotsMismatch(1, 2)");
+      await expect(sft.transferValue(1, 2, 500_000)).to.be.revertedWith("SlotsMismatch(1, 2)");
 
       expect(await sft["balanceOf(uint256)"](1)).to.be.eq("1000000");
       expect(await sft["balanceOf(uint256)"](2)).to.be.eq("2000000");

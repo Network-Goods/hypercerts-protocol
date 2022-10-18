@@ -7,6 +7,7 @@ import { shouldBehaveLikeSemiFungibleTokenAllowances } from "./ERC3525.allowance
 import { shouldBehaveLikeSemiFungibleTokenApprovals } from "./ERC3525.approvals";
 import { shouldBehaveLikeSemiFungibleTokenBurn } from "./ERC3525.burn";
 import { shouldBehaveLikeSemiFungibleTokenMint } from "./ERC3525.mint";
+import { shouldBehaveLikeSemiFungibleTokenMiscellaneous } from "./ERC3525.miscellaneous";
 import { shouldBehaveLikeSemiFungibleTokenTransfer } from "./ERC3525.transfer";
 
 describe("Unit tests", function () {
@@ -62,5 +63,6 @@ describe("Unit tests", function () {
     shouldBehaveLikeSemiFungibleTokenBurn();
     shouldBehaveLikeSemiFungibleTokenAllowances();
     shouldBehaveLikeSemiFungibleTokenApprovals();
+    shouldBehaveLikeSemiFungibleTokenMiscellaneous();
   });
 });
