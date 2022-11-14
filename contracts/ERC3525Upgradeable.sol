@@ -10,8 +10,6 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/IERC721Enume
 import "./interfaces/IERC3525MetadataUpgradeable.sol";
 import "./interfaces/IERC3525Receiver.sol";
 
-import "hardhat/console.sol";
-
 error NonExistentToken(uint256 tokenId);
 error NonExistentSlot(uint256 slotId);
 error InsufficientBalance(uint256 transferAmount, uint256 balance);
