@@ -113,6 +113,11 @@ const config: HardhatUserConfig = {
       },
     },
   },
+  abiExporter: {
+    path: "./abi",
+    clear: true,
+    flat: true,
+  },
   typechain: {
     outDir: "src/types",
     target: "ethers-v5",
