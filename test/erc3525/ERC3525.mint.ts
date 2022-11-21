@@ -44,5 +44,16 @@ export function shouldBehaveLikeSemiFungibleTokenMint(): void {
       expect(await sft["balanceOf(uint256)"](1)).to.be.eq("1000000");
       expect(await sft["balanceOf(uint256)"](2)).to.be.eq("2000000");
     });
+
+    it("can mint and burn tokens without a value", async function () {
+      const { sft, user } = await setupTestERC3525();
+
+      await sft.mint(user.address);
+      expect(await sft.totalSupply()).to.be.eq(1);
+      expect(await sft["balanceOf(uint256)"](1)).to.be.eq("0");
+
+      await user.sft.burn(1);
+      expect(await sft["balanceOf(address)"](user.address)).to.be.eq(0);
+    });
   });
 }

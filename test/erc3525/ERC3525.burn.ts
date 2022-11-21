@@ -15,6 +15,8 @@ export function shouldBehaveLikeSemiFungibleTokenBurn(): void {
       await expect(user.sft.burn(tokenId)).to.emit(sft, "SlotChanged").withArgs(1, 1, 0);
 
       await expect(sft.ownerOf(tokenId)).to.be.revertedWith("NonExistentToken");
+
+      expect(await sft.totalSupply()).to.be.equal("0");
     });
 
     it("does not allow burning other tokens in the same slot the caller does not own", async function () {

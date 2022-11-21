@@ -21,6 +21,13 @@ contract ERC3525_Testing is ERC3525SlotEnumerableUpgradeable {
         _mintValue(to_, slot_, value_);
     }
 
+    function mint(address to_) public {
+        uint256 slotId = slotCount() + 1;
+        _createSlot(slotId);
+        uint256 tokenId = _createOriginalTokenId();
+        _mint(to_, tokenId, slotId);
+    }
+
     function burn(uint256 tokenId_) public {
         _burn(tokenId_);
     }
