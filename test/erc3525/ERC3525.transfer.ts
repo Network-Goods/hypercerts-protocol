@@ -66,5 +66,18 @@ export function shouldBehaveLikeSemiFungibleTokenTransfer(): void {
       expect(await sft["balanceOf(uint256)"](1)).to.be.eq("500000");
       expect(await sft["balanceOf(uint256)"](2)).to.be.eq("500000");
     });
+
+    it("doesnt decrease total supply after nfts have been merged", async function () {
+      const { sft, user } = await setupTestERC3525();
+      await sft.mintValue(user.address, 1, 10);
+      await user.sft.splitValue(1, 5);
+      expect(await sft["balanceOf(address)"](user.address)).to.be.equal(2);
+      await user.sft.mergeValue(2, 1);
+      await user.sft.burn(2);
+      expect(await sft["balanceOf(address)"](user.address)).to.be.equal(1);
+
+      //fails: totalSupply is still 2
+      expect(await sft.totalSupply()).to.be.equal(1);
+    });
   });
 }

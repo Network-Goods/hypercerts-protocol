@@ -44,5 +44,19 @@ export function shouldBehaveLikeSemiFungibleTokenMint(): void {
       expect(await sft["balanceOf(uint256)"](1)).to.be.eq("1000000");
       expect(await sft["balanceOf(uint256)"](2)).to.be.eq("2000000");
     });
+
+    it("enumerates slots correctly", async function () {
+      const { sft, user, anon } = await setupTestERC3525();
+      await sft.mintValue(user.address, 1, 10);
+      await user.sft["transferFrom(uint256,address,uint256)"](1, anon.address, 5);
+      expect(await sft.ownerOf(1)).to.be.eq(user.address);
+      expect(await sft.ownerOf(2)).to.be.eq(anon.address);
+      expect(await sft["tokenInSlotByIndex"](1, 0)).to.be.eq("1");
+      expect(await sft.totalSupply()).to.be.eq(2);
+
+      //these fail:
+      //expect(await sft["tokenInSlotByIndex"](1, 1)).to.be.eq("2"); //reverts
+      expect(await sft.tokenSupplyInSlot(1)).to.be.eq(2); //returns 1
+    });
   });
 }
