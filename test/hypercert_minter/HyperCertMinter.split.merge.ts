@@ -73,4 +73,25 @@ export function shouldBehaveLikeHypercertMinterSplitAndMerge(): void {
     expect(await minter["balanceOf(uint256)"](3)).to.be.eq("50");
     expect(await minter.tokenSupplyInSlot(slot)).to.be.eq(2);
   });
+
+  it("doesnt decrease total supply after nfts have been merged", async function () {
+    const { user, minter, anon } = await setupTest();
+    const claim = await newClaim({ fractions: [10] });
+    const data = encodeClaim(claim);
+
+    await minter.mint(user.address, data);
+    await user.minter["transferFrom(uint256,address,uint256)"](1, anon.address, 5);
+    expect(await minter["balanceOf(address)"](user.address)).to.be.equal(1);
+    expect(await minter["balanceOf(address)"](anon.address)).to.be.equal(1);
+    expect(await minter.totalSupply()).to.be.equal(2);
+
+    await anon.minter["safeTransferFrom(address,address,uint256)"](anon.address, user.address, 2);
+    await user.minter.merge([2, 1]);
+    expect(await minter["balanceOf(address)"](user.address)).to.be.equal(1);
+    expect(await minter["balanceOf(address)"](anon.address)).to.be.equal(0);
+    expect(await minter["balanceOf(uint256)"](1)).to.be.equal(10);
+
+    //fails: totalSupply is still 2
+    expect(await minter.totalSupply()).to.be.equal(1);
+  });
 }
