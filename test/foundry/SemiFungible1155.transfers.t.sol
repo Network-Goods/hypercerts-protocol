@@ -64,7 +64,7 @@ contract HelperContract is SemiFungible1155 {
 /// https://book.getfoundry.sh/forge/writing-tests
 contract SemiFungible1155TransferTest is PRBTest, StdCheats, StdUtils {
     HelperContract internal semiFungible;
-    string _URI = "/ipfs/lalalalalalalalalallaallaa";
+    string internal _uri = "/ipfs/lalalalalalalalalallaallaa";
 
     function setUp() public {
         semiFungible = new HelperContract();
@@ -79,7 +79,7 @@ contract SemiFungible1155TransferTest is PRBTest, StdCheats, StdUtils {
         uint256 baseID = 1 << 128;
         uint256 tokenID = baseID + 1;
 
-        semiFungible.mintValue(alice, 10000, _URI);
+        semiFungible.mintValue(alice, 10000, _uri);
 
         assertEq(semiFungible.balanceOf(alice, baseID), 10000);
         assertEq(semiFungible.balanceOf(alice, tokenID), 10000);
@@ -108,7 +108,7 @@ contract SemiFungible1155TransferTest is PRBTest, StdCheats, StdUtils {
         uint256 baseID = 1 << 128;
         uint256 tokenID = baseID + 1;
 
-        semiFungible.mintValue(from, amount, _URI);
+        semiFungible.mintValue(from, amount, _uri);
 
         assertEq(semiFungible.balanceOf(from, baseID), amount);
         assertEq(semiFungible.balanceOf(from, tokenID), amount);
@@ -140,9 +140,9 @@ contract SemiFungible1155TransferTest is PRBTest, StdCheats, StdUtils {
         uint256 value = 2000;
         uint256 totalValue = size * value;
         uint256[] memory values = semiFungible.buildValues(size, value);
-        uint256[] memory IDs = semiFungible.buildIDs(baseID, size);
+        uint256[] memory _ids = semiFungible.buildIDs(baseID, size);
 
-        semiFungible.mintValue(alice, values, _URI);
+        semiFungible.mintValue(alice, values, _uri);
 
         assertEq(semiFungible.balanceOf(alice, baseID), totalValue);
         assertEq(semiFungible.balanceOf(alice, tokenID), value);
@@ -151,15 +151,15 @@ contract SemiFungible1155TransferTest is PRBTest, StdCheats, StdUtils {
         assertEq(semiFungible.balanceOf(bob, tokenID), 0);
 
         vm.prank(alice);
-        semiFungible.safeTransferFrom(alice, bob, IDs[1], 1, "");
+        semiFungible.safeTransferFrom(alice, bob, _ids[1], 1, "");
 
         // Updates tokenFraction value for (new) owner
         assertEq(semiFungible.balanceOf(alice, baseID), totalValue - value);
-        assertEq(semiFungible.balanceOf(alice, IDs[1]), 0);
+        assertEq(semiFungible.balanceOf(alice, _ids[1]), 0);
 
         // Updates token ownership
         assertEq(semiFungible.balanceOf(bob, baseID), value);
-        assertEq(semiFungible.balanceOf(bob, IDs[1]), value);
+        assertEq(semiFungible.balanceOf(bob, _ids[1]), value);
     }
 
     function testTransferFractionFuzz(address from, address to, uint256 size) public {
@@ -174,29 +174,29 @@ contract SemiFungible1155TransferTest is PRBTest, StdCheats, StdUtils {
         uint256 value = 2000;
         uint256 totalValue = size * value;
         uint256[] memory values = semiFungible.buildValues(size, value);
-        uint256[] memory IDs = semiFungible.buildIDs(tokenID, size);
+        uint256[] memory _ids = semiFungible.buildIDs(tokenID, size);
 
-        semiFungible.mintValue(from, values, _URI);
+        semiFungible.mintValue(from, values, _uri);
 
         assertEq(semiFungible.balanceOf(from, baseID), totalValue);
-        for (uint256 i = 1; i < (IDs.length - 1); i++) {
-            assertEq(semiFungible.balanceOf(from, IDs[i]), value);
+        for (uint256 i = 1; i < (_ids.length - 1); i++) {
+            assertEq(semiFungible.balanceOf(from, _ids[i]), value);
         }
 
         assertEq(semiFungible.balanceOf(to, baseID), 0);
-        for (uint256 i = 1; i < (IDs.length - 1); i++) {
-            assertEq(semiFungible.balanceOf(to, IDs[i]), 0);
+        for (uint256 i = 1; i < (_ids.length - 1); i++) {
+            assertEq(semiFungible.balanceOf(to, _ids[i]), 0);
         }
 
         vm.prank(from);
-        semiFungible.safeTransferFrom(from, to, IDs[size - 1], 1, "");
+        semiFungible.safeTransferFrom(from, to, _ids[size - 1], 1, "");
 
         // // Updates tokenFraction value for (new) owner
         assertEq(semiFungible.balanceOf(from, baseID), totalValue - value);
-        assertEq(semiFungible.balanceOf(from, IDs[size - 1]), 0);
+        assertEq(semiFungible.balanceOf(from, _ids[size - 1]), 0);
 
         // // Updates token ownership
         assertEq(semiFungible.balanceOf(to, baseID), value);
-        assertEq(semiFungible.balanceOf(to, IDs[size - 1]), value);
+        assertEq(semiFungible.balanceOf(to, _ids[size - 1]), value);
     }
 }

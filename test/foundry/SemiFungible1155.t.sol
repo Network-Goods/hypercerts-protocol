@@ -63,7 +63,7 @@ contract HelperContract is SemiFungible1155 {
 /// https://book.getfoundry.sh/forge/writing-tests
 contract SemiFungible1155Test is PRBTest, StdCheats, StdUtils, HelperContract {
     HelperContract internal semiFungible;
-    string _URI = "/ipfs/lalalalalalalalalallaallaa";
+    string internal _uri = "/ipfs/lalalalalalalalalallaallaa";
 
     function setUp() public {
         semiFungible = new HelperContract();
@@ -77,7 +77,7 @@ contract SemiFungible1155Test is PRBTest, StdCheats, StdUtils, HelperContract {
     function testMintValueSingle() public {
         address alice = address(1);
         startHoax(alice, 100 ether);
-        semiFungible.mintValue(alice, 10000, _URI);
+        semiFungible.mintValue(alice, 10000, _uri);
 
         uint256 typeID = 1 << 128;
 
@@ -97,7 +97,7 @@ contract SemiFungible1155Test is PRBTest, StdCheats, StdUtils, HelperContract {
         values[1] = 3000;
         values[2] = 5000;
 
-        semiFungible.mintValue(alice, values, _URI);
+        semiFungible.mintValue(alice, values, _uri);
 
         uint256 typeID = 1 << 128;
         assertEq(semiFungible.balanceOf(alice, typeID), 15000);
@@ -114,7 +114,7 @@ contract SemiFungible1155Test is PRBTest, StdCheats, StdUtils, HelperContract {
         address alice = address(1);
         hoax(alice, 100 ether);
 
-        semiFungible.mintValue(alice, values, _URI);
+        semiFungible.mintValue(alice, values, _uri);
 
         uint256 baseID = 1 << 128;
         uint256 balance = semiFungible.balanceOf(alice, baseID);
@@ -137,7 +137,7 @@ contract SemiFungible1155Test is PRBTest, StdCheats, StdUtils, HelperContract {
         values[0] = 7000;
         values[1] = 3000;
 
-        semiFungible.mintValue(alice, 10000, _URI);
+        semiFungible.mintValue(alice, 10000, _uri);
         semiFungible.splitValue(alice, tokenID, values);
 
         assertEq(semiFungible.balanceOf(alice, baseID), 10000);
@@ -158,7 +158,7 @@ contract SemiFungible1155Test is PRBTest, StdCheats, StdUtils, HelperContract {
         uint256[] memory values = semiFungible.buildValues(size, value);
         uint256 totalValue = size * value;
 
-        semiFungible.mintValue(alice, totalValue, _URI);
+        semiFungible.mintValue(alice, totalValue, _uri);
 
         semiFungible.splitValue(alice, tokenID, values);
 
@@ -181,22 +181,22 @@ contract SemiFungible1155Test is PRBTest, StdCheats, StdUtils, HelperContract {
         uint256[] memory values = semiFungible.buildValues(size, value);
         uint256 totalValue = size * value;
 
-        uint256[] memory IDs = semiFungible.buildIDs(baseID + 1, size);
+        uint256[] memory _ids = semiFungible.buildIDs(baseID + 1, size);
 
-        semiFungible.mintValue(alice, values, _URI);
+        semiFungible.mintValue(alice, values, _uri);
 
-        assertEq(semiFungible.balanceOf(IDs[size - 1]), 2000);
+        assertEq(semiFungible.balanceOf(_ids[size - 1]), 2000);
 
-        semiFungible.mergeValue(IDs);
+        semiFungible.mergeValue(_ids);
 
         assertEq(semiFungible.balanceOf(alice, baseID), totalValue);
         assertEq(semiFungible.totalSupply(baseID), totalValue);
 
-        for (uint256 id = 1; id < (IDs.length - 1); id++) {
+        for (uint256 id = 1; id < (_ids.length - 1); id++) {
             assertEq(semiFungible.balanceOf(baseID + id), 0);
         }
 
-        assertEq(semiFungible.balanceOf(baseID + IDs.length), totalValue);
+        assertEq(semiFungible.balanceOf(baseID + _ids.length), totalValue);
     }
 
     function testMergeValueFuzz(uint256 size) public {
@@ -209,45 +209,45 @@ contract SemiFungible1155Test is PRBTest, StdCheats, StdUtils, HelperContract {
         uint256[] memory values = semiFungible.buildValues(size, value);
         uint256 totalValue = size * value;
 
-        uint256[] memory IDs = semiFungible.buildIDs(baseID + 1, size);
+        uint256[] memory _ids = semiFungible.buildIDs(baseID + 1, size);
 
-        semiFungible.mintValue(alice, values, _URI);
-        semiFungible.mergeValue(IDs);
+        semiFungible.mintValue(alice, values, _uri);
+        semiFungible.mergeValue(_ids);
 
         assertEq(semiFungible.balanceOf(alice, baseID), totalValue);
         assertEq(semiFungible.totalSupply(baseID), totalValue);
 
-        for (uint256 id = 1; id < IDs.length - 1; id++) {
+        for (uint256 id = 1; id < _ids.length - 1; id++) {
             assertEq(semiFungible.balanceOf(baseID + id), 0);
         }
 
-        assertEq(semiFungible.balanceOf(baseID + IDs.length), totalValue);
+        assertEq(semiFungible.balanceOf(baseID + _ids.length), totalValue);
     }
 
     function testBurnValue() public {
         address alice = address(1);
         hoax(alice, 100 ether);
 
-        semiFungible.mintValue(alice, 10000, _URI);
+        semiFungible.mintValue(alice, 10000, _uri);
 
         uint256 baseID = 1 << 128;
         uint256[] memory values = new uint256[](2);
         values[0] = 7000;
         values[1] = 3000;
 
-        semiFungible.mintValue(alice, values, _URI);
+        semiFungible.mintValue(alice, values, _uri);
 
-        uint256[] memory IDs = semiFungible.buildIDs(baseID + 1, values.length);
+        uint256[] memory _ids = semiFungible.buildIDs(baseID + 1, values.length);
 
         vm.expectRevert(HelperContract.NotAllowed.selector);
         semiFungible.burnValue(alice, baseID);
 
         vm.expectRevert(HelperContract.FractionalBurn.selector);
-        semiFungible.burnValue(alice, IDs[1]);
+        semiFungible.burnValue(alice, _ids[1]);
 
-        semiFungible.mergeValue(IDs);
+        semiFungible.mergeValue(_ids);
 
-        semiFungible.burnValue(alice, IDs[IDs.length - 1]);
+        semiFungible.burnValue(alice, _ids[_ids.length - 1]);
 
         assertEq(semiFungible.balanceOf(alice, baseID), 0);
         assertEq(semiFungible.totalSupply(baseID), 0);
