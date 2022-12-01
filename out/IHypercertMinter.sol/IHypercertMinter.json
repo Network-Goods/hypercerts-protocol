@@ -1,0 +1,362 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "units",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "uri",
+          "type": "string"
+        }
+      ],
+      "name": "mintClaim",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "fractions",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "string",
+          "name": "uri",
+          "type": "string"
+        }
+      ],
+      "name": "mintClaimWithFractions",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "methodIdentifiers": {
+    "mintClaim(uint256,string)": "800a6fcb",
+    "mintClaimWithFractions(uint256[],string)": "e53e79f2"
+  },
+  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.17+commit.8df45f5f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"units\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"uri\",\"type\":\"string\"}],\"name\":\"mintClaim\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256[]\",\"name\":\"fractions\",\"type\":\"uint256[]\"},{\"internalType\":\"string\",\"name\":\"uri\",\"type\":\"string\"}],\"name\":\"mintClaimWithFractions\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"src/interfaces/IHypercertMinter.sol\":\"IHypercertMinter\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"none\"},\"optimizer\":{\"enabled\":true,\"runs\":10000},\"remappings\":[\":@murky/=lib/murky/src/\",\":@oz-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/\",\":ds-test/=lib/forge-std/lib/ds-test/src/\",\":forge-std/=lib/forge-std/src/\",\":murky/=lib/murky/src/\",\":openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/\",\":openzeppelin-contracts/=lib/murky/lib/openzeppelin-contracts/\",\":prb-test/=lib/prb-test/src/\"]},\"sources\":{\"src/interfaces/IHypercertMinter.sol\":{\"keccak256\":\"0xcb4af2458b0ad09cd062c491795b5b03f15be1cbce38789fd40ddcb58258e4dd\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://1055450d2fe44a78366aa85382190d60816ee5544be561989590de2fe9ecac2b\",\"dweb:/ipfs/QmRh9Nn5soqiVvx9u6RDJNSvEHVxHPEjvGv6EMxSBuF1tX\"]}},\"version\":1}",
+  "metadata": {
+    "compiler": {
+      "version": "0.8.17+commit.8df45f5f"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "units",
+              "type": "uint256"
+            },
+            {
+              "internalType": "string",
+              "name": "uri",
+              "type": "string"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function",
+          "name": "mintClaim"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256[]",
+              "name": "fractions",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "string",
+              "name": "uri",
+              "type": "string"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function",
+          "name": "mintClaimWithFractions"
+        }
+      ],
+      "devdoc": {
+        "kind": "dev",
+        "methods": {},
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {},
+        "version": 1
+      }
+    },
+    "settings": {
+      "remappings": [
+        ":@murky/=lib/murky/src/",
+        ":@oz-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
+        ":ds-test/=lib/forge-std/lib/ds-test/src/",
+        ":forge-std/=lib/forge-std/src/",
+        ":murky/=lib/murky/src/",
+        ":openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
+        ":openzeppelin-contracts/=lib/murky/lib/openzeppelin-contracts/",
+        ":prb-test/=lib/prb-test/src/"
+      ],
+      "optimizer": {
+        "enabled": true,
+        "runs": 10000
+      },
+      "metadata": {
+        "bytecodeHash": "none"
+      },
+      "compilationTarget": {
+        "src/interfaces/IHypercertMinter.sol": "IHypercertMinter"
+      },
+      "libraries": {}
+    },
+    "sources": {
+      "src/interfaces/IHypercertMinter.sol": {
+        "keccak256": "0xcb4af2458b0ad09cd062c491795b5b03f15be1cbce38789fd40ddcb58258e4dd",
+        "urls": [
+          "bzz-raw://1055450d2fe44a78366aa85382190d60816ee5544be561989590de2fe9ecac2b",
+          "dweb:/ipfs/QmRh9Nn5soqiVvx9u6RDJNSvEHVxHPEjvGv6EMxSBuF1tX"
+        ],
+        "license": "MIT"
+      }
+    },
+    "version": 1
+  },
+  "ast": {
+    "absolutePath": "src/interfaces/IHypercertMinter.sol",
+    "id": 23712,
+    "exportedSymbols": {
+      "IHypercertMinter": [
+        23711
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "32:220:34",
+    "nodes": [
+      {
+        "id": 23695,
+        "nodeType": "PragmaDirective",
+        "src": "32:23:34",
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".9"
+        ]
+      },
+      {
+        "id": 23711,
+        "nodeType": "ContractDefinition",
+        "src": "58:193:34",
+        "nodes": [
+          {
+            "id": 23702,
+            "nodeType": "FunctionDefinition",
+            "src": "92:62:34",
+            "functionSelector": "800a6fcb",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "mintClaim",
+            "nameLocation": "101:9:34",
+            "parameters": {
+              "id": 23700,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 23697,
+                  "mutability": "mutable",
+                  "name": "units",
+                  "nameLocation": "119:5:34",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 23702,
+                  "src": "111:13:34",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 23696,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "111:7:34",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 23699,
+                  "mutability": "mutable",
+                  "name": "uri",
+                  "nameLocation": "140:3:34",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 23702,
+                  "src": "126:17:34",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 23698,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "126:6:34",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "110:34:34"
+            },
+            "returnParameters": {
+              "id": 23701,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "153:0:34"
+            },
+            "scope": 23711,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 23710,
+            "nodeType": "FunctionDefinition",
+            "src": "160:88:34",
+            "functionSelector": "e53e79f2",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "mintClaimWithFractions",
+            "nameLocation": "169:22:34",
+            "parameters": {
+              "id": 23708,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 23705,
+                  "mutability": "mutable",
+                  "name": "fractions",
+                  "nameLocation": "209:9:34",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 23710,
+                  "src": "192:26:34",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$dyn_memory_ptr",
+                    "typeString": "uint256[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 23703,
+                      "name": "uint256",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "192:7:34",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 23704,
+                    "nodeType": "ArrayTypeName",
+                    "src": "192:9:34",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
+                      "typeString": "uint256[]"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 23707,
+                  "mutability": "mutable",
+                  "name": "uri",
+                  "nameLocation": "234:3:34",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 23710,
+                  "src": "220:17:34",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 23706,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "220:6:34",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "191:47:34"
+            },
+            "returnParameters": {
+              "id": 23709,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "247:0:34"
+            },
+            "scope": 23711,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "IHypercertMinter",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "linearizedBaseContracts": [
+          23711
+        ],
+        "name": "IHypercertMinter",
+        "nameLocation": "68:16:34",
+        "scope": 23712,
+        "usedErrors": []
+      }
+    ],
+    "license": "MIT"
+  },
+  "id": 34
+}

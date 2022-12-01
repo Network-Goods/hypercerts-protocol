@@ -13,7 +13,6 @@
         "endOfLine": "auto"
       }
     ],
-    "quotes": "off",
     "reason-string": ["warn", { "maxLength": 64 }]
   }
 }
