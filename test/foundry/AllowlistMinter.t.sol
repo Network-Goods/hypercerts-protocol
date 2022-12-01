@@ -7,7 +7,7 @@ import { StdCheats } from "forge-std/StdCheats.sol";
 import { StdUtils } from "forge-std/StdUtils.sol";
 
 import { AllowlistMinter } from "../../src/AllowlistMinter.sol";
-import { Merkle } from "@murky/Merkle.sol";
+import { Merkle } from "murky/Merkle.sol";
 
 contract MerkleHelper is AllowlistMinter, Merkle {
     function generateData(uint256 size, uint256 value) public view returns (bytes32[] memory data) {

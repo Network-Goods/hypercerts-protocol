@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-import { MerkleProofUpgradeable } from "@oz-upgradeable/utils/cryptography/MerkleProofUpgradeable.sol";
+import {
+    MerkleProofUpgradeable
+} from "lib/openzeppelin-contracts-upgradeable/contracts/utils/cryptography/MerkleProofUpgradeable.sol";
 
 error DuplicateEntry();
 error DoesNotExist();

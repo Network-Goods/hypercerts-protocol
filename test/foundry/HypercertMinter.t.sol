@@ -4,7 +4,7 @@ pragma solidity >=0.8.4;
 import { PRBTest } from "prb-test/PRBTest.sol";
 import { StdCheats } from "forge-std/StdCheats.sol";
 import { HypercertMinter } from "../../src/HypercertMinter.sol";
-import { Merkle } from "@murky/Merkle.sol";
+import { Merkle } from "murky/Merkle.sol";
 
 /// @dev See the "Writing Tests" section in the Foundry Book if this is your first time with Forge.
 /// https://book.getfoundry.sh/forge/writing-tests
