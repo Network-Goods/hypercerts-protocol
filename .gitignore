@@ -16,6 +16,7 @@
 **/node_modules
 **/src/types
 **/deployments/localhost
+**/out
 
 # files
 *.env
@@ -35,3 +36,8 @@ deployments/goerli/HyperCertMinter.json
 deployments/goerli/HyperCertSVG.json
 test/hypercert_minter/HypercertMinter.split.merge.ts
 test/hypercert_svg/HypercertSVG.ts
+
+# broadcasts
+!/broadcast
+/broadcast/*
+/broadcast/*/31337/

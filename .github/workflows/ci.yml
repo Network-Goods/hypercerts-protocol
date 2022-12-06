@@ -4,6 +4,9 @@ name: "CI"
 #   INFURA_API_KEY: ${{ secrets.INFURA_API_KEY }}
 #   MNEMONIC: ${{ secrets.MNEMONIC }}
 
+env:
+  FOUNDRY_PROFILE: "ci"
+
 on:
   pull_request:
     branches:
@@ -13,41 +16,48 @@ on:
       - "main"
 
 jobs:
-  ci:
+  ci-foundry:
     runs-on: "ubuntu-latest"
     steps:
       - name: "Check out the repo"
         uses: "actions/checkout@v3"
+        with:
+          submodules: "recursive"
+
+      - name: "Install Foundry"
+        uses: "onbjerg/foundry-toolchain@v1"
+        with:
+          version: "nightly"
 
       - name: "Install Node.js"
         uses: "actions/setup-node@v3"
         with:
           cache: "yarn"
-          node-version: "16"
+          node-version: "lts/*"
 
-      - name: "Copy config"
-        run: |
-          mv ./.env.github .env
-          echo "::debug::$(less .env)"
-
-      - name: "Install the dependencies"
+      - name: "Install the Node.js dependencies"
         run: "yarn install --immutable"
 
-      - name: "Lint the code"
+      - name: "Lint the contracts"
         run: "yarn lint"
 
       - name: "Add lint summary"
         run: |
-          echo "## Lint results" >> $GITHUB_STEP_SUMMARY
+          echo "## Lint" >> $GITHUB_STEP_SUMMARY
           echo "✅ Passed" >> $GITHUB_STEP_SUMMARY
 
-      - name: "Compile the contracts and generate the TypeChain bindings"
-        run: "yarn typechain"
+      - name: "Show the Foundry config"
+        run: "forge config"
 
-      - name: "Test the contracts and generate the coverage report"
-        run: "yarn coverage"
+      - name: "Run the tests"
+        run: "forge test"
+
+      - name: "Build the contracts"
+        run: |
+          forge --version
+          forge build --sizes
 
       - name: "Add test summary"
         run: |
-          echo "## Test results" >> $GITHUB_STEP_SUMMARY
+          echo "## Tests" >> $GITHUB_STEP_SUMMARY
           echo "✅ Passed" >> $GITHUB_STEP_SUMMARY
