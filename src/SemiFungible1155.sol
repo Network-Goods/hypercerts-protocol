@@ -5,6 +5,7 @@ pragma solidity ^0.8.9;
 
 import { Upgradeable1155 } from "./Upgradeable1155.sol";
 import { IERC1155ReceiverUpgradeable } from "oz-upgradeable/token/ERC1155/IERC1155ReceiverUpgradeable.sol";
+import "forge-std/console2.sol";
 
 // TODO shared error lib
 error ArraySize();
@@ -24,7 +25,7 @@ contract SemiFungible1155 is Upgradeable1155 {
     uint256 public constant NF_INDEX_MASK = uint128(int128(~0));
 
     // The top bit is a flag to tell if this is a NFI.
-    uint256 public constant TYPE_NF_BIT = 1 << 255;
+    uint256 public constant TYPE_NF_BIT = uint256(1 << 255);
 
     mapping(uint256 => address) public owners;
     mapping(uint256 => address) public creators; //TODO extend with admin contracts
@@ -32,6 +33,8 @@ contract SemiFungible1155 is Upgradeable1155 {
     mapping(uint256 => uint256) public tokenValues;
     mapping(uint256 => uint256) internal maxIndex;
     mapping(uint256 => mapping(address => uint256)) public tokenUserBalances;
+
+    event ValueTransfer(uint256 fromTokenID, uint256 toTokenID, uint256 value);
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -46,7 +49,7 @@ contract SemiFungible1155 is Upgradeable1155 {
     /// ENJIN EXAMPLE IMPLEMENTATION
     // Only to make code clearer. Should not be functions
     // TODO cleanup functions
-    function isNonFungible(uint256 _id) internal pure returns (bool) {
+    function isNonFungible(uint256 _id) internal view returns (bool) {
         return _id & TYPE_NF_BIT == TYPE_NF_BIT;
     }
 
@@ -89,37 +92,35 @@ contract SemiFungible1155 is Upgradeable1155 {
     /// MUTATE
 
     /// @dev create token type ID based of token counter
-    // TODO should creator be msg.sender or inital account?
-    function _createTokenType() internal returns (uint256 typeID) {
-        typeID = (++typeCounter << 128); //TODO max value check?
-        creators[typeID] = msg.sender;
-    }
-
-    /// @dev create token type ID based of token counter
+    // TODO should creator be msg.sender or submit account?
     function _createTokenType(uint256 units, string memory uri) internal returns (uint256 typeID) {
         typeID = (++typeCounter << 128); //TODO max value check?
-        _setURI(typeID, uri);
-
         creators[typeID] = msg.sender;
         tokenValues[typeID] = units;
+
+        _setURI(typeID, uri);
+
+        emit TransferSingle(msg.sender, address(0x0), address(0x0), typeID, units);
     }
 
     /// @dev Mint a new token type and the initial value
     function _mintValue(address _account, uint256 _value, string memory uri) internal returns (uint256 typeID) {
-        typeID = _createTokenType();
+        if (_value == 0) {
+            revert NotAllowed();
+        }
+        typeID = _createTokenType(_value, uri);
         maxIndex[typeID] += 1;
         uint256 tokenID = typeID + maxIndex[typeID]; //1 based indexing, 0 holds type data
 
-        _mint(_account, tokenID, 1, "");
-        _setURI(tokenID, uri);
         owners[tokenID] = _account;
-
-        tokenValues[typeID] = _value; // total value at 0-index
         tokenValues[tokenID] = _value; //first fraction
 
         //TODO these balances might not be needed, maybe only total ownership of hypercert.
         tokenUserBalances[typeID][_account] = _value; // creator of fraction gets full value
         tokenUserBalances[tokenID][_account] = _value; // creator of fraction gets full value
+
+        _mint(_account, tokenID, _value, "");
+        _setURI(tokenID, uri);
     }
 
     /// @dev Mint a new token type and the initial fractions
@@ -134,6 +135,8 @@ contract SemiFungible1155 is Upgradeable1155 {
         }
 
         uint256 totalValue = _getSum(_values);
+
+        console2.log("Starting fraction minting: ", totalValue);
         _mintValue(_account, totalValue, uri);
 
         typeID = typeCounter << 128; //TODO max value check
@@ -166,19 +169,19 @@ contract SemiFungible1155 is Upgradeable1155 {
         }
 
         uint256 _typeID = getNonFungibleBaseType(_tokenID);
-        uint256 newFractionsStartID = _typeID + maxIndex[_typeID];
+        uint256 newFractionsStartID = maxIndex[_typeID];
 
         uint256 len = _values.length;
         uint256 left = tokenValues[_tokenID];
 
         for (uint256 i = 1; i < len; i++) {
-            uint256 tokenID = newFractionsStartID + i;
-
-            _mint(_account, tokenID, 1, "");
+            uint256 tokenID = _typeID + newFractionsStartID + i;
 
             tokenValues[tokenID] = _values[i];
             tokenUserBalances[tokenID][_account] = _values[i];
             left -= _values[i];
+            _mint(_account, tokenID, _values[i], ""); //TODO batchmint?
+            emit ValueTransfer(_tokenID, tokenID, _values[i]);
         }
 
         tokenValues[_tokenID] = left;
@@ -227,22 +230,26 @@ contract SemiFungible1155 is Upgradeable1155 {
         if (_to == address(0x0)) revert ToZeroAddress();
         if (_from != msg.sender) revert NotApprovedOrOwner(); //TODO Allowance approval
 
-        uint256 value = tokenValues[_id];
+        uint256 tokenValue = tokenValues[_id];
 
-        if (isNonFungible(_id)) {
-            if (owners[_id] != _from) revert NotApprovedOrOwner();
-            owners[_id] = _to;
+        //TODO emit event per case? Since value NF should be 1
+        //TODO Block marketplace transfer of claim data ownership
+        if (getNonFungibleIndex(_id) == 0) {
+            console2.log("Basetype");
+            revert NotAllowed();
         } else {
+            console2.log("Fungible");
+
             uint256 typeID = getNonFungibleBaseType(_id);
 
-            tokenUserBalances[typeID][_from] -= value;
-            tokenUserBalances[typeID][_to] += value;
+            tokenUserBalances[typeID][_from] -= tokenValue;
+            tokenUserBalances[typeID][_to] += tokenValue;
 
-            tokenUserBalances[_id][_from] -= value;
-            tokenUserBalances[_id][_to] += value;
+            tokenUserBalances[_id][_from] -= tokenValue;
+            tokenUserBalances[_id][_to] += tokenValue;
         }
 
-        emit TransferSingle(msg.sender, _from, _to, _id, _value);
+        emit TransferSingle(msg.sender, _from, _to, _id, tokenValue);
 
         // TODO added extra underscore to bypass non-virtual override conflict
         if (_isContract(_to)) {
@@ -281,11 +288,17 @@ contract SemiFungible1155 is Upgradeable1155 {
      * @dev calculate the sum of the elements of an array
      */
     function _getSum(uint256[] memory array) internal pure returns (uint256 sum) {
-        if (array.length == 0) {
-            return 0;
-        }
         sum = 0;
-        for (uint256 i = 0; i < array.length; i++) sum += array[i];
+        if (array.length == 0) {
+            return sum;
+        }
+
+        for (uint256 i = 0; i < array.length; i++) {
+            if (array[i] == 0) revert NotAllowed();
+            sum += array[i];
+        }
+
+        return sum;
     }
 
     function __doSafeTransferAcceptanceCheck(
