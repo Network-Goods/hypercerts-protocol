@@ -4,6 +4,7 @@ import "@nomiclabs/hardhat-ethers";
 import "@openzeppelin/hardhat-upgrades";
 import { config as dotenvConfig } from "dotenv";
 import fs from "fs";
+import "hardhat-abi-exporter";
 import "hardhat-preprocessor";
 import { HardhatUserConfig } from "hardhat/config";
 import { resolve } from "path";
@@ -53,6 +54,12 @@ function getChainConfig(chain: keyof typeof chainIds) {
 }
 
 const config: HardhatUserConfig = {
+  abiExporter: {
+    path: "./abi",
+    runOnCompile: true,
+    clear: true,
+    flat: true,
+  },
   networks: {
     hardhat: {
       accounts: {
