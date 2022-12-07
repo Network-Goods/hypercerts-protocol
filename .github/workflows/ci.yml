@@ -11,9 +11,11 @@ on:
   pull_request:
     branches:
       - "main"
+      - "dev"
   push:
     branches:
       - "main"
+      - "dev"
 
 jobs:
   ci-foundry:
@@ -34,6 +36,11 @@ jobs:
         with:
           cache: "yarn"
           node-version: "lts/*"
+
+      - name: "Copy config"
+        run: |
+          mv ./.env.github .env
+          echo "::debug::$(less .env)"
 
       - name: "Install the Node.js dependencies"
         run: "yarn install --immutable"
@@ -57,7 +64,13 @@ jobs:
           forge --version
           forge build --sizes
 
+      - name: "Compile the contracts and generate the TypeChain bindings"
+        run: "yarn typechain"
+
+      - name: "Hardhat: Test the contracts - primarily UUPS tests"
+        run: "yarn test:hardhat"
+
       - name: "Add test summary"
         run: |
-          echo "## Tests" >> $GITHUB_STEP_SUMMARY
+          echo "## Test results" >> $GITHUB_STEP_SUMMARY
           echo "✅ Passed" >> $GITHUB_STEP_SUMMARY

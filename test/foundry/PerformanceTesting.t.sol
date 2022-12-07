@@ -22,6 +22,13 @@ contract HelperContract {
         return true;
     }
 
+    function noZeroes(uint256[] memory values) public pure returns (bool) {
+        for (uint256 i = 0; i < values.length; i++) {
+            if (values[i] == 0) return false;
+        }
+        return true;
+    }
+
     function getSum(uint256[] memory array) public pure returns (uint256 sum) {
         if (array.length == 0) {
             return 0;
@@ -78,6 +85,7 @@ contract PerformanceTesting is PRBTest, StdCheats, HelperContract {
 
     function testClaimFractionsFuzz(uint256[] memory fractions) public {
         vm.assume(noOverflow(fractions));
+        vm.assume(noZeroes(fractions));
         vm.assume(fractions.length > 0 && fractions.length < 253);
 
         vm.prank(address(1));
