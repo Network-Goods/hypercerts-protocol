@@ -57,7 +57,13 @@ jobs:
           forge --version
           forge build --sizes
 
+      - name: "Compile the contracts and generate the TypeChain bindings"
+        run: "yarn typechain"
+
+      - name: "Hardhat: Test the contracts - primarily UUPS tests"
+        run: "yarn test:hardhat"
+
       - name: "Add test summary"
         run: |
-          echo "## Tests" >> $GITHUB_STEP_SUMMARY
+          echo "## Test results" >> $GITHUB_STEP_SUMMARY
           echo "✅ Passed" >> $GITHUB_STEP_SUMMARY
