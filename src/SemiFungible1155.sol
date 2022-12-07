@@ -49,7 +49,7 @@ contract SemiFungible1155 is Upgradeable1155 {
     /// ENJIN EXAMPLE IMPLEMENTATION
     // Only to make code clearer. Should not be functions
     // TODO cleanup functions
-    function isNonFungible(uint256 _id) internal view returns (bool) {
+    function isNonFungible(uint256 _id) internal pure returns (bool) {
         return _id & TYPE_NF_BIT == TYPE_NF_BIT;
     }
 

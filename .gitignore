@@ -18,6 +18,7 @@
 **/out
 **/typechain
 **/cache**
+**/abi
 
 # files
 *.env
