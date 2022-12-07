@@ -6,6 +6,7 @@
 **/artifacts
 **/build
 **/cache
+**/cache_hardhat
 **/coverage
 **/dist
 **/node_modules

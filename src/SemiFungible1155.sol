@@ -4,9 +4,7 @@
 pragma solidity ^0.8.9;
 
 import { Upgradeable1155 } from "./Upgradeable1155.sol";
-import {
-    IERC1155ReceiverUpgradeable
-} from "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC1155/IERC1155ReceiverUpgradeable.sol";
+import { IERC1155ReceiverUpgradeable } from "oz-upgradeable/token/ERC1155/IERC1155ReceiverUpgradeable.sol";
 
 // TODO shared error lib
 error ArraySize();

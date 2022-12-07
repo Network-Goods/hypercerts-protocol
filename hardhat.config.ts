@@ -1,11 +1,11 @@
-import "@nomiclabs/hardhat-waffle";
+import "@nomicfoundation/hardhat-chai-matchers";
+import "@nomicfoundation/hardhat-toolbox";
+import "@nomiclabs/hardhat-ethers";
 import "@openzeppelin/hardhat-upgrades";
-import "@typechain/hardhat";
 import { config as dotenvConfig } from "dotenv";
 import fs from "fs";
 import "hardhat-preprocessor";
 import { HardhatUserConfig } from "hardhat/config";
-import { NetworkUserConfig } from "hardhat/types";
 import { resolve } from "path";
 
 import "./tasks";
@@ -38,7 +38,7 @@ const chainIds = {
   mainnet: 1,
 };
 
-function getChainConfig(chain: keyof typeof chainIds): NetworkUserConfig {
+function getChainConfig(chain: keyof typeof chainIds) {
   const jsonRpcUrl = "https://" + chain + ".infura.io/v3/" + infuraApiKey;
 
   return {
@@ -53,7 +53,6 @@ function getChainConfig(chain: keyof typeof chainIds): NetworkUserConfig {
 }
 
 const config: HardhatUserConfig = {
-  defaultNetwork: "localhost",
   networks: {
     hardhat: {
       accounts: {
@@ -65,7 +64,6 @@ const config: HardhatUserConfig = {
     mainnet: getChainConfig("mainnet"),
   },
   paths: {
-    artifacts: "./artifacts",
     cache: "./cache_hardhat", // Use a different cache for Hardhat than Foundry
     sources: "./src",
     tests: "./test",
@@ -82,7 +80,6 @@ const config: HardhatUserConfig = {
         }
         return line;
       },
-      dest: "./build",
     }),
   },
   solidity: {
@@ -96,8 +93,6 @@ const config: HardhatUserConfig = {
   },
   typechain: {
     outDir: "./typechain",
-    target: "ethers-v5",
-    externalArtifacts: ["out/**/*.json"], // optional array of glob patterns with external artifacts to process (for example external libs from node_modules)
   },
 };
 

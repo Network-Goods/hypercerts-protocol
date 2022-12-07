@@ -1,13 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-import {
-    MerkleProofUpgradeable
-} from "lib/openzeppelin-contracts-upgradeable/contracts/utils/cryptography/MerkleProofUpgradeable.sol";
+import { MerkleProofUpgradeable } from "oz-upgradeable/utils/cryptography/MerkleProofUpgradeable.sol";
 
 error DuplicateEntry();
 error DoesNotExist();
-error NotAllowed();
+error Invalid();
 
 contract AllowlistMinter {
     using MerkleProofUpgradeable for bytes32[];
@@ -40,7 +38,7 @@ contract AllowlistMinter {
         bytes32 node = keccak256(abi.encodePacked(msg.sender, amount));
 
         if (hasBeenClaimed[claimID][node]) revert DuplicateEntry();
-        if (!proof.verifyCalldata(merkleRoots[claimID], node)) revert NotAllowed();
+        if (!proof.verifyCalldata(merkleRoots[claimID], node)) revert Invalid();
         hasBeenClaimed[claimID][node] = true;
 
         emit LeafClaimed(claimID, node);

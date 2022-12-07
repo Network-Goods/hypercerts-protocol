@@ -1,18 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-import {
-    ERC1155Upgradeable
-} from "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC1155/ERC1155Upgradeable.sol";
-import {
-    ERC1155BurnableUpgradeable
-} from "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC1155/extensions/ERC1155BurnableUpgradeable.sol";
-import {
-    ERC1155URIStorageUpgradeable
-} from "@oz-upgradeable/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol";
-import { OwnableUpgradeable } from "lib/openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol";
-import { Initializable } from "lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
-import { UUPSUpgradeable } from "lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol";
+import { ERC1155Upgradeable } from "oz-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
+import { ERC1155BurnableUpgradeable } from "oz-upgradeable/token/ERC1155/extensions/ERC1155BurnableUpgradeable.sol";
+import { ERC1155URIStorageUpgradeable } from "oz-upgradeable/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol";
+import { OwnableUpgradeable } from "oz-upgradeable/access/OwnableUpgradeable.sol";
+import { Initializable } from "oz-upgradeable/proxy/utils/Initializable.sol";
+import { UUPSUpgradeable } from "oz-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 contract Upgradeable1155 is
     Initializable,
@@ -42,8 +36,8 @@ contract Upgradeable1155 is
 
     function uri(
         uint256 tokenID
-    ) public view override(ERC1155Upgradeable, ERC1155URIStorageUpgradeable) returns (string memory uri) {
-        uri = ERC1155URIStorageUpgradeable.uri(tokenID);
+    ) public view override(ERC1155Upgradeable, ERC1155URIStorageUpgradeable) returns (string memory _uri) {
+        _uri = ERC1155URIStorageUpgradeable.uri(tokenID);
     }
 
     // The following functions are overrides required by Solidity.
