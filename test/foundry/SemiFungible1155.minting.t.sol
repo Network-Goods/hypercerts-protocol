@@ -22,24 +22,13 @@ contract SemiFungible1155Test is PRBTest, StdCheats, StdUtils, SemiFungible1155H
         bob = address(2);
     }
 
+    // UNHAPPY FLOWS
+
     function testFailMintZeroValue() public {
         startHoax(alice, 100 ether);
 
         // revert NotAllowed()
         semiFungible.mintValue(alice, 0, _uri);
-    }
-
-    function testMintValueSingle() public {
-        startHoax(alice, 100 ether);
-        semiFungible.mintValue(alice, 10000, _uri);
-
-        uint256 typeID = 1 << 128;
-
-        assertEq(semiFungible.creators(typeID), alice);
-        assertEq(semiFungible.balanceOf(alice, typeID), 10000);
-        assertEq(semiFungible.totalSupply(typeID), 10000);
-        assertEq(semiFungible.tokenValues(typeID + 0), 10000);
-        assertEq(semiFungible.tokenValues(typeID + 1), 10000);
     }
 
     function testFailMintValueWithZeroInArray() public {
@@ -52,6 +41,21 @@ contract SemiFungible1155Test is PRBTest, StdCheats, StdUtils, SemiFungible1155H
 
         // revert NotAllowed()
         semiFungible.mintValue(alice, values, _uri);
+    }
+
+    // HAPPY MINTING
+
+    function testMintValueSingle() public {
+        startHoax(alice, 100 ether);
+        semiFungible.mintValue(alice, 10000, _uri);
+
+        uint256 typeID = 1 << 128;
+
+        assertEq(semiFungible.creators(typeID), alice);
+        assertEq(semiFungible.balanceOf(alice, typeID), 10000);
+        assertEq(semiFungible.totalSupply(typeID), 10000);
+        assertEq(semiFungible.tokenValues(typeID + 0), 10000);
+        assertEq(semiFungible.tokenValues(typeID + 1), 10000);
     }
 
     function testMintValueArray() public {
