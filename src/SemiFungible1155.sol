@@ -39,7 +39,7 @@ contract SemiFungible1155 is Upgradeable1155 {
     }
 
     // solhint-disable-next-line func-name-mixedcase
-    function __SemiFungible1155_init() public virtual onlyInitializing {
+    function __SemiFungible1155_init() public virtual initializer {
         __Upgradeable1155_init();
     }
 

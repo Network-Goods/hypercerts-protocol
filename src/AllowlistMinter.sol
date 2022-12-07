@@ -5,7 +5,7 @@ import { MerkleProofUpgradeable } from "oz-upgradeable/utils/cryptography/Merkle
 
 error DuplicateEntry();
 error DoesNotExist();
-error NotAllowed();
+error Invalid();
 
 contract AllowlistMinter {
     using MerkleProofUpgradeable for bytes32[];
@@ -38,7 +38,7 @@ contract AllowlistMinter {
         bytes32 node = keccak256(abi.encodePacked(msg.sender, amount));
 
         if (hasBeenClaimed[claimID][node]) revert DuplicateEntry();
-        if (!proof.verifyCalldata(merkleRoots[claimID], node)) revert NotAllowed();
+        if (!proof.verifyCalldata(merkleRoots[claimID], node)) revert Invalid();
         hasBeenClaimed[claimID][node] = true;
 
         emit LeafClaimed(claimID, node);

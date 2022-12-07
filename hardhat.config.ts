@@ -1,4 +1,6 @@
+import "@nomicfoundation/hardhat-chai-matchers";
 import "@nomicfoundation/hardhat-toolbox";
+import "@nomiclabs/hardhat-ethers";
 import "@openzeppelin/hardhat-upgrades";
 import { config as dotenvConfig } from "dotenv";
 import fs from "fs";
@@ -51,7 +53,6 @@ function getChainConfig(chain: keyof typeof chainIds) {
 }
 
 const config: HardhatUserConfig = {
-  defaultNetwork: "localhost",
   networks: {
     hardhat: {
       accounts: {
@@ -65,6 +66,7 @@ const config: HardhatUserConfig = {
   paths: {
     cache: "./cache_hardhat", // Use a different cache for Hardhat than Foundry
     sources: "./src",
+    tests: "./test",
   },
   preprocess: {
     eachLine: (hre) => ({

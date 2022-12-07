@@ -12,7 +12,7 @@
     "**/CVS": true,
     "**/.DS_Store": true,
     "**/Thumbs.db": true,
-    "cache": true,
+    "cache": false,
     "node_modules": false,
     "out": true
   }

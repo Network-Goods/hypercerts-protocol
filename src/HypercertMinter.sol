@@ -18,7 +18,7 @@ contract HypercertMinter is IHypercertMinter, SemiFungible1155, AllowlistMinter 
         _disableInitializers();
     }
 
-    function initialize() public virtual onlyInitializing {
+    function initialize() public virtual initializer {
         __SemiFungible1155_init();
     }
 
