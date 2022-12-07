@@ -37,6 +37,11 @@ jobs:
           cache: "yarn"
           node-version: "lts/*"
 
+      - name: "Copy config"
+        run: |
+          mv ./.env.github .env
+          echo "::debug::$(less .env)"
+
       - name: "Install the Node.js dependencies"
         run: "yarn install --immutable"
 
