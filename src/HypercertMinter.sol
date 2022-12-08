@@ -9,7 +9,7 @@ contract HypercertMinter is IHypercertMinter, SemiFungible1155, AllowlistMinter 
     // solhint-disable-next-line const-name-snakecase
     string public constant name = "HypercertMinter";
 
-    mapping(uint256 => uint256) public claimToToken;
+    event ClaimStored(uint256 indexed claimID, string uri);
 
     /// INIT
 
@@ -25,11 +25,13 @@ contract HypercertMinter is IHypercertMinter, SemiFungible1155, AllowlistMinter 
     /// EXTERNAL
 
     function mintClaim(uint256 units, string memory uri) external {
-        _mintValue(msg.sender, units, uri);
+        uint256 claimID = _mintValue(msg.sender, units, uri);
+        emit ClaimStored(claimID, uri);
     }
 
     function mintClaimWithFractions(uint256[] memory fractions, string memory uri) external {
-        _mintValue(msg.sender, fractions, uri);
+        uint256 claimID = _mintValue(msg.sender, fractions, uri);
+        emit ClaimStored(claimID, uri);
     }
 
     function mintClaimFromAllowlist(bytes32[] calldata proof, uint256 claimID, uint256 amount) external {
@@ -40,6 +42,7 @@ contract HypercertMinter is IHypercertMinter, SemiFungible1155, AllowlistMinter 
     function createAllowlist(uint256 units, bytes32 merkleRoot, string memory uri) external {
         uint256 claimID = _createTokenType(units, uri);
         _createAllowlist(claimID, merkleRoot);
+        emit ClaimStored(claimID, uri);
     }
 
     /// INTERNAL

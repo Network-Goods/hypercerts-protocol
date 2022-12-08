@@ -27,12 +27,12 @@ contract SemiFungible1155 is Upgradeable1155 {
     // The top bit is a flag to tell if this is a NFI.
     uint256 public constant TYPE_NF_BIT = uint256(1 << 255);
 
-    mapping(uint256 => address) public owners;
-    mapping(uint256 => address) public creators; //TODO extend with admin contracts
+    mapping(uint256 => address) internal owners;
+    mapping(uint256 => address) internal creators; //TODO extend with admin contracts
 
-    mapping(uint256 => uint256) public tokenValues;
+    mapping(uint256 => uint256) internal tokenValues;
     mapping(uint256 => uint256) internal maxIndex;
-    mapping(uint256 => mapping(address => uint256)) public tokenUserBalances;
+    mapping(uint256 => mapping(address => uint256)) internal tokenUserBalances;
 
     event ValueTransfer(uint256 fromTokenID, uint256 toTokenID, uint256 value);
 
@@ -136,7 +136,6 @@ contract SemiFungible1155 is Upgradeable1155 {
 
         uint256 totalValue = _getSum(_values);
 
-        console2.log("Starting fraction minting: ", totalValue);
         _mintValue(_account, totalValue, uri);
 
         typeID = typeCounter << 128; //TODO max value check

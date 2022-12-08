@@ -3,10 +3,13 @@ pragma solidity >=0.8.4;
 
 import { PRBTest } from "prb-test/PRBTest.sol";
 import { StdCheats } from "forge-std/StdCheats.sol";
+import { StdUtils } from "forge-std/StdUtils.sol";
 import { HypercertMinter } from "../../src/HypercertMinter.sol";
 import { Merkle } from "murky/Merkle.sol";
 
 contract HelperContract {
+    event ClaimStored(uint256 indexed claimID, string uri);
+
     function noOverflow(uint256[] memory values) public pure returns (bool) {
         uint256 total;
         for (uint256 i = 0; i < values.length; i++) {
@@ -48,15 +51,20 @@ contract HelperContract {
 
 /// @dev See the "Writing Tests" section in the Foundry Book if this is your first time with Forge.
 /// https://book.getfoundry.sh/forge/writing-tests
-contract HypercertMinterTest is PRBTest, StdCheats, HelperContract {
+contract HypercertMinterTest is PRBTest, StdCheats, StdUtils, HelperContract {
     Merkle internal merkle;
     HypercertMinter internal hypercertMinter;
+    string internal _uri;
+    address alice;
 
     //TODO restore memoizze, gave weird memory issues (stuck..)
 
     function setUp() public {
         merkle = new Merkle();
         hypercertMinter = new HypercertMinter();
+        _uri = "ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi";
+        alice = address(1);
+        startHoax(alice, 10 ether);
     }
 
     /// @dev Run Forge with `-vvvv` to see console logs.
@@ -68,27 +76,27 @@ contract HypercertMinterTest is PRBTest, StdCheats, HelperContract {
         assertEq(keccak256(abi.encodePacked(hypercertMinter.name())), keccak256("HypercertMinter"));
     }
 
-    function testClaimSingleFraction(uint256) public {
-        vm.prank(address(1));
+    function testClaimSingleFraction() public {
+        uint256 units = 10000;
 
-        hypercertMinter.mintClaim(10000, "https://example.com/ipfsHash");
+        vm.expectEmit(true, false, false, true);
+        emit ClaimStored(1 << 128, _uri);
+        hypercertMinter.mintClaim(units, _uri);
     }
 
     function testClaimTenFractions() public {
-        vm.prank(address(1));
         uint256[] memory fractions = buildFractions(10);
 
-        hypercertMinter.mintClaimWithFractions(fractions, "https://example.com/ipfsHash");
+        vm.expectEmit(true, false, false, true);
+        emit ClaimStored(1 << 128, _uri);
+        hypercertMinter.mintClaimWithFractions(fractions, _uri);
     }
 
     function testClaimHundredFractions() public {
-        vm.prank(address(1));
         uint256[] memory fractions = buildFractions(100);
 
-        hypercertMinter.mintClaimWithFractions(fractions, "https://example.com/ipfsHash");
-    }
-
-    function onERC1155Received(address, address, uint256, uint256, bytes memory) public pure returns (bytes4) {
-        return this.onERC1155Received.selector;
+        vm.expectEmit(true, false, false, true);
+        emit ClaimStored(1 << 128, _uri);
+        hypercertMinter.mintClaimWithFractions(fractions, _uri);
     }
 }

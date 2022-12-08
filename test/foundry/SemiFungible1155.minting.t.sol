@@ -20,68 +20,92 @@ contract SemiFungible1155Test is PRBTest, StdCheats, StdUtils, SemiFungible1155H
         _uri = "ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi";
         alice = address(1);
         bob = address(2);
+        startHoax(alice, 100 ether);
     }
 
     // UNHAPPY FLOWS
 
-    function testFailMintZeroValue() public {
-        startHoax(alice, 100 ether);
-
-        // revert NotAllowed()
+    function testMintZeroValue() public {
+        vm.expectRevert(NotAllowed.selector);
         semiFungible.mintValue(alice, 0, _uri);
     }
 
-    function testFailMintValueWithZeroInArray() public {
-        startHoax(alice, 100 ether);
-
+    function testMintWithZeroInArray() public {
         uint256[] memory values = new uint256[](3);
         values[0] = 7000;
         values[1] = 3000;
         values[2] = 0;
 
-        // revert NotAllowed()
+        vm.expectRevert(NotAllowed.selector);
+        semiFungible.mintValue(alice, values, _uri);
+    }
+
+    function testMintWithToLargeArray() public {
+        uint256[] memory values = new uint256[](256);
+
+        vm.expectRevert(ArraySize.selector);
         semiFungible.mintValue(alice, values, _uri);
     }
 
     // HAPPY MINTING
 
     function testMintValueSingle() public {
-        startHoax(alice, 100 ether);
-        semiFungible.mintValue(alice, 10000, _uri);
+        uint256 _baseID = 1 << 128;
 
-        uint256 typeID = 1 << 128;
+        // Transfer from 0x0 to 0x0 declares token baseID for claim
+        // event TransferSingle(address indexed operator, address indexed from, address indexed to, uint256 id, uint256 value);        uint256 tokenID = semiFungible.mintValue(alice, 10000, _uri);
+        vm.expectEmit(true, true, true, true);
+        emit TransferSingle(alice, address(0), address(0), _baseID, 10000);
+        uint256 baseID = semiFungible.mintValue(alice, 10000, _uri);
 
-        assertEq(semiFungible.creators(typeID), alice);
-        assertEq(semiFungible.balanceOf(alice, typeID), 10000);
-        assertEq(semiFungible.totalSupply(typeID), 10000);
-        assertEq(semiFungible.tokenValues(typeID + 0), 10000);
-        assertEq(semiFungible.tokenValues(typeID + 1), 10000);
+        assertEq(baseID, _baseID);
+        assertEq(semiFungible.creator(baseID), alice);
+        assertEq(semiFungible.balanceOf(alice, baseID), 10000);
+        assertEq(semiFungible.totalSupply(baseID), 10000);
+        assertEq(semiFungible.tokenValue(baseID + 0), 10000);
+        assertEq(semiFungible.tokenValue(baseID + 1), 10000);
+        assertEq(semiFungible.tokenValue(baseID + 2), 0);
+    }
+
+    function testFuzzMintValueSingle(uint256 value) public {
+        vm.assume(value > 0);
+        uint256 _baseID = 1 << 128;
+
+        // Transfer from 0x0 to 0x0 declares token baseID for claim
+        // event TransferSingle(address indexed operator, address indexed from, address indexed to, uint256 id, uint256 value);        uint256 tokenID = semiFungible.mintValue(alice, 10000, _uri);
+        vm.expectEmit(true, true, true, true);
+        emit TransferSingle(alice, address(0), address(0), _baseID, value);
+        uint256 baseID = semiFungible.mintValue(alice, value, _uri);
+
+        assertEq(baseID, _baseID);
+        assertEq(semiFungible.creator(baseID), alice);
+        assertEq(semiFungible.balanceOf(alice, baseID), value);
+        assertEq(semiFungible.totalSupply(baseID), value);
+        assertEq(semiFungible.tokenValue(baseID + 0), value);
+        assertEq(semiFungible.tokenValue(baseID + 1), value);
+        assertEq(semiFungible.tokenValue(baseID + 2), 0);
     }
 
     function testMintValueArray() public {
-        startHoax(alice, 100 ether);
-
         uint256[] memory values = new uint256[](3);
         values[0] = 7000;
         values[1] = 3000;
         values[2] = 5000;
 
-        semiFungible.mintValue(alice, values, _uri);
+        uint256 baseID = semiFungible.mintValue(alice, values, _uri);
+        assertEq(semiFungible.balanceOf(alice, baseID), 15000);
+        assertEq(semiFungible.totalSupply(baseID), 15000);
 
-        uint256 typeID = 1 << 128;
-        assertEq(semiFungible.balanceOf(alice, typeID), 15000);
-        assertEq(semiFungible.totalSupply(typeID), 15000);
-        assertEq(semiFungible.tokenValues(typeID + 1), 7000);
-        assertEq(semiFungible.tokenValues(typeID + 2), 3000);
-        assertEq(semiFungible.tokenValues(typeID + 3), 5000);
+        for (uint256 i = 0; i < values.length; i++) {
+            assertEq(semiFungible.tokenValue(baseID + 1 + i), values[i]);
+        }
     }
 
-    function testMintValueArrayFuzz(uint256[] memory values, address other) public {
+    function testFuzzMintValueArray(uint256[] memory values, address other) public {
         vm.assume(values.length > 0 && values.length < 254);
         vm.assume(semiFungible.noOverflow(values));
         vm.assume(semiFungible.noZeroes(values));
         vm.assume(other != address(1));
-        hoax(alice, 100 ether);
 
         semiFungible.mintValue(alice, values, _uri);
 
@@ -89,10 +113,12 @@ contract SemiFungible1155Test is PRBTest, StdCheats, StdUtils, SemiFungible1155H
         uint256 balance = semiFungible.balanceOf(alice, baseID);
         assertEq(balance, semiFungible.getSum(values));
         assertEq(balance, semiFungible.totalSupply(baseID));
+        assertEq(semiFungible.balanceOf(other, baseID), 0);
 
-        assertEq(semiFungible.balanceOf(alice, baseID + values.length), values[values.length - 1]);
-
-        uint256 balanceOther = semiFungible.balanceOf(other, baseID);
-        assertEq(balanceOther, 0);
+        for (uint256 i = 0; i < values.length; i++) {
+            assertEq(semiFungible.tokenValue(baseID + 1 + i), values[i]);
+            assertEq(semiFungible.balanceOf(alice, baseID + 1 + i), values[i]);
+            assertEq(semiFungible.balanceOf(other, baseID + 1 + i), 0);
+        }
     }
 }
