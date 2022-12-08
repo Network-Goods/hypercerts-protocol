@@ -70,7 +70,6 @@
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "packageManager": "yarn@3.2.4",
-  "private": false,
   "resolutions": {
     "solhint/@solidity-parser/parser": "^0.14.5"
   },

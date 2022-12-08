@@ -6,13 +6,22 @@ contract SemiFungible1155Helper is SemiFungible1155 {
     error FractionalBurn();
     error NotAllowed();
     error NotApprovedOrOwner();
+    error ArraySize();
 
-    function mintValue(address user, uint256 value, string memory uri) public {
-        _mintValue(user, value, uri);
+    function creator(uint256 tokenID) public view returns (address _creator) {
+        _creator = creators[tokenID];
     }
 
-    function mintValue(address user, uint256[] memory values, string memory uri) public {
-        _mintValue(user, values, uri);
+    function tokenValue(uint256 tokenID) public view returns (uint256 value) {
+        value = tokenValues[tokenID];
+    }
+
+    function mintValue(address user, uint256 value, string memory uri) public returns (uint256 tokenID) {
+        return _mintValue(user, value, uri);
+    }
+
+    function mintValue(address user, uint256[] memory values, string memory uri) public returns (uint256 tokenID) {
+        return _mintValue(user, values, uri);
     }
 
     function noOverflow(uint256[] memory values) public pure returns (bool) {

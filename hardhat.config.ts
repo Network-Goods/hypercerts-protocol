@@ -33,8 +33,14 @@ if (!infuraApiKey) {
   throw new Error("Please set your INFURA_API_KEY in a .env file");
 }
 
+const etherscanApiKey: string | undefined = process.env.ETHERSCAN_API_KEY;
+if (!etherscanApiKey) {
+  throw new Error("Please set your INFURA_API_KEY in a .env file");
+}
+
 const chainIds = {
   goerli: 5,
+  sepolia: 11155111,
   hardhat: 31337,
   mainnet: 1,
 };
@@ -60,6 +66,12 @@ const config: HardhatUserConfig = {
     clear: true,
     flat: true,
   },
+  etherscan: {
+    apiKey: {
+      goerli: etherscanApiKey,
+      sepolia: etherscanApiKey,
+    },
+  },
   networks: {
     hardhat: {
       accounts: {
@@ -68,6 +80,7 @@ const config: HardhatUserConfig = {
       chainId: chainIds.hardhat,
     },
     goerli: getChainConfig("goerli"),
+    sepolia: getChainConfig("sepolia"),
     mainnet: getChainConfig("mainnet"),
   },
   paths: {
