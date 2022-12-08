@@ -53,7 +53,12 @@ contract SemiFungible1155Test is PRBTest, StdCheats, StdUtils, SemiFungible1155H
         uint256 _baseID = 1 << 128;
 
         // Transfer from 0x0 to 0x0 declares token baseID for claim
-        // event TransferSingle(address indexed operator, address indexed from, address indexed to, uint256 id, uint256 value);        uint256 tokenID = semiFungible.mintValue(alice, 10000, _uri);
+        // event TransferSingle
+        // address indexed operator
+        // address indexed from
+        // address indexed to
+        // uint256 id
+        // uint256 value
         vm.expectEmit(true, true, true, true);
         emit TransferSingle(alice, address(0), address(0), _baseID, 10000);
         uint256 baseID = semiFungible.mintValue(alice, 10000, _uri);
@@ -71,8 +76,6 @@ contract SemiFungible1155Test is PRBTest, StdCheats, StdUtils, SemiFungible1155H
         vm.assume(value > 0);
         uint256 _baseID = 1 << 128;
 
-        // Transfer from 0x0 to 0x0 declares token baseID for claim
-        // event TransferSingle(address indexed operator, address indexed from, address indexed to, uint256 id, uint256 value);        uint256 tokenID = semiFungible.mintValue(alice, 10000, _uri);
         vm.expectEmit(true, true, true, true);
         emit TransferSingle(alice, address(0), address(0), _baseID, value);
         uint256 baseID = semiFungible.mintValue(alice, value, _uri);

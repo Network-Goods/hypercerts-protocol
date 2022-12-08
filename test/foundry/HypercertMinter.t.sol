@@ -55,7 +55,7 @@ contract HypercertMinterTest is PRBTest, StdCheats, StdUtils, HelperContract {
     Merkle internal merkle;
     HypercertMinter internal hypercertMinter;
     string internal _uri;
-    address alice;
+    address internal alice;
 
     //TODO restore memoizze, gave weird memory issues (stuck..)
 
