@@ -7,6 +7,12 @@
 [license]: https://opensource.org/licenses/MIT
 [license-badge]: https://img.shields.io/badge/License-MIT-blue.svg
 
+## Contracts
+
+#### Sepolia
+
+HypercertMinter (UUPS Proxy) is deployed to proxy address: 0x2E5C3A3015a4A25819Bb2277C65df7Fe2e909CC8
+
 ## Usage
 
 Here's a list of the most frequently needed commands.
@@ -37,15 +43,11 @@ $ forge build
 
 ### Deploy
 
-Deploy to Anvil:
+Deployment of the contract to EVM compatible net is managed by
+[OpenZeppelin](https://docs.openzeppelin.com/upgrades-plugins/1.x/api-hardhat-upgrades). Primarily because of proxy
+management and safety checks.
 
-```sh
-$ forge script script/Foo.s.sol:FooScript --fork-url http://localhost:8545 \
- --broadcast --private-key $PRIVATE_KEY
-```
-
-For instructions on how to deploy to a testnet or mainnet, check out the
-[Solidity Scripting tutorial](https://book.getfoundry.sh/tutorials/solidity-scripting.html).
+Run: `yarn hardhat deploy --network sepolia`
 
 ### Format
 
@@ -73,10 +75,13 @@ $ yarn lint
 
 ### Test
 
-Run the tests:
+#### Foundry
+
+Solidity tests are executed using Foundry Run the tests:
 
 ```sh
 $ forge test
+
 ```
 
 ## License

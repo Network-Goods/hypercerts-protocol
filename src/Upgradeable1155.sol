@@ -16,13 +16,8 @@ contract Upgradeable1155 is
     OwnableUpgradeable,
     UUPSUpgradeable
 {
-    /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor() {
-        _disableInitializers();
-    }
-
     // solhint-disable-next-line func-name-mixedcase
-    function __Upgradeable1155_init() public virtual initializer {
+    function __Upgradeable1155_init() public virtual onlyInitializing {
         __ERC1155_init("");
         __ERC1155Burnable_init();
         __ERC1155URIStorage_init();

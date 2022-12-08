@@ -5,7 +5,6 @@ pragma solidity ^0.8.9;
 
 import { Upgradeable1155 } from "./Upgradeable1155.sol";
 import { IERC1155ReceiverUpgradeable } from "oz-upgradeable/token/ERC1155/IERC1155ReceiverUpgradeable.sol";
-import "forge-std/console2.sol";
 
 // TODO shared error lib
 error ArraySize();
@@ -36,13 +35,8 @@ contract SemiFungible1155 is Upgradeable1155 {
 
     event ValueTransfer(uint256 fromTokenID, uint256 toTokenID, uint256 value);
 
-    /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor() {
-        _disableInitializers();
-    }
-
     // solhint-disable-next-line func-name-mixedcase
-    function __SemiFungible1155_init() public virtual initializer {
+    function __SemiFungible1155_init() public virtual onlyInitializing {
         __Upgradeable1155_init();
     }
 
@@ -234,11 +228,8 @@ contract SemiFungible1155 is Upgradeable1155 {
         //TODO emit event per case? Since value NF should be 1
         //TODO Block marketplace transfer of claim data ownership
         if (getNonFungibleIndex(_id) == 0) {
-            console2.log("Basetype");
             revert NotAllowed();
         } else {
-            console2.log("Fungible");
-
             uint256 typeID = getNonFungibleBaseType(_id);
 
             tokenUserBalances[typeID][_from] -= tokenValue;

@@ -6,7 +6,7 @@ import { HypercertMinter } from "../typechain";
 describe("Hypercert Minter", function () {
   it("is upgradeable", async () => {
     const HypercertMinter = await ethers.getContractFactory("HypercertMinter");
-    const instance = <HypercertMinter>await upgrades.deployProxy(HypercertMinter, [], {
+    const instance = <HypercertMinter>await upgrades.deployProxy(HypercertMinter, {
       kind: "uups",
       unsafeAllow: ["constructor"],
     });
