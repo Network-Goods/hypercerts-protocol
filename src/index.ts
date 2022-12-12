@@ -8,12 +8,12 @@
 
 // ABIs
 export { default as HypercertMinterABI } from "../abi/HypercertMinter.json";
-export { default as IHypercertMinterABI } from "../abi/IHypercertMinter.json";
+export { default as IHypercertTokenABI } from "../abi/IHypercertToken.json";
 export { default as SemiFungible1155ABI } from "../abi/SemiFungible1155.json";
 export { default as ERC1155UpgradeableABI } from "../abi/ERC1155Upgradeable.json";
 
 // Interfaces
-export type { IHypercertMinter } from "../typechain/src/interfaces/IHypercertMinter";
+export type { IHypercertToken } from "../typechain/src/interfaces/IHypercertToken";
 
 // Contracts
 export { HypercertMinter } from "../typechain/src/HypercertMinter";

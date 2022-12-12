@@ -2,6 +2,7 @@ import "@nomicfoundation/hardhat-chai-matchers";
 import "@nomicfoundation/hardhat-toolbox";
 import "@nomiclabs/hardhat-ethers";
 import "@openzeppelin/hardhat-upgrades";
+import "@primitivefi/hardhat-dodoc";
 import { config as dotenvConfig } from "dotenv";
 import fs from "fs";
 import "hardhat-abi-exporter";
@@ -65,6 +66,12 @@ const config: HardhatUserConfig = {
     runOnCompile: true,
     clear: true,
     flat: true,
+  },
+  dodoc: {
+    runOnCompile: true,
+    include: ["src"],
+    freshOutput: true,
+    // More options...
   },
   etherscan: {
     apiKey: {

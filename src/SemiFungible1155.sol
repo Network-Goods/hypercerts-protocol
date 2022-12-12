@@ -14,27 +14,43 @@ error NotAllowed();
 error TypeMismatch();
 error FractionalBurn();
 
+/// @title Contract for minting semi-fungible EIP1155 tokens
+/// @author bitbeckers
+/// @notice Extends { Upgradeable1155 } token with semi-fungible properties and the concept of `units`
+/// @dev Adds split bit strategy as described in [EIP-1155](https://eips.ethereum.org/EIPS/eip-1155#non-fungible-tokens)
 contract SemiFungible1155 is Upgradeable1155 {
+    /// @dev Counter used to generate next typeID.
     uint256 public typeCounter;
-    // Use a split bit implementation.
-    // Store the type in the upper 128 bits..
+
+    /// @dev Bitmask used to expose only upper 128 bits of uint256
     uint256 public constant TYPE_MASK = uint256(uint128(int128(~0))) << 128;
 
-    // ..and the non-fungible index in the lower 128
+    /// @dev Bitmask used to expose only lower 128 bits of uint256
     uint256 public constant NF_INDEX_MASK = uint128(int128(~0));
 
-    // The top bit is a flag to tell if this is a NFI.
+    /// @dev Identify non-fungible index. Use to find index of token belonging to `typeID`
     uint256 public constant TYPE_NF_BIT = uint256(1 << 255);
 
+    /// @dev Mapping of `tokenID` to address of `owner`
     mapping(uint256 => address) internal owners;
+
+    /// @dev Mapping of `tokenID` to address of `creator`
     mapping(uint256 => address) internal creators; //TODO extend with admin contracts
 
+    /// @dev Used to determine amount of `units` stored in token at `tokenID`
     mapping(uint256 => uint256) internal tokenValues;
+
+    /// @dev Used to find highest index of token belonging to token at `typeID`
+    // TODO should have max value type(uint256).max
     mapping(uint256 => uint256) internal maxIndex;
+
+    /// @dev Mapping from `tokenID` to user at `address` to get `units` owned
     mapping(uint256 => mapping(address => uint256)) internal tokenUserBalances;
 
+    /// @dev Emitted when `value` represented in `units` is transfered between tokens
     event ValueTransfer(uint256 fromTokenID, uint256 toTokenID, uint256 value);
 
+    /// @dev Init method. Underlying { Upgradeable1155 } is `Initializable`
     // solhint-disable-next-line func-name-mixedcase
     function __SemiFungible1155_init() public virtual onlyInitializing {
         __Upgradeable1155_init();
@@ -43,29 +59,38 @@ contract SemiFungible1155 is Upgradeable1155 {
     /// ENJIN EXAMPLE IMPLEMENTATION
     // Only to make code clearer. Should not be functions
     // TODO cleanup functions
+    /// @dev Identify if token at `_id` is non-fungible.
+    /// @dev Non-fungible tokens are used to represent the base type for hypercert tokens
     function isNonFungible(uint256 _id) internal pure returns (bool) {
         return _id & TYPE_NF_BIT == TYPE_NF_BIT;
     }
 
+    /// @dev Identify if token at `_id` is fungible.
+    /// @dev Fungible tokens are used to represent (fractional) ownership of a claim
     function isFungible(uint256 _id) internal pure returns (bool) {
         return _id & TYPE_NF_BIT == 0;
     }
 
+    /// @dev Get index of fractional token as `_id`
     function getNonFungibleIndex(uint256 _id) internal pure returns (uint256) {
         return _id & NF_INDEX_MASK;
     }
 
+    /// @dev Get base type ID for token at `_id`
     function getNonFungibleBaseType(uint256 _id) internal pure returns (uint256) {
         return _id & TYPE_MASK;
     }
 
+    /// @dev Identify that token at `_id` is base type.
+    /// @dev Upper 128 bits identify base type ID, lower bits should be 0
     function isNonFungibleBaseType(uint256 _id) internal pure returns (bool) {
         // A base type has the NF bit but does not have an index.
         return (_id & TYPE_NF_BIT == TYPE_NF_BIT) && (_id & NF_INDEX_MASK == 0);
     }
 
+    /// @dev Identify that token at `_id` is fraction of a claim.
+    /// @dev Upper 128 bits identify base type ID, lower bits should be > 0
     function isNonFungibleItem(uint256 _id) internal pure returns (bool) {
-        // A base type has the NF bit but does has an index.
         return (_id & TYPE_NF_BIT == TYPE_NF_BIT) && (_id & NF_INDEX_MASK != 0);
     }
 
@@ -134,7 +159,7 @@ contract SemiFungible1155 is Upgradeable1155 {
 
         typeID = typeCounter << 128; //TODO max value check
 
-        splitValue(_account, typeID + maxIndex[typeID], _values);
+        _splitValue(_account, typeID + maxIndex[typeID], _values);
     }
 
     /// @dev Mint a new token for an existing type
@@ -152,7 +177,9 @@ contract SemiFungible1155 is Upgradeable1155 {
         tokenUserBalances[tokenID][_account] = _units; // creator of fraction gets full value
     }
 
-    function splitValue(address _account, uint256 _tokenID, uint256[] memory _values) public {
+    /// @dev Split the units of `_tokenID` owned by `account` across `_values`
+    /// @dev `_values` must sum to total `units` held at `_tokenID`
+    function _splitValue(address _account, uint256 _tokenID, uint256[] memory _values) internal {
         if (_values.length > 253) {
             revert ArraySize();
         }
@@ -183,7 +210,9 @@ contract SemiFungible1155 is Upgradeable1155 {
         maxIndex[_typeID] += len;
     }
 
-    function mergeValue(uint256[] memory _fractionIDs) public {
+    /// @dev Merge the units of `_fractionIDs`.
+    /// @dev Base type of `_fractionIDs` must be identical for all tokens.
+    function _mergeValue(uint256[] memory _fractionIDs) internal {
         if (_fractionIDs.length > 253) {
             revert ArraySize();
         }
@@ -202,7 +231,10 @@ contract SemiFungible1155 is Upgradeable1155 {
         }
     }
 
-    function burnValue(address _account, uint256 _tokenID) public {
+    /// @dev Burn the token at `_tokenID` owned by `_account`
+    /// @dev Not allowed to mint base type.
+    /// @dev `_tokenID` must hold all value declared at base type
+    function _burnValue(address _account, uint256 _tokenID) internal {
         uint256 _typeID = getNonFungibleBaseType(_tokenID);
         if (getNonFungibleIndex(_tokenID) == 0) revert NotAllowed();
         if (tokenValues[_tokenID] != tokenValues[_typeID]) revert FractionalBurn();

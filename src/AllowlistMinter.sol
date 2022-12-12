@@ -2,16 +2,21 @@
 pragma solidity ^0.8.9;
 
 import { MerkleProofUpgradeable } from "oz-upgradeable/utils/cryptography/MerkleProofUpgradeable.sol";
+import { IAllowlist } from "./interfaces/IAllowlist.sol";
 
 error DuplicateEntry();
 error DoesNotExist();
 error Invalid();
 
-contract AllowlistMinter {
+/// @title Interface for hypercert token interactions
+/// @author bitbeckers
+/// @notice This interface declares the required functionality for a hypercert token
+/// @notice This interface does not specify the underlying token type (e.g. 721 or 1155)
+contract AllowlistMinter is IAllowlist {
     using MerkleProofUpgradeable for bytes32[];
 
-    event AllowlistCreated(uint256 claimID, bytes32 root);
-    event LeafClaimed(uint256 claimID, bytes32 leaf);
+    event AllowlistCreated(uint256 tokenID, bytes32 root);
+    event LeafClaimed(uint256 tokenID, bytes32 leaf);
 
     mapping(uint256 => bytes32) internal merkleRoots;
     mapping(uint256 => mapping(bytes32 => bool)) public hasBeenClaimed;

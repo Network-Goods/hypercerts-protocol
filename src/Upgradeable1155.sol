@@ -16,6 +16,7 @@ contract Upgradeable1155 is
     OwnableUpgradeable,
     UUPSUpgradeable
 {
+    /// @dev see { openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol }
     // solhint-disable-next-line func-name-mixedcase
     function __Upgradeable1155_init() public virtual onlyInitializing {
         __ERC1155_init("");
@@ -25,10 +26,12 @@ contract Upgradeable1155 is
         __UUPSUpgradeable_init();
     }
 
+    /// @dev see { openzeppelin-contracts-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol }
     function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {
         // solhint-disable-previous-line no-empty-blocks
     }
 
+    /// @dev see { openzeppelin-contracts-upgradeable/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol }
     function uri(
         uint256 tokenID
     ) public view override(ERC1155Upgradeable, ERC1155URIStorageUpgradeable) returns (string memory _uri) {
