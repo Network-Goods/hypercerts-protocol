@@ -60,13 +60,13 @@ contract SemiFungible1155Test is PRBTest, StdCheats, StdUtils, SemiFungible1155H
         // uint256 id
         // uint256 value
         vm.expectEmit(true, true, true, true);
-        emit TransferSingle(alice, address(0), address(0), _baseID, 10000);
+        emit TransferSingle(alice, address(0), alice, _baseID, 1);
         uint256 baseID = semiFungible.mintValue(alice, 10000, _uri);
 
         assertEq(baseID, _baseID);
         assertEq(semiFungible.creator(baseID), alice);
-        assertEq(semiFungible.balanceOf(alice, baseID), 10000);
-        assertEq(semiFungible.totalSupply(baseID), 10000);
+        assertEq(semiFungible.balanceOf(alice, baseID), 1);
+        assertEq(semiFungible.totalUnits(baseID), 10000);
         assertEq(semiFungible.tokenValue(baseID + 0), 10000);
         assertEq(semiFungible.tokenValue(baseID + 1), 10000);
         assertEq(semiFungible.tokenValue(baseID + 2), 0);
@@ -77,13 +77,13 @@ contract SemiFungible1155Test is PRBTest, StdCheats, StdUtils, SemiFungible1155H
         uint256 _baseID = 1 << 128;
 
         vm.expectEmit(true, true, true, true);
-        emit TransferSingle(alice, address(0), address(0), _baseID, value);
+        emit TransferSingle(alice, address(0), alice, _baseID, 1);
         uint256 baseID = semiFungible.mintValue(alice, value, _uri);
 
         assertEq(baseID, _baseID);
         assertEq(semiFungible.creator(baseID), alice);
-        assertEq(semiFungible.balanceOf(alice, baseID), value);
-        assertEq(semiFungible.totalSupply(baseID), value);
+        assertEq(semiFungible.balanceOf(alice, baseID), 1);
+        assertEq(semiFungible.totalUnits(baseID), value);
         assertEq(semiFungible.tokenValue(baseID + 0), value);
         assertEq(semiFungible.tokenValue(baseID + 1), value);
         assertEq(semiFungible.tokenValue(baseID + 2), 0);
@@ -96,8 +96,8 @@ contract SemiFungible1155Test is PRBTest, StdCheats, StdUtils, SemiFungible1155H
         values[2] = 5000;
 
         uint256 baseID = semiFungible.mintValue(alice, values, _uri);
-        assertEq(semiFungible.balanceOf(alice, baseID), 15000);
-        assertEq(semiFungible.totalSupply(baseID), 15000);
+        assertEq(semiFungible.balanceOf(alice, baseID), 1);
+        assertEq(semiFungible.totalUnits(baseID), 15000);
 
         for (uint256 i = 0; i < values.length; i++) {
             assertEq(semiFungible.tokenValue(baseID + 1 + i), values[i]);
@@ -113,14 +113,13 @@ contract SemiFungible1155Test is PRBTest, StdCheats, StdUtils, SemiFungible1155H
         semiFungible.mintValue(alice, values, _uri);
 
         uint256 baseID = 1 << 128;
-        uint256 balance = semiFungible.balanceOf(alice, baseID);
-        assertEq(balance, semiFungible.getSum(values));
-        assertEq(balance, semiFungible.totalSupply(baseID));
+        assertEq(semiFungible.balanceOf(alice, baseID), 1);
+        assertEq(semiFungible.getSum(values), semiFungible.totalUnits(baseID));
         assertEq(semiFungible.balanceOf(other, baseID), 0);
 
         for (uint256 i = 0; i < values.length; i++) {
             assertEq(semiFungible.tokenValue(baseID + 1 + i), values[i]);
-            assertEq(semiFungible.balanceOf(alice, baseID + 1 + i), values[i]);
+            assertEq(semiFungible.balanceOf(alice, baseID + 1 + i), 1);
             assertEq(semiFungible.balanceOf(other, baseID + 1 + i), 0);
         }
     }

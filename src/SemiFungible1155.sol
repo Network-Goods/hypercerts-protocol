@@ -5,6 +5,7 @@ pragma solidity ^0.8.9;
 
 import { Upgradeable1155 } from "./Upgradeable1155.sol";
 import { IERC1155ReceiverUpgradeable } from "oz-upgradeable/token/ERC1155/IERC1155ReceiverUpgradeable.sol";
+import "forge-std/console2.sol";
 
 // TODO shared error lib
 error ArraySize();
@@ -96,16 +97,18 @@ contract SemiFungible1155 is Upgradeable1155 {
 
     /// READ
 
-    function balanceOf(address _owner, uint256 _tokenID) public view override returns (uint256 tokenUserBalance) {
-        tokenUserBalance = tokenUserBalances[_tokenID][_owner];
-    }
-
-    function balanceOf(uint256 _tokenID) public view returns (uint256 tokenValue) {
-        tokenValue = tokenValues[_tokenID];
-    }
-
-    function totalSupply(uint256 _typeID) external view returns (uint256 total) {
+    function totalUnits(uint256 _typeID) external view returns (uint256 total) {
         total = tokenValues[_typeID];
+    }
+
+    /// @dev see {IHypercertToken}
+    function _unitsOf(uint256 tokenID) internal view returns (uint256 units) {
+        units = tokenValues[tokenID];
+    }
+
+    /// @dev see {IHypercertToken}
+    function _unitsOf(address account, uint256 tokenID) internal view returns (uint256 units) {
+        units = tokenUserBalances[tokenID][account];
     }
 
     /// MUTATE
@@ -117,9 +120,8 @@ contract SemiFungible1155 is Upgradeable1155 {
         creators[typeID] = msg.sender;
         tokenValues[typeID] = units;
 
+        _mint(msg.sender, typeID, 1, "");
         _setURI(typeID, uri);
-
-        emit TransferSingle(msg.sender, address(0x0), address(0x0), typeID, units);
     }
 
     /// @dev Mint a new token type and the initial value
@@ -134,12 +136,10 @@ contract SemiFungible1155 is Upgradeable1155 {
         owners[tokenID] = _account;
         tokenValues[tokenID] = _value; //first fraction
 
-        //TODO these balances might not be needed, maybe only total ownership of hypercert.
-        tokenUserBalances[typeID][_account] = _value; // creator of fraction gets full value
+        tokenUserBalances[typeID][_account] = _value;
         tokenUserBalances[tokenID][_account] = _value; // creator of fraction gets full value
 
-        _mint(_account, tokenID, _value, "");
-        _setURI(tokenID, uri);
+        _mint(_account, tokenID, 1, "");
     }
 
     /// @dev Mint a new token type and the initial fractions
@@ -200,7 +200,7 @@ contract SemiFungible1155 is Upgradeable1155 {
             tokenValues[tokenID] = _values[i];
             tokenUserBalances[tokenID][_account] = _values[i];
             left -= _values[i];
-            _mint(_account, tokenID, _values[i], ""); //TODO batchmint?
+            _mint(_account, tokenID, 1, ""); //TODO batchmint?
             emit ValueTransfer(_tokenID, tokenID, _values[i]);
         }
 
@@ -212,6 +212,8 @@ contract SemiFungible1155 is Upgradeable1155 {
 
     /// @dev Merge the units of `_fractionIDs`.
     /// @dev Base type of `_fractionIDs` must be identical for all tokens.
+    // TODO optimise merge, possibly batch burn and mint 1 new?
+    // TODO emit events
     function _mergeValue(uint256[] memory _fractionIDs) internal {
         if (_fractionIDs.length > 253) {
             revert ArraySize();
@@ -221,30 +223,54 @@ contract SemiFungible1155 is Upgradeable1155 {
         uint256 target = _fractionIDs[len - 1];
         uint256 _typeID = getNonFungibleBaseType(target);
 
+        uint256 _totalValue = 0;
+        uint256[] memory _valuesToBurn = new uint256[](len - 1);
+        uint256[] memory _idsToBurn = new uint256[](len - 1);
         for (uint256 i = 0; i < len; i++) {
             if (getNonFungibleBaseType(_fractionIDs[i]) != _typeID) revert TypeMismatch();
             uint256 _fractionID = _fractionIDs[i];
             if (_fractionID != target) {
-                tokenValues[target] += tokenValues[_fractionID];
+                _idsToBurn[i] = _fractionID;
+                _valuesToBurn[i] = 1;
+                _totalValue += tokenValues[_fractionID];
+
                 delete tokenValues[_fractionID];
+                delete tokenUserBalances[_fractionID][msg.sender];
+            } else {
+                tokenUserBalances[_fractionID][msg.sender] += _totalValue;
+                tokenValues[_fractionID] += _totalValue;
             }
         }
+        _burnBatch(msg.sender, _idsToBurn, _valuesToBurn);
     }
 
     /// @dev Burn the token at `_tokenID` owned by `_account`
-    /// @dev Not allowed to mint base type.
+    /// @dev Not allowed to burn base type.
     /// @dev `_tokenID` must hold all value declared at base type
     function _burnValue(address _account, uint256 _tokenID) internal {
         uint256 _typeID = getNonFungibleBaseType(_tokenID);
         if (getNonFungibleIndex(_tokenID) == 0) revert NotAllowed();
         if (tokenValues[_tokenID] != tokenValues[_typeID]) revert FractionalBurn();
+
         delete tokenValues[_typeID];
         delete tokenValues[_tokenID];
-        delete tokenUserBalances[_typeID][_account]; //TODO delete all balances
-        delete tokenUserBalances[_tokenID][_account]; //TODO delete all balances
+        delete tokenUserBalances[_typeID][_account];
+        delete tokenUserBalances[_tokenID][_account];
+
+        _burn(_account, _tokenID, 1);
+        _burn(_account, _typeID, 1);
     }
 
-    /// Transfers
+    /// METADATA
+
+    /// @dev see { openzeppelin-contracts-upgradeable/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol }
+    /// @dev Always returns the URI for the basetype so that it's managed in one place.
+    function uri(uint256 tokenID) public view override returns (string memory _uri) {
+        _uri = Upgradeable1155.uri(getNonFungibleBaseType(tokenID));
+    }
+
+    /// TRANSFERS
+
     function safeTransferFrom(
         address _from,
         address _to,
@@ -254,29 +280,19 @@ contract SemiFungible1155 is Upgradeable1155 {
     ) public override {
         if (_to == address(0x0)) revert ToZeroAddress();
         if (_from != msg.sender) revert NotApprovedOrOwner(); //TODO Allowance approval
+        if (getNonFungibleIndex(_id) == 0) revert NotAllowed();
 
         uint256 tokenValue = tokenValues[_id];
+        uint256 typeID = getNonFungibleBaseType(_id);
 
-        //TODO emit event per case? Since value NF should be 1
-        //TODO Block marketplace transfer of claim data ownership
-        if (getNonFungibleIndex(_id) == 0) {
-            revert NotAllowed();
-        } else {
-            uint256 typeID = getNonFungibleBaseType(_id);
+        //TODO evaluate need of double accounting (base type & fractions)
+        tokenUserBalances[typeID][_from] -= tokenValue;
+        tokenUserBalances[typeID][_to] += tokenValue;
 
-            tokenUserBalances[typeID][_from] -= tokenValue;
-            tokenUserBalances[typeID][_to] += tokenValue;
+        tokenUserBalances[_id][_from] -= tokenValue;
+        tokenUserBalances[_id][_to] += tokenValue;
 
-            tokenUserBalances[_id][_from] -= tokenValue;
-            tokenUserBalances[_id][_to] += tokenValue;
-        }
-
-        emit TransferSingle(msg.sender, _from, _to, _id, tokenValue);
-
-        // TODO added extra underscore to bypass non-virtual override conflict
-        if (_isContract(_to)) {
-            __doSafeTransferAcceptanceCheck(msg.sender, _from, _to, _id, _value, _data);
-        }
+        super.safeTransferFrom(_from, _to, _id, _value, _data);
     }
 
     // The following functions are overrides required by Solidity.
@@ -321,34 +337,5 @@ contract SemiFungible1155 is Upgradeable1155 {
         }
 
         return sum;
-    }
-
-    function __doSafeTransferAcceptanceCheck(
-        address operator,
-        address from,
-        address to,
-        uint256 id,
-        uint256 amount,
-        bytes memory data
-    ) private {
-        try IERC1155ReceiverUpgradeable(to).onERC1155Received(operator, from, id, amount, data) returns (
-            bytes4 response
-        ) {
-            if (response != IERC1155ReceiverUpgradeable.onERC1155Received.selector) {
-                revert("ERC1155: ERC1155Receiver rejected tokens");
-            }
-        } catch Error(string memory reason) {
-            revert(reason);
-        } catch {
-            revert("ERC1155: transfer to non-ERC1155Receiver implementer");
-        }
-    }
-
-    function _isContract(address account) internal view returns (bool) {
-        // This method relies on extcodesize/address.code.length, which returns 0
-        // for contracts in construction, since the code is only stored at the end
-        // of the constructor execution.
-
-        return account.code.length > 0;
     }
 }

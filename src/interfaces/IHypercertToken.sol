@@ -29,4 +29,14 @@ interface IHypercertToken {
     /// @notice Operator must be allowed by `creator` and the token must represent the total amount of available units.
     // TODO _account might not be needed? Or operator?
     function burnValue(address account, uint256 tokenID) external;
+
+    /// @dev Returns the `units` held by a (fractional) token at `claimID`
+    /// @dev If `tokenID` is a base type, the total amount of `units` for the claim is returned.
+    /// @dev If `tokenID` is a fractional token, the `units` held by the token is returned
+    function unitsOf(uint256 tokenID) external view returns (uint256 units);
+
+    /// @dev Returns the `units` held by `account` of a (fractional) token at `claimID`
+    /// @dev If `tokenID` is a base type, the total amount of `units` held by `account` for the claim is returned.
+    /// @dev If `tokenID` is a fractional token, the `units` held by `account` the token is returned
+    function unitsOf(address account, uint256 tokenID) external view returns (uint256 units);
 }

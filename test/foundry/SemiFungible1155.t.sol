@@ -28,27 +28,34 @@ contract SemiFungible1155Test is PRBTest, StdCheats, StdUtils, SemiFungible1155H
     }
 
     function testSplitValue() public {
-        hoax(alice, 100 ether);
-
         uint256 baseID = 1 << 128;
         uint256 tokenID = baseID + 1;
         uint256[] memory values = new uint256[](2);
         values[0] = 7000;
         values[1] = 3000;
 
+        startHoax(alice, 100 ether);
+
         semiFungible.mintValue(alice, 10000, _uri);
         semiFungible.splitValue(alice, tokenID, values);
 
-        assertEq(semiFungible.balanceOf(alice, baseID), 10000);
-        assertEq(semiFungible.totalSupply(baseID), 10000);
+        assertEq(semiFungible.totalUnits(baseID), 10000);
 
-        assertEq(semiFungible.balanceOf(tokenID), 7000);
-        assertEq(semiFungible.balanceOf(tokenID + 1), 3000);
+        // Balances
+        assertEq(semiFungible.balanceOf(alice, baseID), 1);
+
+        assertEq(semiFungible.balanceOf(alice, tokenID), 1);
+        assertEq(semiFungible.balanceOf(alice, tokenID + 1), 1);
+
+        // Units
+        assertEq(semiFungible.unitsOf(baseID), 10000);
+        assertEq(semiFungible.unitsOf(alice, baseID), 10000);
+        assertEq(semiFungible.unitsOf(tokenID), 7000);
+        assertEq(semiFungible.unitsOf(tokenID + 1), 3000);
+        assertEq(semiFungible.unitsOf(alice, tokenID + 1), 3000);
     }
 
     function testSplitValueLarge() public {
-        hoax(alice, 100 ether);
-
         uint256 baseID = 1 << 128;
         uint256 tokenID = baseID + 1;
         uint256 size = 100;
@@ -56,44 +63,57 @@ contract SemiFungible1155Test is PRBTest, StdCheats, StdUtils, SemiFungible1155H
         uint256[] memory values = semiFungible.buildValues(size, value);
         uint256 totalValue = size * value;
 
+        startHoax(alice, 100 ether);
+
         semiFungible.mintValue(alice, totalValue, _uri);
 
         semiFungible.splitValue(alice, tokenID, values);
 
-        assertEq(semiFungible.balanceOf(alice, baseID), totalValue);
-        assertEq(semiFungible.totalSupply(baseID), totalValue);
+        assertEq(semiFungible.balanceOf(alice, baseID), 1);
+        assertEq(semiFungible.totalUnits(baseID), totalValue);
 
-        assertEq(semiFungible.balanceOf(tokenID), value);
-        assertEq(semiFungible.balanceOf(tokenID + 1), value);
-        assertEq(semiFungible.balanceOf(tokenID + (size / 2)), value);
-        assertEq(semiFungible.balanceOf(tokenID + (size - 1)), value);
+        for (uint256 i = 0; i < values.length; i++) {
+            assertEq(semiFungible.balanceOf(alice, tokenID + i), 1);
+            assertEq(semiFungible.unitsOf(tokenID + 1), 1000);
+            assertEq(semiFungible.unitsOf(alice, tokenID + 1), 1000);
+        }
     }
 
     function testMergeValue() public {
-        hoax(alice, 100 ether);
-
         uint256 baseID = 1 << 128;
         uint256 size = 10;
         uint256 value = 2000;
         uint256[] memory values = semiFungible.buildValues(size, value);
         uint256 totalValue = size * value;
-
         uint256[] memory _ids = semiFungible.buildIDs(baseID, size);
+
+        startHoax(alice, 100 ether);
 
         semiFungible.mintValue(alice, values, _uri);
 
-        assertEq(semiFungible.balanceOf(_ids[size - 1]), 2000);
+        for (uint256 i = 0; i < (_ids.length - 1); i++) {
+            assertEq(semiFungible.balanceOf(alice, _ids[i]), 1);
+            assertEq(semiFungible.unitsOf(alice, _ids[i]), value);
+
+            assertEq(semiFungible.balanceOf(bob, _ids[i]), 0);
+            assertEq(semiFungible.unitsOf(bob, _ids[i]), 0);
+        }
 
         semiFungible.mergeValue(_ids);
 
-        assertEq(semiFungible.balanceOf(alice, baseID), totalValue);
-        assertEq(semiFungible.totalSupply(baseID), totalValue);
+        assertEq(semiFungible.balanceOf(alice, baseID), 1);
+        assertEq(semiFungible.unitsOf(alice, baseID), totalValue);
 
-        for (uint256 id = 1; id < (_ids.length - 1); id++) {
-            assertEq(semiFungible.balanceOf(baseID + id), 0);
+        assertEq(semiFungible.totalUnits(baseID), totalValue);
+
+        for (uint256 i = 0; i < (_ids.length - 1); i++) {
+            assertEq(semiFungible.balanceOf(alice, baseID + 1 + i), 0);
+            assertEq(semiFungible.unitsOf(alice, baseID + 1 + i), 0);
+            assertEq(semiFungible.balanceOf(bob, baseID + 1 + i), 0);
         }
 
-        assertEq(semiFungible.balanceOf(baseID + _ids.length), totalValue);
+        assertEq(semiFungible.balanceOf(alice, _ids[_ids.length - 1]), 1);
+        assertEq(semiFungible.unitsOf(alice, _ids[_ids.length - 1]), totalValue);
     }
 
     function testMergeValueFuzz(uint256 size) public {
@@ -106,28 +126,35 @@ contract SemiFungible1155Test is PRBTest, StdCheats, StdUtils, SemiFungible1155H
 
         uint256[] memory tokenIDs = semiFungible.buildIDs(baseID, size);
 
+        startHoax(alice, 100 ether);
+
         semiFungible.mintValue(alice, values, _uri);
         semiFungible.mergeValue(tokenIDs);
 
-        assertEq(semiFungible.balanceOf(alice, baseID), totalValue);
-        assertEq(semiFungible.totalSupply(baseID), totalValue);
+        assertEq(semiFungible.balanceOf(alice, baseID), 1);
+        assertEq(semiFungible.unitsOf(alice, baseID), totalValue);
 
-        for (uint256 i = 1; i < tokenIDs.length - 1; i++) {
-            assertEq(semiFungible.balanceOf(tokenIDs[i]), 0);
+        assertEq(semiFungible.totalUnits(baseID), totalValue);
+
+        for (uint256 i = 0; i < (tokenIDs.length - 1); i++) {
+            assertEq(semiFungible.balanceOf(alice, baseID + 1 + i), 0);
+            assertEq(semiFungible.unitsOf(alice, baseID + 1 + i), 0);
+            assertEq(semiFungible.balanceOf(bob, baseID + 1 + i), 0);
         }
 
-        assertEq(semiFungible.balanceOf(tokenIDs[tokenIDs.length - 1]), totalValue);
+        assertEq(semiFungible.balanceOf(alice, tokenIDs[tokenIDs.length - 1]), 1);
+        assertEq(semiFungible.unitsOf(alice, tokenIDs[tokenIDs.length - 1]), totalValue);
     }
 
     function testBurnValue() public {
-        hoax(alice, 100 ether);
-
         uint256 baseID = 1 << 128;
 
         uint256 size = 20;
         uint256 value = 2000;
         uint256[] memory values = semiFungible.buildValues(size, value);
         uint256[] memory tokenIDs = semiFungible.buildIDs(baseID, size);
+
+        startHoax(alice, 100 ether);
 
         semiFungible.mintValue(alice, values, _uri);
 
@@ -146,12 +173,13 @@ contract SemiFungible1155Test is PRBTest, StdCheats, StdUtils, SemiFungible1155H
         semiFungible.burnValue(alice, tokenIDs[tokenIDs.length - 1]);
 
         assertEq(semiFungible.balanceOf(alice, baseID), 0);
-        assertEq(semiFungible.totalSupply(baseID), 0);
+        assertEq(semiFungible.totalUnits(baseID), 0);
 
-        assertEq(semiFungible.balanceOf(baseID), 0);
+        assertEq(semiFungible.unitsOf(baseID), 0);
 
         for (uint256 i = 0; i < tokenIDs.length; i++) {
-            assertEq(semiFungible.balanceOf(tokenIDs[i]), 0);
+            assertEq(semiFungible.balanceOf(alice, tokenIDs[i]), 0);
+            assertEq(semiFungible.unitsOf(alice, tokenIDs[i]), 0);
         }
     }
 }

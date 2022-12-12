@@ -78,6 +78,16 @@ contract HypercertMinter is IHypercertToken, SemiFungible1155, AllowlistMinter {
         _burnValue(_account, _tokenID);
     }
 
+    /// @dev see {IHypercertToken}
+    function unitsOf(uint256 tokenID) external view returns (uint256 units) {
+        units = _unitsOf(tokenID);
+    }
+
+    /// @dev see {IHypercertToken}
+    function unitsOf(address account, uint256 tokenID) external view returns (uint256 units) {
+        units = _unitsOf(account, tokenID);
+    }
+
     /// INTERNAL
 
     /// @dev see { openzeppelin-contracts-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol }

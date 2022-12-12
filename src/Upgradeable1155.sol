@@ -34,7 +34,7 @@ contract Upgradeable1155 is
     /// @dev see { openzeppelin-contracts-upgradeable/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol }
     function uri(
         uint256 tokenID
-    ) public view override(ERC1155Upgradeable, ERC1155URIStorageUpgradeable) returns (string memory _uri) {
+    ) public view virtual override(ERC1155Upgradeable, ERC1155URIStorageUpgradeable) returns (string memory _uri) {
         _uri = ERC1155URIStorageUpgradeable.uri(tokenID);
     }
 

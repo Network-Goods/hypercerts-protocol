@@ -36,6 +36,14 @@ contract SemiFungible1155Helper is SemiFungible1155 {
         _burnValue(account, tokenID);
     }
 
+    function unitsOf(uint256 tokenID) public view returns (uint256) {
+        return _unitsOf(tokenID);
+    }
+
+    function unitsOf(address owner, uint256 tokenID) public view returns (uint256) {
+        return _unitsOf(owner, tokenID);
+    }
+
     function noOverflow(uint256[] memory values) public pure returns (bool) {
         uint256 total;
         for (uint256 i = 0; i < values.length; i++) {

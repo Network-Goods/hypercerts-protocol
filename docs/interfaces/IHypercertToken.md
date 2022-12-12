@@ -95,6 +95,51 @@ The sum of `values` must equal the current value of `_tokenID`.
 | tokenID | uint256 | undefined |
 | _values | uint256[] | undefined |
 
+### unitsOf
+
+```solidity
+function unitsOf(address account, uint256 tokenID) external view returns (uint256 units)
+```
+
+
+
+*Returns the `units` held by `account` of a (fractional) token at `claimID`If `tokenID` is a base type, the total amount of `units` held by `account` for the claim is returned.If `tokenID` is a fractional token, the `units` held by `account` the token is returned*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| account | address | undefined |
+| tokenID | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| units | uint256 | undefined |
+
+### unitsOf
+
+```solidity
+function unitsOf(uint256 tokenID) external view returns (uint256 units)
+```
+
+
+
+*Returns the `units` held by a (fractional) token at `claimID`If `tokenID` is a base type, the total amount of `units` for the claim is returned.If `tokenID` is a fractional token, the `units` held by the token is returned*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| tokenID | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| units | uint256 | undefined |
+
 
 
 ## Events
