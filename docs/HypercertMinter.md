@@ -344,7 +344,7 @@ function mintClaimFromAllowlist(bytes32[] proof, uint256 claimID, uint256 amount
 
 Mint a semi-fungible token representing a fraction of the claim
 
-*Calls AllowlistMinter to verify `proof` and mints the `amount` of units for the hypercert stored under `claimID`*
+*Calls AllowlistMinter to verify `proof`.Mints the `amount` of units for the hypercert stored under `claimID`*
 
 #### Parameters
 
