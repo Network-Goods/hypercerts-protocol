@@ -105,9 +105,7 @@ contract SemiFungible1155TransferTest is PRBTest, StdCheats, StdUtils {
 
         semiFungible.mintValue(from, units, _uri);
 
-        assertEq(semiFungible.balanceOf(from, baseID), 1);
-        assertEq(semiFungible.unitsOf(from, baseID), units);
-
+        semiFungible.validateOwnerBalanceUnits(baseID, from, 1, units);
         semiFungible.validateOwnerBalanceUnits(baseID + tokenID, from, 1, units);
 
         semiFungible.validateNotOwnerNoBalanceNoUnits(baseID, to);
@@ -115,12 +113,10 @@ contract SemiFungible1155TransferTest is PRBTest, StdCheats, StdUtils {
 
         semiFungible.safeTransferFrom(from, to, baseID + tokenID, 1, "");
 
-        assertEq(semiFungible.balanceOf(from, baseID), 1);
-        assertEq(semiFungible.unitsOf(from, baseID), 0);
-
+        semiFungible.validateOwnerBalanceUnits(baseID, from, 1, units);
         semiFungible.validateNotOwnerNoBalanceNoUnits(baseID + tokenID, from);
 
-        assertEq(semiFungible.balanceOf(to, baseID), 0);
+        semiFungible.validateNotOwnerNoBalanceNoUnits(baseID, to);
         semiFungible.validateOwnerBalanceUnits(baseID + tokenID, to, 1, units);
     }
 
@@ -150,7 +146,7 @@ contract SemiFungible1155TransferTest is PRBTest, StdCheats, StdUtils {
 
         // Updates tokenFraction value for (new) owner
         semiFungible.validateOwnerBalanceUnits(baseID, alice, 1, totalValue - value);
-        assertEq(semiFungible.unitsOf(bob, baseID), value);
+        semiFungible.validateNotOwnerNoBalanceNoUnits(baseID, bob);
 
         // Updates token ownership
         semiFungible.validateNotOwnerNoBalanceNoUnits(tokenIDs[1], alice);

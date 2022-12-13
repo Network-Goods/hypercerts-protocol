@@ -45,9 +45,6 @@ contract SemiFungible1155 is Upgradeable1155 {
     // TODO should have max value type(uint256).max
     mapping(uint256 => uint256) internal maxIndex;
 
-    /// @dev Mapping from `tokenID` to user at `address` to get `units` owned
-    mapping(uint256 => mapping(address => uint256)) internal tokenUserBalances;
-
     /// @dev Emitted when `value` represented in `units` is transfered between tokens
     event ValueTransfer(uint256 fromTokenID, uint256 toTokenID, uint256 value);
 
@@ -107,7 +104,14 @@ contract SemiFungible1155 is Upgradeable1155 {
 
     /// @dev see {IHypercertToken}
     function _unitsOf(address account, uint256 tokenID) internal view returns (uint256 units) {
-        units = tokenUserBalances[tokenID][account];
+        units = 0;
+
+        // Check if fraction token and accounts owns it
+        if (getNonFungibleIndex(tokenID) != 0 && ownerOf(tokenID) == account) {
+            units = tokenValues[tokenID];
+        }
+
+        return units;
     }
 
     /// MUTATE
@@ -137,9 +141,6 @@ contract SemiFungible1155 is Upgradeable1155 {
         owners[tokenID] = _account;
         tokenValues[tokenID] = _value; //first fraction
 
-        tokenUserBalances[typeID][_account] = _value;
-        tokenUserBalances[tokenID][_account] = _value; // creator of fraction gets full value
-
         _mint(_account, tokenID, 1, "");
     }
 
@@ -158,8 +159,6 @@ contract SemiFungible1155 is Upgradeable1155 {
 
         typeID = _mintValue(_account, totalValue, uri);
 
-        // typeID = typeCounter << 128; //TODO max value check
-
         _splitValue(_account, typeID + maxIndex[typeID], _values);
     }
 
@@ -169,13 +168,10 @@ contract SemiFungible1155 is Upgradeable1155 {
         tokenID = _typeID + maxIndex[_typeID]; //1 based indexing, 0 holds type data
 
         address _account = _msgSender();
+        owners[tokenID] = _account;
+        tokenValues[tokenID] = _units;
 
         _mint(_account, tokenID, 1, "");
-        owners[tokenID] = _account;
-
-        //TODO these balances might not be needed, maybe only total ownership of hypercert.
-        tokenUserBalances[_typeID][_account] += _units; // creator of fraction gets full value
-        tokenUserBalances[tokenID][_account] = _units; // creator of fraction gets full value
     }
 
     /// @dev Split the units of `_tokenID` owned by `account` across `_values`
@@ -200,14 +196,12 @@ contract SemiFungible1155 is Upgradeable1155 {
 
             owners[tokenID] = _account;
             tokenValues[tokenID] = _values[i];
-            tokenUserBalances[tokenID][_account] = _values[i];
             left -= _values[i];
             _mint(_account, tokenID, 1, ""); //TODO batchmint?
             emit ValueTransfer(_tokenID, tokenID, _values[i]);
         }
 
         tokenValues[_tokenID] = left;
-        tokenUserBalances[_tokenID][_account] = left;
 
         maxIndex[_typeID] += len;
     }
@@ -240,9 +234,7 @@ contract SemiFungible1155 is Upgradeable1155 {
 
                 delete owners[_fractionID];
                 delete tokenValues[_fractionID];
-                delete tokenUserBalances[_fractionID][_account];
             } else {
-                tokenUserBalances[_fractionID][_account] += _totalValue;
                 tokenValues[_fractionID] += _totalValue;
             }
         }
@@ -261,8 +253,6 @@ contract SemiFungible1155 is Upgradeable1155 {
         delete owners[_tokenID];
         delete tokenValues[_typeID];
         delete tokenValues[_tokenID];
-        delete tokenUserBalances[_typeID][_account];
-        delete tokenUserBalances[_tokenID][_account];
 
         _burn(_account, _tokenID, 1);
         _burn(_account, _typeID, 1);
@@ -288,16 +278,6 @@ contract SemiFungible1155 is Upgradeable1155 {
         if (_to == address(0x0)) revert ToZeroAddress();
         if (_from != msg.sender) revert NotApprovedOrOwner(); //TODO Allowance approval
         if (getNonFungibleIndex(_id) == 0) revert NotAllowed();
-
-        uint256 tokenValue = tokenValues[_id];
-        uint256 typeID = getNonFungibleBaseType(_id);
-
-        //TODO evaluate need of double accounting (base type & fractions)
-        tokenUserBalances[typeID][_from] -= tokenValue;
-        tokenUserBalances[typeID][_to] += tokenValue;
-
-        tokenUserBalances[_id][_from] -= tokenValue;
-        tokenUserBalances[_id][_to] += tokenValue;
 
         owners[_id] = _to;
 
