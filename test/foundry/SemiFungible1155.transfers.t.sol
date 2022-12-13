@@ -72,10 +72,10 @@ contract SemiFungible1155TransferTest is PRBTest, StdCheats, StdUtils {
         semiFungible.mintValue(alice, 10000, _uri);
 
         assertEq(semiFungible.balanceOf(alice, baseID), 1);
-        assertEq(semiFungible.balanceOf(alice, baseID + tokenID), 1);
+        semiFungible.validateOwnerBalanceUnits(baseID + tokenID, alice, 1, 10000);
 
         assertEq(semiFungible.balanceOf(bob, baseID), 0);
-        assertEq(semiFungible.balanceOf(bob, baseID + tokenID), 0);
+        semiFungible.validateNotOwnerNoBalanceNoUnits(baseID + tokenID, bob);
 
         // Bloack transfer ownership of impact claim 'data'
         vm.expectRevert(SemiFungible1155Helper.NotAllowed.selector);
@@ -86,15 +86,15 @@ contract SemiFungible1155TransferTest is PRBTest, StdCheats, StdUtils {
 
         // Updates tokenFraction value for (new) owner
         assertEq(semiFungible.balanceOf(alice, baseID), 1);
-        assertEq(semiFungible.balanceOf(alice, baseID + tokenID), 0);
+        semiFungible.validateNotOwnerNoBalanceNoUnits(baseID + tokenID, alice);
 
         // Updates token ownership
         assertEq(semiFungible.balanceOf(bob, baseID), 0);
-        assertEq(semiFungible.balanceOf(bob, baseID + tokenID), 1);
+        semiFungible.validateOwnerBalanceUnits(baseID + tokenID, bob, 1, 10000);
     }
 
-    function testFuzzTransferFullToken(address from, address to, uint256 amount) public {
-        vm.assume(amount > 0);
+    function testFuzzTransferFullToken(address from, address to, uint256 units) public {
+        vm.assume(units > 0);
         vm.assume(from != to && from != address(0) && to != address(0));
         vm.assume(!semiFungible.isContract(from) && !semiFungible.isContract(to));
 
@@ -103,61 +103,58 @@ contract SemiFungible1155TransferTest is PRBTest, StdCheats, StdUtils {
         uint256 baseID = 1 << 128;
         uint128 tokenID = 1;
 
-        semiFungible.mintValue(from, amount, _uri);
+        semiFungible.mintValue(from, units, _uri);
 
         assertEq(semiFungible.balanceOf(from, baseID), 1);
-        assertEq(semiFungible.balanceOf(from, baseID + tokenID), 1);
-        assertEq(semiFungible.unitsOf(from, baseID), amount);
-        assertEq(semiFungible.unitsOf(from, baseID + tokenID), amount);
+        assertEq(semiFungible.unitsOf(from, baseID), units);
 
-        assertEq(semiFungible.balanceOf(to, baseID), 0);
-        assertEq(semiFungible.balanceOf(to, baseID + tokenID), 0);
-        assertEq(semiFungible.unitsOf(to, baseID), 0);
-        assertEq(semiFungible.unitsOf(to, baseID + tokenID), 0);
+        semiFungible.validateOwnerBalanceUnits(baseID + tokenID, from, 1, units);
+
+        semiFungible.validateNotOwnerNoBalanceNoUnits(baseID, to);
+        semiFungible.validateNotOwnerNoBalanceNoUnits(baseID + tokenID, to);
 
         semiFungible.safeTransferFrom(from, to, baseID + tokenID, 1, "");
 
         assertEq(semiFungible.balanceOf(from, baseID), 1);
-        assertEq(semiFungible.balanceOf(from, baseID + tokenID), 0);
         assertEq(semiFungible.unitsOf(from, baseID), 0);
-        assertEq(semiFungible.unitsOf(from, baseID + tokenID), 0);
+
+        semiFungible.validateNotOwnerNoBalanceNoUnits(baseID + tokenID, from);
 
         assertEq(semiFungible.balanceOf(to, baseID), 0);
-        assertEq(semiFungible.balanceOf(to, baseID + tokenID), 1);
-        assertEq(semiFungible.unitsOf(to, baseID), amount);
-        assertEq(semiFungible.unitsOf(to, baseID + tokenID), amount);
+        semiFungible.validateOwnerBalanceUnits(baseID + tokenID, to, 1, units);
     }
 
     // FRACTIONS
 
     function testTransferFraction() public {
         uint256 baseID = 1 << 128;
-        uint128 tokenID = 1;
 
         uint256 size = 20;
         uint256 value = 2000;
         uint256[] memory values = semiFungible.buildValues(size, value);
-        uint256[] memory _ids = semiFungible.buildIDs(baseID, size);
+        uint256[] memory tokenIDs = semiFungible.buildIDs(baseID, size);
+
+        uint256 totalValue = size * value;
 
         startHoax(alice, 100 ether);
 
         semiFungible.mintValue(alice, values, _uri);
 
-        assertEq(semiFungible.balanceOf(alice, baseID), 1);
-        assertEq(semiFungible.balanceOf(alice, baseID + tokenID), 1);
+        semiFungible.validateOwnerBalanceUnits(baseID, alice, 1, totalValue);
+        semiFungible.validateNotOwnerNoBalanceNoUnits(baseID, bob);
 
-        assertEq(semiFungible.balanceOf(bob, baseID), 0);
-        assertEq(semiFungible.balanceOf(bob, baseID + tokenID), 0);
+        semiFungible.validateOwnerBalanceUnits(tokenIDs[0], alice, 1, value);
+        semiFungible.validateNotOwnerNoBalanceNoUnits(tokenIDs[0], bob);
 
-        semiFungible.safeTransferFrom(alice, bob, _ids[1], 1, "");
+        semiFungible.safeTransferFrom(alice, bob, tokenIDs[1], 1, "");
 
         // Updates tokenFraction value for (new) owner
-        assertEq(semiFungible.balanceOf(alice, baseID), 1);
-        assertEq(semiFungible.balanceOf(alice, _ids[1]), 0);
+        semiFungible.validateOwnerBalanceUnits(baseID, alice, 1, totalValue - value);
+        assertEq(semiFungible.unitsOf(bob, baseID), value);
 
         // Updates token ownership
-        assertEq(semiFungible.balanceOf(bob, baseID), 0);
-        assertEq(semiFungible.balanceOf(bob, _ids[1]), 1);
+        semiFungible.validateNotOwnerNoBalanceNoUnits(tokenIDs[1], alice);
+        semiFungible.validateOwnerBalanceUnits(tokenIDs[1], bob, 1, value);
     }
 
     function testFuzzTransferFraction(address from, address to, uint256 size) public {
@@ -169,44 +166,37 @@ contract SemiFungible1155TransferTest is PRBTest, StdCheats, StdUtils {
 
         uint256 value = 2000;
         uint256[] memory values = semiFungible.buildValues(size, value);
-        uint256[] memory _ids = semiFungible.buildIDs(baseID, size);
+        uint256[] memory tokenIDs = semiFungible.buildIDs(baseID, size);
 
         startHoax(from, 100 ether);
 
         semiFungible.mintValue(from, values, _uri);
 
         assertEq(semiFungible.balanceOf(from, baseID), 1);
-        for (uint256 i = 0; i < _ids.length; i++) {
-            assertEq(semiFungible.balanceOf(from, _ids[i]), 1);
-            assertEq(semiFungible.unitsOf(from, _ids[i]), value);
+        for (uint256 i = 0; i < tokenIDs.length; i++) {
+            semiFungible.validateOwnerBalanceUnits(tokenIDs[i], from, 1, value);
         }
 
         assertEq(semiFungible.balanceOf(to, baseID), 0);
-        for (uint256 i = 0; i < _ids.length; i++) {
-            assertEq(semiFungible.balanceOf(to, _ids[i]), 0);
-            assertEq(semiFungible.unitsOf(to, _ids[i]), 0);
+        for (uint256 i = 0; i < tokenIDs.length; i++) {
+            semiFungible.validateNotOwnerNoBalanceNoUnits(tokenIDs[i], to);
         }
 
         // Transfer all except last one
-        semiFungible.safeTransferFrom(from, to, _ids[size - 1], 1, "");
+        semiFungible.safeTransferFrom(from, to, tokenIDs[size - 1], 1, "");
 
         assertEq(semiFungible.balanceOf(from, baseID), 1);
-
-        for (uint256 i = 0; i < _ids.length - 1; i++) {
-            assertEq(semiFungible.balanceOf(from, _ids[i]), 1);
-            assertEq(semiFungible.unitsOf(from, _ids[i]), value);
-        }
-
         assertEq(semiFungible.balanceOf(to, baseID), 0);
 
-        for (uint256 i = 0; i < _ids.length - 1; i++) {
-            assertEq(semiFungible.balanceOf(to, _ids[i]), 0);
-            assertEq(semiFungible.unitsOf(to, _ids[i]), 0);
+        for (uint256 i = 0; i < tokenIDs.length - 1; i++) {
+            semiFungible.validateOwnerBalanceUnits(tokenIDs[i], from, 1, value);
         }
 
-        assertEq(semiFungible.balanceOf(from, _ids[size - 1]), 0);
-        assertEq(semiFungible.balanceOf(to, _ids[size - 1]), 1);
-        assertEq(semiFungible.unitsOf(from, _ids[size - 1]), 0);
-        assertEq(semiFungible.unitsOf(to, _ids[size - 1]), value);
+        for (uint256 i = 0; i < tokenIDs.length - 1; i++) {
+            semiFungible.validateNotOwnerNoBalanceNoUnits(tokenIDs[i], to);
+        }
+
+        semiFungible.validateNotOwnerNoBalanceNoUnits(tokenIDs[size - 1], from);
+        semiFungible.validateOwnerBalanceUnits(tokenIDs[size - 1], to, 1, value);
     }
 }

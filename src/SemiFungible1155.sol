@@ -96,9 +96,8 @@ contract SemiFungible1155 is Upgradeable1155 {
     }
 
     /// READ
-
-    function totalUnits(uint256 _typeID) external view returns (uint256 total) {
-        total = tokenValues[_typeID];
+    function ownerOf(uint256 tokenID) public view returns (address _owner) {
+        _owner = owners[tokenID];
     }
 
     /// @dev see {IHypercertToken}
@@ -117,10 +116,12 @@ contract SemiFungible1155 is Upgradeable1155 {
     // TODO should creator be msg.sender or submit account?
     function _createTokenType(uint256 units, string memory uri) internal returns (uint256 typeID) {
         typeID = (++typeCounter << 128); //TODO max value check?
-        creators[typeID] = msg.sender;
+
+        owners[typeID] = _msgSender();
+        creators[typeID] = _msgSender();
         tokenValues[typeID] = units;
 
-        _mint(msg.sender, typeID, 1, "");
+        _mint(_msgSender(), typeID, 1, "");
         _setURI(typeID, uri);
     }
 
@@ -155,9 +156,9 @@ contract SemiFungible1155 is Upgradeable1155 {
 
         uint256 totalValue = _getSum(_values);
 
-        _mintValue(_account, totalValue, uri);
+        typeID = _mintValue(_account, totalValue, uri);
 
-        typeID = typeCounter << 128; //TODO max value check
+        // typeID = typeCounter << 128; //TODO max value check
 
         _splitValue(_account, typeID + maxIndex[typeID], _values);
     }
@@ -167,7 +168,7 @@ contract SemiFungible1155 is Upgradeable1155 {
         maxIndex[_typeID] += 1;
         tokenID = _typeID + maxIndex[_typeID]; //1 based indexing, 0 holds type data
 
-        address _account = msg.sender;
+        address _account = _msgSender();
 
         _mint(_account, tokenID, 1, "");
         owners[tokenID] = _account;
@@ -197,6 +198,7 @@ contract SemiFungible1155 is Upgradeable1155 {
         for (uint256 i = 1; i < len; i++) {
             uint256 tokenID = _typeID + newFractionsStartID + i;
 
+            owners[tokenID] = _account;
             tokenValues[tokenID] = _values[i];
             tokenUserBalances[tokenID][_account] = _values[i];
             left -= _values[i];
@@ -226,6 +228,8 @@ contract SemiFungible1155 is Upgradeable1155 {
         uint256 _totalValue = 0;
         uint256[] memory _valuesToBurn = new uint256[](len - 1);
         uint256[] memory _idsToBurn = new uint256[](len - 1);
+
+        address _account = _msgSender();
         for (uint256 i = 0; i < len; i++) {
             if (getNonFungibleBaseType(_fractionIDs[i]) != _typeID) revert TypeMismatch();
             uint256 _fractionID = _fractionIDs[i];
@@ -234,14 +238,15 @@ contract SemiFungible1155 is Upgradeable1155 {
                 _valuesToBurn[i] = 1;
                 _totalValue += tokenValues[_fractionID];
 
+                delete owners[_fractionID];
                 delete tokenValues[_fractionID];
-                delete tokenUserBalances[_fractionID][msg.sender];
+                delete tokenUserBalances[_fractionID][_account];
             } else {
-                tokenUserBalances[_fractionID][msg.sender] += _totalValue;
+                tokenUserBalances[_fractionID][_account] += _totalValue;
                 tokenValues[_fractionID] += _totalValue;
             }
         }
-        _burnBatch(msg.sender, _idsToBurn, _valuesToBurn);
+        _burnBatch(_account, _idsToBurn, _valuesToBurn);
     }
 
     /// @dev Burn the token at `_tokenID` owned by `_account`
@@ -252,6 +257,8 @@ contract SemiFungible1155 is Upgradeable1155 {
         if (getNonFungibleIndex(_tokenID) == 0) revert NotAllowed();
         if (tokenValues[_tokenID] != tokenValues[_typeID]) revert FractionalBurn();
 
+        delete owners[_typeID];
+        delete owners[_tokenID];
         delete tokenValues[_typeID];
         delete tokenValues[_tokenID];
         delete tokenUserBalances[_typeID][_account];
@@ -291,6 +298,8 @@ contract SemiFungible1155 is Upgradeable1155 {
 
         tokenUserBalances[_id][_from] -= tokenValue;
         tokenUserBalances[_id][_to] += tokenValue;
+
+        owners[_id] = _to;
 
         super.safeTransferFrom(_from, _to, _id, _value, _data);
     }

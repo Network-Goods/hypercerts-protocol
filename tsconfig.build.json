@@ -23,10 +23,10 @@
   "include": [
     "typechain/common.ts",
     "abi/HypercertMinter.json",
-    "abi/IHypercertMinter.json",
+    "abi/IHypercertToken.json",
     "abi/SemiFungible1155.json",
     "abi/ERC1155Upgradeable.json",
-    "typechain/src/interfaces/IHypercertMinter.ts",
+    "typechain/src/interfaces/IHypercertToken.ts",
     "typechain/src/HypercertMinter.ts",
     "typechain/src/AllowlistMinter.ts",
     "typechain/factories/src/HypercertMinter__factory.ts"

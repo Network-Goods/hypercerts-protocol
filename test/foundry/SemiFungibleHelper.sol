@@ -1,8 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.4;
 import { SemiFungible1155 } from "../../src/SemiFungible1155.sol";
+import { PRBTest } from "prb-test/PRBTest.sol";
+import { StdCheats } from "forge-std/StdCheats.sol";
+import { StdUtils } from "forge-std/StdUtils.sol";
 
-contract SemiFungible1155Helper is SemiFungible1155 {
+contract SemiFungible1155Helper is SemiFungible1155, PRBTest, StdCheats, StdUtils {
     error FractionalBurn();
     error NotAllowed();
     error NotApprovedOrOwner();
@@ -96,5 +99,17 @@ contract SemiFungible1155Helper is SemiFungible1155 {
         // of the constructor execution.
 
         return account.code.length > 0;
+    }
+
+    function validateOwnerBalanceUnits(uint256 tokenID, address owner, uint256 balance, uint256 units) public {
+        assertEq(ownerOf(tokenID), owner);
+        assertEq(balanceOf(owner, tokenID), balance);
+        assertEq(unitsOf(owner, tokenID), units);
+    }
+
+    function validateNotOwnerNoBalanceNoUnits(uint256 tokenID, address owner) public {
+        assertNotEq(ownerOf(tokenID), owner);
+        assertEq(balanceOf(owner, tokenID), 0);
+        assertEq(unitsOf(owner, tokenID), 0);
     }
 }

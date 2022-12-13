@@ -205,6 +205,28 @@ function owner() external view returns (address)
 |---|---|---|
 | _0 | address | undefined |
 
+### ownerOf
+
+```solidity
+function ownerOf(uint256 tokenID) external view returns (address _owner)
+```
+
+READ
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| tokenID | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _owner | address | undefined |
+
 ### proxiableUUID
 
 ```solidity
@@ -311,28 +333,6 @@ function supportsInterface(bytes4 interfaceId) external view returns (bool)
 | Name | Type | Description |
 |---|---|---|
 | _0 | bool | undefined |
-
-### totalUnits
-
-```solidity
-function totalUnits(uint256 _typeID) external view returns (uint256 total)
-```
-
-READ
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _typeID | uint256 | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| total | uint256 | undefined |
 
 ### transferOwnership
 

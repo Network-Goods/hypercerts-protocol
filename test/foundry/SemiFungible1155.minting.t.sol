@@ -65,15 +65,20 @@ contract SemiFungible1155Test is PRBTest, StdCheats, StdUtils, SemiFungible1155H
 
         assertEq(baseID, _baseID);
         assertEq(semiFungible.creator(baseID), alice);
-        assertEq(semiFungible.balanceOf(alice, baseID), 1);
-        assertEq(semiFungible.totalUnits(baseID), 10000);
-        assertEq(semiFungible.tokenValue(baseID + 0), 10000);
+
+        semiFungible.validateOwnerBalanceUnits(baseID, alice, 1, 10000);
+        semiFungible.validateOwnerBalanceUnits(baseID + 1, alice, 1, 10000);
+
+        assertEq(semiFungible.unitsOf(baseID), 10000);
+
+        assertEq(semiFungible.tokenValue(baseID), 10000);
         assertEq(semiFungible.tokenValue(baseID + 1), 10000);
         assertEq(semiFungible.tokenValue(baseID + 2), 0);
     }
 
     function testFuzzMintValueSingle(uint256 value) public {
         vm.assume(value > 0);
+
         uint256 _baseID = 1 << 128;
 
         vm.expectEmit(true, true, true, true);
@@ -82,9 +87,13 @@ contract SemiFungible1155Test is PRBTest, StdCheats, StdUtils, SemiFungible1155H
 
         assertEq(baseID, _baseID);
         assertEq(semiFungible.creator(baseID), alice);
-        assertEq(semiFungible.balanceOf(alice, baseID), 1);
-        assertEq(semiFungible.totalUnits(baseID), value);
-        assertEq(semiFungible.tokenValue(baseID + 0), value);
+
+        semiFungible.validateOwnerBalanceUnits(baseID, alice, 1, value);
+        semiFungible.validateOwnerBalanceUnits(baseID + 1, alice, 1, value);
+
+        assertEq(semiFungible.unitsOf(baseID), value);
+
+        assertEq(semiFungible.tokenValue(baseID), value);
         assertEq(semiFungible.tokenValue(baseID + 1), value);
         assertEq(semiFungible.tokenValue(baseID + 2), 0);
     }
@@ -97,10 +106,11 @@ contract SemiFungible1155Test is PRBTest, StdCheats, StdUtils, SemiFungible1155H
 
         uint256 baseID = semiFungible.mintValue(alice, values, _uri);
         assertEq(semiFungible.balanceOf(alice, baseID), 1);
-        assertEq(semiFungible.totalUnits(baseID), 15000);
+        assertEq(semiFungible.unitsOf(baseID), 15000);
+        assertEq(semiFungible.ownerOf(baseID), alice);
 
         for (uint256 i = 0; i < values.length; i++) {
-            assertEq(semiFungible.tokenValue(baseID + 1 + i), values[i]);
+            semiFungible.validateOwnerBalanceUnits(baseID + 1 + i, alice, 1, values[i]);
         }
     }
 
@@ -108,19 +118,19 @@ contract SemiFungible1155Test is PRBTest, StdCheats, StdUtils, SemiFungible1155H
         vm.assume(values.length > 0 && values.length < 254);
         vm.assume(semiFungible.noOverflow(values));
         vm.assume(semiFungible.noZeroes(values));
-        vm.assume(other != address(1));
+        vm.assume(other != address(1) && other != address(0));
 
-        semiFungible.mintValue(alice, values, _uri);
+        uint256 baseID = semiFungible.mintValue(alice, values, _uri);
 
-        uint256 baseID = 1 << 128;
         assertEq(semiFungible.balanceOf(alice, baseID), 1);
-        assertEq(semiFungible.getSum(values), semiFungible.totalUnits(baseID));
+        assertEq(semiFungible.getSum(values), semiFungible.unitsOf(baseID));
         assertEq(semiFungible.balanceOf(other, baseID), 0);
 
         for (uint256 i = 0; i < values.length; i++) {
-            assertEq(semiFungible.tokenValue(baseID + 1 + i), values[i]);
-            assertEq(semiFungible.balanceOf(alice, baseID + 1 + i), 1);
-            assertEq(semiFungible.balanceOf(other, baseID + 1 + i), 0);
+            uint256 tokenID = baseID + 1 + i;
+            semiFungible.validateOwnerBalanceUnits(tokenID, alice, 1, values[i]);
+
+            semiFungible.validateNotOwnerNoBalanceNoUnits(tokenID, bob);
         }
     }
 }
