@@ -24,6 +24,18 @@ contract SemiFungible1155Helper is SemiFungible1155 {
         return _mintValue(user, values, uri);
     }
 
+    function splitValue(address user, uint256 tokenID, uint256[] memory values) public {
+        _splitValue(user, tokenID, values);
+    }
+
+    function mergeValue(uint256[] memory tokenIDs) public {
+        _mergeValue(tokenIDs);
+    }
+
+    function burnValue(address account, uint256 tokenID) public {
+        _burnValue(account, tokenID);
+    }
+
     function noOverflow(uint256[] memory values) public pure returns (bool) {
         uint256 total;
         for (uint256 i = 0; i < values.length; i++) {

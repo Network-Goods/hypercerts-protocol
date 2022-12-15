@@ -9,9 +9,15 @@
 
 ## Contracts
 
+#### Goerli
+
+HypercertMinter (UUPS Proxy) is deployed to proxy address:
+[0xcC08266250930E98256182734913Bf1B36102072](https://goerli.etherscan.io/address/0xcC08266250930E98256182734913Bf1B36102072#code)
+
 #### Sepolia
 
 HypercertMinter (UUPS Proxy) is deployed to proxy address: 0x2E5C3A3015a4A25819Bb2277C65df7Fe2e909CC8
+[0x2E5C3A3015a4A25819Bb2277C65df7Fe2e909CC8](https://sepolia.etherscan.io/address/0x2E5C3A3015a4A25819Bb2277C65df7Fe2e909CC8#code)
 
 ## Usage
 

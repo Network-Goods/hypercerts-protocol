@@ -16,6 +16,7 @@
 **/types
 **/deployments
 **/.openzeppelin
+**/docs
 
 # files
 *.env

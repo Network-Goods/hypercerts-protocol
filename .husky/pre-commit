@@ -3,3 +3,4 @@
 
 yarn dlx lint-staged
 forge snapshot 
+yarn docs
