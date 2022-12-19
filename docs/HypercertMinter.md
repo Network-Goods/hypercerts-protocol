@@ -317,7 +317,7 @@ Mint a semi-fungible token for the impact claim referenced via `uri`
 ### mintClaimFromAllowlist
 
 ```solidity
-function mintClaimFromAllowlist(bytes32[] proof, uint256 claimID, uint256 amount) external nonpayable
+function mintClaimFromAllowlist(bytes32[] proof, uint256 claimID, uint256 units) external nonpayable
 ```
 
 Mint a semi-fungible token representing a fraction of the claim
@@ -330,12 +330,12 @@ Mint a semi-fungible token representing a fraction of the claim
 |---|---|---|
 | proof | bytes32[] | undefined |
 | claimID | uint256 | undefined |
-| amount | uint256 | undefined |
+| units | uint256 | undefined |
 
 ### mintClaimWithFractions
 
 ```solidity
-function mintClaimWithFractions(uint256[] fractions, string uri) external nonpayable
+function mintClaimWithFractions(uint256 units, uint256[] fractions, string uri) external nonpayable
 ```
 
 Mint semi-fungible tokens for the impact claim referenced via `uri`
@@ -346,6 +346,7 @@ Mint semi-fungible tokens for the impact claim referenced via `uri`
 
 | Name | Type | Description |
 |---|---|---|
+| units | uint256 | undefined |
 | fractions | uint256[] | undefined |
 | uri | string | undefined |
 
@@ -738,7 +739,7 @@ event BeaconUpgraded(address indexed beacon)
 ### ClaimStored
 
 ```solidity
-event ClaimStored(uint256 indexed claimID, string uri)
+event ClaimStored(uint256 indexed claimID, string uri, uint256 totalUnits)
 ```
 
 
@@ -751,6 +752,7 @@ event ClaimStored(uint256 indexed claimID, string uri)
 |---|---|---|
 | claimID `indexed` | uint256 | undefined |
 | uri  | string | undefined |
+| totalUnits  | uint256 | undefined |
 
 ### Initialized
 

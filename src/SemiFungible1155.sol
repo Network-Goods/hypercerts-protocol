@@ -142,6 +142,7 @@ contract SemiFungible1155 is Upgradeable1155 {
         tokenValues[tokenID] = _value; //first fraction
 
         _mint(_account, tokenID, 1, "");
+        emit ValueTransfer(0, tokenID, _value);
     }
 
     /// @dev Mint a new token type and the initial fractions
@@ -234,6 +235,7 @@ contract SemiFungible1155 is Upgradeable1155 {
 
                 delete owners[_fractionID];
                 delete tokenValues[_fractionID];
+                emit ValueTransfer(_fractionID, target, tokenValues[_fractionID]);
             } else {
                 tokenValues[_fractionID] += _totalValue;
             }

@@ -7,14 +7,14 @@ pragma solidity ^0.8.9;
 /// @notice This interface does not specify the underlying token type (e.g. 721 or 1155)
 interface IHypercertToken {
     /// @dev Emitted when token with tokenID `claimID` is stored, with external data reference via `uri`.
-    event ClaimStored(uint256 indexed claimID, string uri);
+    event ClaimStored(uint256 indexed claimID, string uri, uint256 totalUnits);
 
     /// @dev Function called to store a claim referenced via `uri` with a maximum number of fractions `units`.
     function mintClaim(uint256 units, string memory uri) external;
 
     /// @dev Function called to store a claim referenced via `uri` with a set of `fractions`.
     /// @dev Fractions are internally summed to total units.
-    function mintClaimWithFractions(uint256[] memory fractions, string memory uri) external;
+    function mintClaimWithFractions(uint256 units, uint256[] memory fractions, string memory uri) external;
 
     /// @dev Function called to split `tokenID` owned by `account` into units declared in `values`.
     /// @notice The sum of `values` must equal the current value of `_tokenID`.
