@@ -880,7 +880,7 @@ event Upgraded(address indexed implementation)
 ### ValueTransfer
 
 ```solidity
-event ValueTransfer(uint256 fromTokenID, uint256 toTokenID, uint256 value)
+event ValueTransfer(uint256 claimID, uint256 fromTokenID, uint256 toTokenID, uint256 value)
 ```
 
 
@@ -891,6 +891,7 @@ event ValueTransfer(uint256 fromTokenID, uint256 toTokenID, uint256 value)
 
 | Name | Type | Description |
 |---|---|---|
+| claimID  | uint256 | undefined |
 | fromTokenID  | uint256 | undefined |
 | toTokenID  | uint256 | undefined |
 | value  | uint256 | undefined |
