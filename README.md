@@ -9,6 +9,15 @@
 
 ## Contracts
 
+### IHypercertToken
+
+This interface is the requirements set for hypercert compliant tokens. This enables developer to use their own prefered
+token implementation or standard.
+
+### HypercertMinter
+
+Example implementation for a hypercert token that is an `ERC1155 NFT` under the hood with an `Allowlist` extenstion.
+
 #### Goerli
 
 HypercertMinter (UUPS Proxy) is deployed to proxy address:

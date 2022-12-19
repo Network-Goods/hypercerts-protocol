@@ -86,47 +86,25 @@ function __Upgradeable1155_init() external nonpayable
 ### balanceOf
 
 ```solidity
-function balanceOf(address _owner, uint256 _tokenID) external view returns (uint256 tokenUserBalance)
+function balanceOf(address account, uint256 id) external view returns (uint256)
 ```
 
-READ
 
 
+*See {IERC1155-balanceOf}. Requirements: - `account` cannot be the zero address.*
 
 #### Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| _owner | address | undefined |
-| _tokenID | uint256 | undefined |
+| account | address | undefined |
+| id | uint256 | undefined |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| tokenUserBalance | uint256 | undefined |
-
-### balanceOf
-
-```solidity
-function balanceOf(uint256 _tokenID) external view returns (uint256 tokenValue)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _tokenID | uint256 | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| tokenValue | uint256 | undefined |
+| _0 | uint256 | undefined |
 
 ### balanceOfBatch
 
@@ -227,6 +205,28 @@ function owner() external view returns (address)
 |---|---|---|
 | _0 | address | undefined |
 
+### ownerOf
+
+```solidity
+function ownerOf(uint256 tokenID) external view returns (address _owner)
+```
+
+READ
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| tokenID | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _owner | address | undefined |
+
 ### proxiableUUID
 
 ```solidity
@@ -281,7 +281,7 @@ function safeBatchTransferFrom(address from, address to, uint256[] ids, uint256[
 function safeTransferFrom(address _from, address _to, uint256 _id, uint256 _value, bytes _data) external nonpayable
 ```
 
-Transfers
+TRANSFERS
 
 
 
@@ -333,28 +333,6 @@ function supportsInterface(bytes4 interfaceId) external view returns (bool)
 | Name | Type | Description |
 |---|---|---|
 | _0 | bool | undefined |
-
-### totalSupply
-
-```solidity
-function totalSupply(uint256 _typeID) external view returns (uint256 total)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _typeID | uint256 | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| total | uint256 | undefined |
 
 ### transferOwnership
 
@@ -430,7 +408,7 @@ function uri(uint256 tokenID) external view returns (string _uri)
 
 
 
-*see { openzeppelin-contracts-upgradeable/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol }*
+*see { openzeppelin-contracts-upgradeable/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol }Always returns the URI for the basetype so that it&#39;s managed in one place.*
 
 #### Parameters
 
