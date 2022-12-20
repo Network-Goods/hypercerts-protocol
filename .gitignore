@@ -14,8 +14,11 @@
 **/.coverage_contracts
 **/dist
 **/node_modules
-**/src/types
 **/deployments/localhost
+**/out
+**/typechain
+**/cache**
+**/abi
 
 # files
 *.env
@@ -30,8 +33,7 @@ yarn-error.log*
 /.idea
 test*.svg
 
-deployments/goerli/HyperCertMetadata.json
-deployments/goerli/HyperCertMinter.json
-deployments/goerli/HyperCertSVG.json
-test/hypercert_minter/HypercertMinter.split.merge.ts
-test/hypercert_svg/HypercertSVG.ts
+# broadcasts
+!/broadcast
+/broadcast/*
+/broadcast/*/31337/

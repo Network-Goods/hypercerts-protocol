@@ -1,143 +1,103 @@
 # hypercerts-protocol [![Github Actions][gha-badge]][gha] [![Hardhat][hardhat-badge]][hardhat] [![License: MIT][license-badge]][license]
 
-[gha]: https://github.com/paulrberg/hardhat-template/actions
-[gha-badge]: https://github.com/paulrberg/hardhat-template/actions/workflows/ci.yml/badge.svg
-[hardhat]: https://hardhat.org/
-[hardhat-badge]: https://img.shields.io/badge/Built%20with-Hardhat-FFDB1C.svg
+[gha]: https://github.com/bitbeckers/foundry-infinitoken-poc/actions
+[gha-badge]: https://github.com/bitbeckers/foundry-infinitoken-poc/actions/workflows/ci.yml/badge.svg
+[foundry]: https://getfoundry.sh/
+[foundry-badge]: https://img.shields.io/badge/Built%20with-Foundry-FFDB1C.svg
 [license]: https://opensource.org/licenses/MIT
 [license-badge]: https://img.shields.io/badge/License-MIT-blue.svg
 
-A Hardhat-based template for developing Solidity smart contracts, with sensible defaults.
+## Contracts
 
-- [Hardhat](https://github.com/nomiclabs/hardhat): compile, run and test smart contracts
-- [TypeChain](https://github.com/ethereum-ts/TypeChain): generate TypeScript bindings for smart contracts
-- [Ethers](https://github.com/ethers-io/ethers.js/): renowned Ethereum library and wallet implementation
-- [Solhint](https://github.com/protofire/solhint): code linter
-- [Solcover](https://github.com/sc-forks/solidity-coverage): code coverage
-- [Prettier Plugin Solidity](https://github.com/prettier-solidity/prettier-plugin-solidity): code formatter
+### IHypercertToken
+
+This interface is the requirements set for hypercert compliant tokens. This enables developer to use their own prefered
+token implementation or standard.
+
+### HypercertMinter
+
+Example implementation for a hypercert token that is an `ERC1155 NFT` under the hood with an `Allowlist` extenstion.
+
+#### Goerli
+
+HypercertMinter (UUPS Proxy) is deployed to proxy address:
+[0xcC08266250930E98256182734913Bf1B36102072](https://goerli.etherscan.io/address/0xcC08266250930E98256182734913Bf1B36102072#code)
+
+#### Sepolia
+
+HypercertMinter (UUPS Proxy) is deployed to proxy address: 0x2E5C3A3015a4A25819Bb2277C65df7Fe2e909CC8
+[0x2E5C3A3015a4A25819Bb2277C65df7Fe2e909CC8](https://sepolia.etherscan.io/address/0x2E5C3A3015a4A25819Bb2277C65df7Fe2e909CC8#code)
 
 ## Usage
 
-### Pre Requisites
+Here's a list of the most frequently needed commands.
 
-Before being able to run any command, you need to create a `.env` file and set a BIP-39 compatible mnemonic as an environment
-variable. You can follow the example in `.env.example`. If you don't already have a mnemonic, you can use this [website](https://iancoleman.io/bip39/) to generate one.
+### Build
 
-Then, proceed with installing dependencies:
-
-> NOTE: Make sure to use Node 16.
+Build the contracts:
 
 ```sh
-$ yarn install
-```
-
-### Run local
-
-```sh
-$ yarn hardhat node
-```
-
-### Compile
-
-Compile the smart contracts with Hardhat:
-
-```sh
-$ yarn compile
-```
-
-### TypeChain
-
-Compile the smart contracts and generate TypeChain bindings:
-
-```sh
-$ yarn typechain
-```
-
-### Test
-
-Run the tests with Hardhat:
-
-```sh
-$ yarn test
-```
-
-### Lint Solidity
-
-Lint the Solidity code:
-
-```sh
-$ yarn lint:sol
-```
-
-### Lint TypeScript
-
-Lint the TypeScript code:
-
-```sh
-$ yarn lint:ts
-```
-
-### Coverage
-
-Generate the code coverage report:
-
-```sh
-$ yarn coverage
-```
-
-### Report Gas
-
-See the gas usage per unit test and average gas per method call:
-
-```sh
-$ REPORT_GAS=true yarn test
+$ forge build
 ```
 
 ### Clean
 
-Delete the smart contract artifacts, the coverage reports and the Hardhat cache:
+Delete the build artifacts and cache directories:
 
 ```sh
-$ yarn clean
+$ forge clean
+```
+
+### Compile
+
+Compile the contracts:
+
+```sh
+$ forge build
 ```
 
 ### Deploy
 
-Deploy the contracts to Hardhat Network:
+Deployment of the contract to EVM compatible net is managed by
+[OpenZeppelin](https://docs.openzeppelin.com/upgrades-plugins/1.x/api-hardhat-upgrades). Primarily because of proxy
+management and safety checks.
+
+Run: `yarn hardhat deploy --network sepolia`
+
+### Format
+
+Format the contracts with Prettier:
 
 ```sh
-$ yarn deploy
+$ yarn prettier
 ```
 
-Deploy the contracts to live network (e.g. goerli):
+### Gas Usage
+
+Get a gas report:
 
 ```sh
-$ yarn deploy --network goerli
+$ forge test --gas-report
 ```
 
-### Verify on Etherscan
+### Lint
 
-To verify on Etherscan, first get the implementation address via Etherscan:
-
-- Under the contract tab select 'is this a Proxy?' and Etherscan will display the implementation address
-
-Example for Goerli:
+Lint the contracts:
 
 ```sh
-yarn hardhat --network goerli verify CONTRACT_IMPLEMENTATION_ADDRESS
+$ yarn lint
 ```
 
-## Tips
+### Test
 
-### Syntax Highlighting
+#### Foundry
 
-If you use VSCode, you can get Solidity syntax highlighting with the [hardhat-solidity](https://marketplace.visualstudio.com/items?itemName=NomicFoundation.hardhat-solidity) extension.
+Solidity tests are executed using Foundry Run the tests:
 
-## Using GitPod
+```sh
+$ forge test
 
-[GitPod](https://www.gitpod.io/) is an open-source developer platform for remote development.
-
-To view the coverage report generated by `yarn coverage`, just click `Go Live` from the status bar to turn the server on/off.
+```
 
 ## License
 

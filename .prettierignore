@@ -4,14 +4,19 @@
 **/.coverage_cache
 **/.coverage_contracts
 **/artifacts
+**/broadcast
 **/build
 **/cache
+**/cache_hardhat
 **/coverage
 **/dist
+**/lib
 **/node_modules
+**/out
 **/types
 **/deployments
 **/.openzeppelin
+**/docs
 
 # files
 *.env
