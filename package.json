@@ -1,5 +1,5 @@
 {
-  "name": "@bitbeckers/hypercerts-protocol",
+  "name": "@network-goods/hypercerts-protocol",
   "description": "EVM compatible protocol for managing impact claims",
   "version": "0.0.4",
   "author": {
