@@ -48,7 +48,7 @@ contract SemiFungible1155 is Upgradeable1155 {
     /// @dev Mapping from `tokenID` to user at `address` to get `units` owned
     mapping(uint256 => mapping(address => uint256)) internal tokenUserBalances;
 
-    /// @dev Emitted when `value` represented in `units` is transfered between `fromTokenID` to `toTokenID` of the same `claimID`
+    /// @dev Emitted on transfer of `value` between `fromTokenID` to `toTokenID` of the same `claimID`
     event ValueTransfer(uint256 claimID, uint256 fromTokenID, uint256 toTokenID, uint256 value);
 
     /// @dev Init method. Underlying { Upgradeable1155 } is `Initializable`
