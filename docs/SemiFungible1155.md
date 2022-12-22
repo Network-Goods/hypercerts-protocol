@@ -591,7 +591,7 @@ event ValueTransfer(uint256 claimID, uint256 fromTokenID, uint256 toTokenID, uin
 
 
 
-*Emitted when `value` represented in `units` is transfered between `fromTokenID` to `toTokenID` of the same `claimID`*
+*Emitted on transfer of `value` between `fromTokenID` to `toTokenID` of the same `claimID`*
 
 #### Parameters
 
