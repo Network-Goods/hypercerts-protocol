@@ -141,6 +141,28 @@ function unitsOf(uint256 tokenID) external view returns (uint256 units)
 |---|---|---|
 | units | uint256 | undefined |
 
+### uri
+
+```solidity
+function uri(uint256 tokenID) external view returns (string metadata)
+```
+
+
+
+*Returns the `uri` for metadata of the claim represented by `tokenID`Metadata must conform to { Hypercert Metadata } spec (based on ERC1155 Metadata)*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| tokenID | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| metadata | string | undefined |
+
 
 
 ## Events
