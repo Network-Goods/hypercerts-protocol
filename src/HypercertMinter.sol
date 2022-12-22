@@ -31,16 +31,16 @@ contract HypercertMinter is IHypercertToken, SemiFungible1155, AllowlistMinter {
 
     /// @notice Mint a semi-fungible token for the impact claim referenced via `uri`
     /// @dev see {IHypercertToken}
-    function mintClaim(uint256 units, string memory uri) external {
-        uint256 claimID = _mintValue(msg.sender, units, uri);
-        emit ClaimStored(claimID, uri, units);
+    function mintClaim(uint256 units, string memory _uri) external {
+        uint256 claimID = _mintValue(msg.sender, units, _uri);
+        emit ClaimStored(claimID, _uri, units);
     }
 
     /// @notice Mint semi-fungible tokens for the impact claim referenced via `uri`
     /// @dev see {IHypercertToken}
-    function mintClaimWithFractions(uint256 units, uint256[] memory fractions, string memory uri) external {
-        uint256 claimID = _mintValue(msg.sender, fractions, uri);
-        emit ClaimStored(claimID, uri, units);
+    function mintClaimWithFractions(uint256 units, uint256[] memory fractions, string memory _uri) external {
+        uint256 claimID = _mintValue(msg.sender, fractions, _uri);
+        emit ClaimStored(claimID, _uri, units);
     }
 
     /// @notice Mint a semi-fungible token representing a fraction of the claim
@@ -54,10 +54,10 @@ contract HypercertMinter is IHypercertToken, SemiFungible1155, AllowlistMinter {
     /// @notice Register a claim and the whitelist for minting token(s) belonging to that claim
     /// @dev Calls SemiFungible1155 to store the claim referenced in `uri` with amount of `units`
     /// @dev Calls AlloslistMinter to store the `merkleRoot` as proof to authorize claims
-    function createAllowlist(uint256 units, bytes32 merkleRoot, string memory uri) external {
-        uint256 claimID = _createTokenType(units, uri);
+    function createAllowlist(uint256 units, bytes32 merkleRoot, string memory _uri) external {
+        uint256 claimID = _createTokenType(units, _uri);
         _createAllowlist(claimID, merkleRoot);
-        emit ClaimStored(claimID, uri, units);
+        emit ClaimStored(claimID, _uri, units);
     }
 
     /// @notice Split a claimtokens value into parts with summed value equal to the original
@@ -86,6 +86,13 @@ contract HypercertMinter is IHypercertToken, SemiFungible1155, AllowlistMinter {
     /// @dev see {IHypercertToken}
     function unitsOf(address account, uint256 tokenID) external view returns (uint256 units) {
         units = _unitsOf(account, tokenID);
+    }
+
+    /// METADATA
+
+    /// @dev see { IHypercertMetadata}
+    function uri(uint256 tokenID) public view override(IHypercertToken, SemiFungible1155) returns (string memory _uri) {
+        _uri = super.uri(tokenID);
     }
 
     /// INTERNAL

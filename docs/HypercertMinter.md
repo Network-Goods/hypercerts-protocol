@@ -185,7 +185,7 @@ Burn a claimtoken
 ### createAllowlist
 
 ```solidity
-function createAllowlist(uint256 units, bytes32 merkleRoot, string uri) external nonpayable
+function createAllowlist(uint256 units, bytes32 merkleRoot, string _uri) external nonpayable
 ```
 
 Register a claim and the whitelist for minting token(s) belonging to that claim
@@ -198,7 +198,7 @@ Register a claim and the whitelist for minting token(s) belonging to that claim
 |---|---|---|
 | units | uint256 | undefined |
 | merkleRoot | bytes32 | undefined |
-| uri | string | undefined |
+| _uri | string | undefined |
 
 ### hasBeenClaimed
 
@@ -300,7 +300,7 @@ Merge the value of tokens belonging to the same claim
 ### mintClaim
 
 ```solidity
-function mintClaim(uint256 units, string uri) external nonpayable
+function mintClaim(uint256 units, string _uri) external nonpayable
 ```
 
 Mint a semi-fungible token for the impact claim referenced via `uri`
@@ -312,7 +312,7 @@ Mint a semi-fungible token for the impact claim referenced via `uri`
 | Name | Type | Description |
 |---|---|---|
 | units | uint256 | undefined |
-| uri | string | undefined |
+| _uri | string | undefined |
 
 ### mintClaimFromAllowlist
 
@@ -335,7 +335,7 @@ Mint a semi-fungible token representing a fraction of the claim
 ### mintClaimWithFractions
 
 ```solidity
-function mintClaimWithFractions(uint256 units, uint256[] fractions, string uri) external nonpayable
+function mintClaimWithFractions(uint256 units, uint256[] fractions, string _uri) external nonpayable
 ```
 
 Mint semi-fungible tokens for the impact claim referenced via `uri`
@@ -348,7 +348,7 @@ Mint semi-fungible tokens for the impact claim referenced via `uri`
 |---|---|---|
 | units | uint256 | undefined |
 | fractions | uint256[] | undefined |
-| uri | string | undefined |
+| _uri | string | undefined |
 
 ### name
 
@@ -650,7 +650,7 @@ function uri(uint256 tokenID) external view returns (string _uri)
 
 
 
-*see { openzeppelin-contracts-upgradeable/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol }Always returns the URI for the basetype so that it&#39;s managed in one place.*
+*see { IHypercertMetadata}*
 
 #### Parameters
 

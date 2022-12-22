@@ -121,7 +121,7 @@ contract SemiFungible1155 is Upgradeable1155 {
 
     /// @dev create token type ID based of token counter
     // TODO should creator be msg.sender or submit account?
-    function _createTokenType(uint256 units, string memory uri) internal returns (uint256 typeID) {
+    function _createTokenType(uint256 units, string memory _uri) internal returns (uint256 typeID) {
         typeID = (++typeCounter << 128); //TODO max value check?
 
         owners[typeID] = _msgSender();
@@ -129,15 +129,15 @@ contract SemiFungible1155 is Upgradeable1155 {
         tokenValues[typeID] = units;
 
         _mint(_msgSender(), typeID, 1, "");
-        _setURI(typeID, uri);
+        _setURI(typeID, _uri);
     }
 
     /// @dev Mint a new token type and the initial value
-    function _mintValue(address _account, uint256 _value, string memory uri) internal returns (uint256 typeID) {
+    function _mintValue(address _account, uint256 _value, string memory _uri) internal returns (uint256 typeID) {
         if (_value == 0) {
             revert NotAllowed();
         }
-        typeID = _createTokenType(_value, uri);
+        typeID = _createTokenType(_value, _uri);
         maxIndex[typeID] += 1;
         uint256 tokenID = typeID + maxIndex[typeID]; //1 based indexing, 0 holds type data
 
@@ -152,7 +152,7 @@ contract SemiFungible1155 is Upgradeable1155 {
     function _mintValue(
         address _account,
         uint256[] memory _values,
-        string memory uri
+        string memory _uri
     ) internal returns (uint256 typeID) {
         if (_values.length > 253) {
             //TODO determine array limits (use testing)
@@ -161,7 +161,7 @@ contract SemiFungible1155 is Upgradeable1155 {
 
         uint256 totalValue = _getSum(_values);
 
-        typeID = _mintValue(_account, totalValue, uri);
+        typeID = _mintValue(_account, totalValue, _uri);
 
         _splitValue(_account, typeID + maxIndex[typeID], _values);
     }
@@ -263,14 +263,6 @@ contract SemiFungible1155 is Upgradeable1155 {
         _burn(_account, _typeID, 1);
     }
 
-    /// METADATA
-
-    /// @dev see { openzeppelin-contracts-upgradeable/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol }
-    /// @dev Always returns the URI for the basetype so that it's managed in one place.
-    function uri(uint256 tokenID) public view override returns (string memory _uri) {
-        _uri = Upgradeable1155.uri(getNonFungibleBaseType(tokenID));
-    }
-
     /// TRANSFERS
 
     function safeTransferFrom(
@@ -314,6 +306,14 @@ contract SemiFungible1155 is Upgradeable1155 {
 
     function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {
         // solhint-disable-previous-line no-empty-blocks
+    }
+
+    /// METADATA
+
+    /// @dev see { openzeppelin-contracts-upgradeable/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol }
+    /// @dev Always returns the URI for the basetype so that it's managed in one place.
+    function uri(uint256 tokenID) public view virtual override returns (string memory _uri) {
+        _uri = Upgradeable1155.uri(getNonFungibleBaseType(tokenID));
     }
 
     /**
