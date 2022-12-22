@@ -16,4 +16,4 @@ test = "test/foundry"
 
 [profile.ci]
 fuzz = { runs = 1_000 }
-verbosity = 4
+verbosity = 1
