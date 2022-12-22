@@ -39,4 +39,8 @@ interface IHypercertToken {
     /// @dev If `tokenID` is a base type, the total amount of `units` held by `account` for the claim is returned.
     /// @dev If `tokenID` is a fractional token, the `units` held by `account` the token is returned
     function unitsOf(address account, uint256 tokenID) external view returns (uint256 units);
+
+    /// @dev Returns the `uri` for metadata of the claim represented by `tokenID`
+    /// @dev Metadata must conform to { Hypercert Metadata } spec (based on ERC1155 Metadata)
+    function uri(uint256 tokenID) external view returns (string memory metadata);
 }
