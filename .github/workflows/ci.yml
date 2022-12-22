@@ -56,8 +56,11 @@ jobs:
       - name: "Show the Foundry config"
         run: "forge config"
 
-      - name: "Run the tests"
-        run: "forge test"
+      - name: "Run the tests and report gas"
+        run: "forge test --gas-report"
+
+      - name: "Report test coverage"
+        run: "forge coverage"
 
       - name: "Build the contracts"
         run: |
