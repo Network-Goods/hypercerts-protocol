@@ -45,8 +45,11 @@ contract SemiFungible1155 is Upgradeable1155 {
     // TODO should have max value type(uint256).max
     mapping(uint256 => uint256) internal maxIndex;
 
-    /// @dev Emitted when `value` represented in `units` is transfered between tokens
-    event ValueTransfer(uint256 fromTokenID, uint256 toTokenID, uint256 value);
+    /// @dev Mapping from `tokenID` to user at `address` to get `units` owned
+    mapping(uint256 => mapping(address => uint256)) internal tokenUserBalances;
+
+    /// @dev Emitted on transfer of `value` between `fromTokenID` to `toTokenID` of the same `claimID`
+    event ValueTransfer(uint256 claimID, uint256 fromTokenID, uint256 toTokenID, uint256 value);
 
     /// @dev Init method. Underlying { Upgradeable1155 } is `Initializable`
     // solhint-disable-next-line func-name-mixedcase
@@ -142,6 +145,7 @@ contract SemiFungible1155 is Upgradeable1155 {
         tokenValues[tokenID] = _value; //first fraction
 
         _mint(_account, tokenID, 1, "");
+        emit ValueTransfer(typeID, 0, tokenID, _value);
     }
 
     /// @dev Mint a new token type and the initial fractions
@@ -198,7 +202,7 @@ contract SemiFungible1155 is Upgradeable1155 {
             tokenValues[tokenID] = _values[i];
             left -= _values[i];
             _mint(_account, tokenID, 1, ""); //TODO batchmint?
-            emit ValueTransfer(_tokenID, tokenID, _values[i]);
+            emit ValueTransfer(_typeID, _tokenID, tokenID, _values[i]);
         }
 
         tokenValues[_tokenID] = left;
@@ -234,6 +238,7 @@ contract SemiFungible1155 is Upgradeable1155 {
 
                 delete owners[_fractionID];
                 delete tokenValues[_fractionID];
+                emit ValueTransfer(_typeID, _fractionID, target, tokenValues[_fractionID]);
             } else {
                 tokenValues[_fractionID] += _totalValue;
             }

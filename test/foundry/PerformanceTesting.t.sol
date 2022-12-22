@@ -71,24 +71,27 @@ contract PerformanceTesting is PRBTest, StdCheats, HelperContract {
 
     function testClaimTwoFractions() public {
         uint256[] memory fractions = buildFractions(2);
+        uint256 totalUnits = getSum(fractions);
 
         vm.prank(address(1));
-        hypercertMinter.mintClaimWithFractions(fractions, "https://example.com/ipfsHash");
+        hypercertMinter.mintClaimWithFractions(totalUnits, fractions, "https://example.com/ipfsHash");
     }
 
     function testClaimHundredFractions() public {
         uint256[] memory fractions = buildFractions(100);
+        uint256 totalUnits = getSum(fractions);
 
         vm.prank(address(1));
-        hypercertMinter.mintClaimWithFractions(fractions, "https://example.com/ipfsHash");
+        hypercertMinter.mintClaimWithFractions(totalUnits, fractions, "https://example.com/ipfsHash");
     }
 
     function testClaimFractionsFuzz(uint256[] memory fractions) public {
         vm.assume(noOverflow(fractions));
         vm.assume(noZeroes(fractions));
         vm.assume(fractions.length > 0 && fractions.length < 253);
+        uint256 totalUnits = getSum(fractions);
 
         vm.prank(address(1));
-        hypercertMinter.mintClaimWithFractions(fractions, "https://example.com/ipfsHash");
+        hypercertMinter.mintClaimWithFractions(totalUnits, fractions, "https://example.com/ipfsHash");
     }
 }

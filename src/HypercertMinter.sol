@@ -33,22 +33,22 @@ contract HypercertMinter is IHypercertToken, SemiFungible1155, AllowlistMinter {
     /// @dev see {IHypercertToken}
     function mintClaim(uint256 units, string memory uri) external {
         uint256 claimID = _mintValue(msg.sender, units, uri);
-        emit ClaimStored(claimID, uri);
+        emit ClaimStored(claimID, uri, units);
     }
 
     /// @notice Mint semi-fungible tokens for the impact claim referenced via `uri`
     /// @dev see {IHypercertToken}
-    function mintClaimWithFractions(uint256[] memory fractions, string memory uri) external {
+    function mintClaimWithFractions(uint256 units, uint256[] memory fractions, string memory uri) external {
         uint256 claimID = _mintValue(msg.sender, fractions, uri);
-        emit ClaimStored(claimID, uri);
+        emit ClaimStored(claimID, uri, units);
     }
 
     /// @notice Mint a semi-fungible token representing a fraction of the claim
     /// @dev Calls AllowlistMinter to verify `proof`.
     /// @dev Mints the `amount` of units for the hypercert stored under `claimID`
-    function mintClaimFromAllowlist(bytes32[] calldata proof, uint256 claimID, uint256 amount) external {
-        _processClaim(proof, claimID, amount);
-        _mintClaim(claimID, amount);
+    function mintClaimFromAllowlist(bytes32[] calldata proof, uint256 claimID, uint256 units) external {
+        _processClaim(proof, claimID, units);
+        _mintClaim(claimID, units);
     }
 
     /// @notice Register a claim and the whitelist for minting token(s) belonging to that claim
@@ -57,7 +57,7 @@ contract HypercertMinter is IHypercertToken, SemiFungible1155, AllowlistMinter {
     function createAllowlist(uint256 units, bytes32 merkleRoot, string memory uri) external {
         uint256 claimID = _createTokenType(units, uri);
         _createAllowlist(claimID, merkleRoot);
-        emit ClaimStored(claimID, uri);
+        emit ClaimStored(claimID, uri, units);
     }
 
     /// @notice Split a claimtokens value into parts with summed value equal to the original

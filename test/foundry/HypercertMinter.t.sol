@@ -8,7 +8,7 @@ import { HypercertMinter } from "../../src/HypercertMinter.sol";
 import { Merkle } from "murky/Merkle.sol";
 
 contract HelperContract {
-    event ClaimStored(uint256 indexed claimID, string uri);
+    event ClaimStored(uint256 indexed claimID, string uri, uint256 totalUnits);
 
     function noOverflow(uint256[] memory values) public pure returns (bool) {
         uint256 total;
@@ -79,24 +79,25 @@ contract HypercertMinterTest is PRBTest, StdCheats, StdUtils, HelperContract {
     function testClaimSingleFraction() public {
         uint256 units = 10000;
 
-        vm.expectEmit(true, false, false, true);
-        emit ClaimStored(1 << 128, _uri);
+        vm.expectEmit(true, true, true, true);
+        emit ClaimStored(1 << 128, _uri, units);
         hypercertMinter.mintClaim(units, _uri);
     }
 
     function testClaimTenFractions() public {
         uint256[] memory fractions = buildFractions(10);
-
-        vm.expectEmit(true, false, false, true);
-        emit ClaimStored(1 << 128, _uri);
-        hypercertMinter.mintClaimWithFractions(fractions, _uri);
+        uint256 totalUnits = getSum(fractions);
+        vm.expectEmit(true, true, true, true);
+        emit ClaimStored(1 << 128, _uri, totalUnits);
+        hypercertMinter.mintClaimWithFractions(totalUnits, fractions, _uri);
     }
 
     function testClaimHundredFractions() public {
         uint256[] memory fractions = buildFractions(100);
+        uint256 totalUnits = getSum(fractions);
 
-        vm.expectEmit(true, false, false, true);
-        emit ClaimStored(1 << 128, _uri);
-        hypercertMinter.mintClaimWithFractions(fractions, _uri);
+        vm.expectEmit(true, true, true, true);
+        emit ClaimStored(1 << 128, _uri, totalUnits);
+        hypercertMinter.mintClaimWithFractions(totalUnits, fractions, _uri);
     }
 }

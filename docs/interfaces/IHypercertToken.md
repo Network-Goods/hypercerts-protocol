@@ -63,7 +63,7 @@ function mintClaim(uint256 units, string uri) external nonpayable
 ### mintClaimWithFractions
 
 ```solidity
-function mintClaimWithFractions(uint256[] fractions, string uri) external nonpayable
+function mintClaimWithFractions(uint256 units, uint256[] fractions, string uri) external nonpayable
 ```
 
 
@@ -74,6 +74,7 @@ function mintClaimWithFractions(uint256[] fractions, string uri) external nonpay
 
 | Name | Type | Description |
 |---|---|---|
+| units | uint256 | undefined |
 | fractions | uint256[] | undefined |
 | uri | string | undefined |
 
@@ -147,7 +148,7 @@ function unitsOf(uint256 tokenID) external view returns (uint256 units)
 ### ClaimStored
 
 ```solidity
-event ClaimStored(uint256 indexed claimID, string uri)
+event ClaimStored(uint256 indexed claimID, string uri, uint256 totalUnits)
 ```
 
 
@@ -160,6 +161,7 @@ event ClaimStored(uint256 indexed claimID, string uri)
 |---|---|---|
 | claimID `indexed` | uint256 | undefined |
 | uri  | string | undefined |
+| totalUnits  | uint256 | undefined |
 
 
 

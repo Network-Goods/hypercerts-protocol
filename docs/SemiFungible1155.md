@@ -586,17 +586,18 @@ event Upgraded(address indexed implementation)
 ### ValueTransfer
 
 ```solidity
-event ValueTransfer(uint256 fromTokenID, uint256 toTokenID, uint256 value)
+event ValueTransfer(uint256 claimID, uint256 fromTokenID, uint256 toTokenID, uint256 value)
 ```
 
 
 
-*Emitted when `value` represented in `units` is transfered between tokens*
+*Emitted on transfer of `value` between `fromTokenID` to `toTokenID` of the same `claimID`*
 
 #### Parameters
 
 | Name | Type | Description |
 |---|---|---|
+| claimID  | uint256 | undefined |
 | fromTokenID  | uint256 | undefined |
 | toTokenID  | uint256 | undefined |
 | value  | uint256 | undefined |
