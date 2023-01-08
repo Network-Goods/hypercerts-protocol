@@ -1,6 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
+/**
+ * AllowAll = Unrestricted
+ * DisallowAll = Transfers disabled after minting
+ * FromCreatorOnly = Only the original creator can transfer
+ */
+/// @dev Transfer restriction policies on hypercerts
+enum TransferRestrictions {
+    AllowAll,
+    DisallowAll,
+    FromCreatorOnly
+}
+
 /// @title Interface for hypercert token interactions
 /// @author bitbeckers
 /// @notice This interface declares the required functionality for a hypercert token
@@ -10,11 +22,16 @@ interface IHypercertToken {
     event ClaimStored(uint256 indexed claimID, string uri, uint256 totalUnits);
 
     /// @dev Function called to store a claim referenced via `uri` with a maximum number of fractions `units`.
-    function mintClaim(uint256 units, string memory uri) external;
+    function mintClaim(uint256 units, string memory uri, TransferRestrictions restrictions) external;
 
     /// @dev Function called to store a claim referenced via `uri` with a set of `fractions`.
     /// @dev Fractions are internally summed to total units.
-    function mintClaimWithFractions(uint256 units, uint256[] memory fractions, string memory uri) external;
+    function mintClaimWithFractions(
+        uint256 units,
+        uint256[] memory fractions,
+        string memory uri,
+        TransferRestrictions restrictions
+    ) external;
 
     /// @dev Function called to split `tokenID` owned by `account` into units declared in `values`.
     /// @notice The sum of `values` must equal the current value of `_tokenID`.
