@@ -13,7 +13,7 @@ contract MerkleHelper is AllowlistMinter, Merkle {
     function generateData(uint256 size, uint256 value) public view returns (bytes32[] memory data) {
         data = new bytes32[](size);
         for (uint256 i = 0; i < size; i++) {
-            data[i] = keccak256(abi.encodePacked(msg.sender, value));
+            data[i] = keccak256(bytes.concat(keccak256(abi.encodePacked(msg.sender, value))));
         }
     }
 
