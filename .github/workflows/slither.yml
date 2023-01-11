@@ -20,6 +20,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+      - name: Set up node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14
+      - name: "Copy config"
+        run: |
+          mv ./.env.github .env
+          echo "::debug::$(less .env)"
+
       - name: Run Slither
         uses: crytic/slither-action@v0.2.0
         id: slither
