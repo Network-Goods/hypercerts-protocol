@@ -88,7 +88,7 @@
     "slither": "slither ./src",
     "test": "forge test",
     "test:hardhat": "hardhat test",
-    "test:gas": "forge test --gas-report",
+    "test:gas": "forge test --match-path test/foundry/PerformanceTesting.t.sol --gas-report",
     "typechain": "forge build --skip test && typechain --target \"ethers-v5\" --out-dir \"typechain\" \"./out/**/*.json\""
   }
 }

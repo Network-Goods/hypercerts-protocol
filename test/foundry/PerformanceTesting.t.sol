@@ -5,8 +5,11 @@ import { console2 } from "forge-std/console2.sol";
 import { PRBTest } from "prb-test/PRBTest.sol";
 import { StdCheats } from "forge-std/StdCheats.sol";
 import { HypercertMinter } from "../../src/HypercertMinter.sol";
+import { Merkle } from "murky/Merkle.sol";
 
-contract HelperContract {
+// forge test -vv --match-path test/foundry/PerformanceTesting.t.sol
+
+contract HelperContract is Merkle {
     function noOverflow(uint256[] memory values) public pure returns (bool) {
         uint256 total;
         for (uint256 i = 0; i < values.length; i++) {
@@ -44,15 +47,34 @@ contract HelperContract {
         }
         return fractions;
     }
+
+    function generateData(address account, uint256 size, uint256 value) public pure returns (bytes32[] memory data) {
+        data = new bytes32[](size);
+        for (uint256 i = 0; i < size; i++) {
+            data[i] = keccak256(bytes.concat(keccak256(abi.encode(account, value))));
+        }
+    }
 }
 
 /// @dev See the "Writing Tests" section in the Foundry Book if this is your first time with Forge.
 /// https://book.getfoundry.sh/forge/writing-tests
 contract PerformanceTesting is PRBTest, StdCheats, HelperContract {
     HypercertMinter internal hypercertMinter;
+    string _uri = "https://example.com/ipfsHash";
+    bytes32 root = bytes32(bytes.concat("f1ef5e66fa78313ec3d3617a44c21a9061f1c87437f512625a50a5a29335a647"));
+    bytes32 rootHash;
+    bytes32[] proof;
+    address alice;
 
     function setUp() public {
+        alice = address(1);
         hypercertMinter = new HypercertMinter();
+        bytes32[] memory data = generateData(alice, 12, 200000);
+        rootHash = getRoot(data);
+        proof = getProof(data, 6);
+
+        startHoax(alice, 10 ether);
+        hypercertMinter.createAllowlist(200000, rootHash, _uri);
     }
 
     /// @dev Run Forge with `-vvvv` to see console logs.
@@ -64,25 +86,33 @@ contract PerformanceTesting is PRBTest, StdCheats, HelperContract {
         assertEq(keccak256(abi.encodePacked(hypercertMinter.name())), keccak256("HypercertMinter"));
     }
 
+    // Mint Hypercert with 1 fraction
     function testClaimSingleFraction() public {
-        vm.prank(address(1));
-        hypercertMinter.mintClaim(10000, "https://example.com/ipfsHash");
+        hypercertMinter.mintClaim(10000, _uri);
     }
+
+    function testClaimSingleFractionFuzz(address account, uint256 units) public {
+        vm.assume(units > 0);
+        vm.assume(account != address(0) && account != address(this) && account != address(hypercertMinter));
+
+        changePrank(account);
+        hypercertMinter.mintClaim(units, _uri);
+    }
+
+    // Mint Hypercert with multiple fractions
 
     function testClaimTwoFractions() public {
         uint256[] memory fractions = buildFractions(2);
         uint256 totalUnits = getSum(fractions);
 
-        vm.prank(address(1));
-        hypercertMinter.mintClaimWithFractions(totalUnits, fractions, "https://example.com/ipfsHash");
+        hypercertMinter.mintClaimWithFractions(totalUnits, fractions, _uri);
     }
 
     function testClaimHundredFractions() public {
         uint256[] memory fractions = buildFractions(100);
         uint256 totalUnits = getSum(fractions);
 
-        vm.prank(address(1));
-        hypercertMinter.mintClaimWithFractions(totalUnits, fractions, "https://example.com/ipfsHash");
+        hypercertMinter.mintClaimWithFractions(totalUnits, fractions, _uri);
     }
 
     function testClaimFractionsFuzz(uint256[] memory fractions) public {
@@ -91,7 +121,25 @@ contract PerformanceTesting is PRBTest, StdCheats, HelperContract {
         vm.assume(fractions.length > 0 && fractions.length < 253);
         uint256 totalUnits = getSum(fractions);
 
-        vm.prank(address(1));
-        hypercertMinter.mintClaimWithFractions(totalUnits, fractions, "https://example.com/ipfsHash");
+        hypercertMinter.mintClaimWithFractions(totalUnits, fractions, _uri);
+    }
+
+    // Store allowlist and reserve Hypercert ID
+    function testCreateAllowlist() public {
+        hypercertMinter.createAllowlist(10000, root, _uri);
+    }
+
+    function testCreateAllowlistFuzz(address account, uint256 units) public {
+        vm.assume(units > 0);
+        vm.assume(account != address(0) && account != address(this) && account != address(hypercertMinter));
+
+        changePrank(account);
+        hypercertMinter.createAllowlist(units, root, _uri);
+    }
+
+    // Mint claim from allowlist
+    function testClaimAllowlistFraction() public {
+        changePrank(alice);
+        hypercertMinter.mintClaimFromAllowlist(proof, 340282366920938463463374607431768211456, 200000);
     }
 }
