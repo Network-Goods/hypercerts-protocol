@@ -48,7 +48,7 @@ contract AllowlistMinter is IAllowlist {
         emit LeafClaimed(claimID, node);
     }
 
-    function _calculateLeaf(address account, uint256 amount) internal view returns (bytes32 leaf) {
+    function _calculateLeaf(address account, uint256 amount) internal pure returns (bytes32 leaf) {
         leaf = keccak256(bytes.concat(keccak256(abi.encode(account, amount))));
     }
 }
