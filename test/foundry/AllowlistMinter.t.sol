@@ -10,10 +10,20 @@ import { AllowlistMinter } from "../../src/AllowlistMinter.sol";
 import { Merkle } from "murky/Merkle.sol";
 
 contract MerkleHelper is AllowlistMinter, Merkle {
+    function generateCustomData(
+        address[] calldata addresses,
+        uint256[] calldata units
+    ) public view returns (bytes32[] memory data) {
+        data = new bytes32[](addresses.length);
+        for (uint256 i = 0; i < addresses.length; i++) {
+            data[i] = _calculateLeaf(addresses[i], units[i]);
+        }
+    }
+
     function generateData(uint256 size, uint256 value) public view returns (bytes32[] memory data) {
         data = new bytes32[](size);
         for (uint256 i = 0; i < size; i++) {
-            data[i] = keccak256(abi.encodePacked(msg.sender, value));
+            data[i] = _calculateLeaf(msg.sender, value);
         }
     }
 
@@ -38,6 +48,41 @@ contract AllowlistTest is PRBTest, StdCheats, StdUtils {
 
     function setUp() public {
         merkle = new MerkleHelper();
+    }
+
+    // Used for testing with FE merkle libs
+    function testCustomAllowlist() public {
+        address[] memory accounts = new address[](3);
+        accounts[0] = address(0x23314160c752D6Bb544661DcE13d01C21c64331E);
+        accounts[1] = address(0x6E4f821eD0a4a99Fc0061FCE01246490505Ddc91);
+        accounts[2] = address(0x23314160c752D6Bb544661DcE13d01C21c64331E);
+
+        uint256[] memory units = new uint256[](3);
+        units[0] = 100;
+        units[1] = 300;
+        units[2] = 600;
+
+        bytes32[] memory data = merkle.generateCustomData(accounts, units);
+        console2.log("DATA");
+        for (uint256 i = 0; i < data.length; i++) {
+            console2.logBytes32(data[i]);
+        }
+
+        bytes32 root = merkle.getRoot(data);
+
+        console2.log("ROOT");
+        console2.logBytes32(root);
+        bytes32[] memory proof = merkle.getProof(data, 0);
+
+        console2.log("PROOF");
+        for (uint256 i = 0; i < proof.length; i++) {
+            console2.logBytes32(proof[i]);
+        }
+        uint256 claimID = 1;
+
+        merkle.createAllowlist(claimID, root);
+
+        assertTrue(merkle.isAllowedToClaim(proof, claimID, data[0]));
     }
 
     function testBasicAllowlist() public {
