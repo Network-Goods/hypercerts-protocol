@@ -3,3 +3,5 @@
 **/node_modules
 **/mocks
 **/lib
+**/src/utils/console.sol
+
