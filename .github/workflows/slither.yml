@@ -1,0 +1,58 @@
+name: Static Analysis
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  slither:
+    name: Slither
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: "Install the dependencies"
+        run: "yarn install --immutable"
+      - name: Install slither
+        run: |
+          python -m pip install --upgrade pip
+          pip3 install slither-analyzer
+      # workaround for https://github.com/crytic/crytic-compile/issues/113
+      - name: "Copy config"
+        run: |
+          mv ./.env.github .env
+          echo "::debug::$(less .env)"
+      - name: Install solc
+        run: |
+          sudo wget -O /usr/bin/solc https://github.com/ethereum/solidity/releases/download/v0.8.17/solc-static-linux
+          sudo chmod +x /usr/bin/solc
+      - name: Summary of static ananlysis
+        run: |
+          echo "Running slither"
+          slither . --print human-summary
+      # - name: Contract summary of static ananlysis
+      #   run: |
+      #     echo "Running slither"
+      #     slither . --print contract-summary
+      # - name: Function summary
+      #   run: |
+      #     slither . --print function-summary
+      # - name: Data dependency
+      #   run: |
+      #     slither . --print data-dependency
+      # - name: Inheritance
+      #   run: |
+      #     slither . --print inheritance
