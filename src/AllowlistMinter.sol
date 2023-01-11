@@ -3,7 +3,6 @@ pragma solidity ^0.8.9;
 
 import { MerkleProofUpgradeable } from "oz-upgradeable/utils/cryptography/MerkleProofUpgradeable.sol";
 import { IAllowlist } from "./interfaces/IAllowlist.sol";
-import { console } from "./utils/console.sol";
 
 error DuplicateEntry();
 error DoesNotExist();
@@ -14,8 +13,6 @@ error Invalid();
 /// @notice This interface declares the required functionality for a hypercert token
 /// @notice This interface does not specify the underlying token type (e.g. 721 or 1155)
 contract AllowlistMinter is IAllowlist {
-    // using MerkleProofUpgradeable for bytes32[];
-
     event AllowlistCreated(uint256 tokenID, bytes32 root);
     event LeafClaimed(uint256 tokenID, bytes32 leaf);
 
@@ -33,10 +30,6 @@ contract AllowlistMinter is IAllowlist {
 
     function _createAllowlist(uint256 claimID, bytes32 merkleRoot) internal {
         if (merkleRoots[claimID] != "") revert DuplicateEntry();
-        console.log("Creating allowlist");
-        console.log("ClaimID: ", claimID);
-        console.log("MerkleRoot: ");
-        console.logBytes32(merkleRoot);
 
         merkleRoots[claimID] = merkleRoot;
         emit AllowlistCreated(claimID, merkleRoot);
@@ -49,20 +42,6 @@ contract AllowlistMinter is IAllowlist {
 
         if (hasBeenClaimed[claimID][node]) revert DuplicateEntry();
 
-        console.log("Validating allowlist mint");
-        console.log("ClaimID: ", claimID);
-        console.log("MerkleRoot: ");
-        console.logBytes32(merkleRoots[claimID]);
-        console.log("Leaf: ");
-        console.logBytes32(node);
-        console.log("Proofs length: ", proof.length);
-
-        console.log("Proofs: ");
-
-        for (uint256 i = 0; i < proof.length; i++) {
-            console.logBytes32(proof[i]);
-        }
-
         if (!MerkleProofUpgradeable.verifyCalldata(proof, merkleRoots[claimID], node)) revert Invalid();
         hasBeenClaimed[claimID][node] = true;
 
@@ -70,6 +49,6 @@ contract AllowlistMinter is IAllowlist {
     }
 
     function _calculateLeaf(address account, uint256 amount) internal view returns (bytes32 leaf) {
-        leaf = keccak256(bytes.concat(keccak256(abi.encodePacked(account, amount))));
+        leaf = keccak256(bytes.concat(keccak256(abi.encode(account, amount))));
     }
 }
