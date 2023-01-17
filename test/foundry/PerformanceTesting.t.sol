@@ -9,7 +9,7 @@ import { Merkle } from "murky/Merkle.sol";
 
 // forge test -vv --match-path test/foundry/PerformanceTesting.t.sol
 
-contract HelperContract is Merkle {
+contract PerformanceTestHelper is Merkle {
     function noOverflow(uint256[] memory values) public pure returns (bool) {
         uint256 total;
         for (uint256 i = 0; i < values.length; i++) {
@@ -66,7 +66,7 @@ contract HelperContract is Merkle {
 
 /// @dev See the "Writing Tests" section in the Foundry Book if this is your first time with Forge.
 /// https://book.getfoundry.sh/forge/writing-tests
-contract PerformanceTesting is PRBTest, StdCheats, HelperContract {
+contract PerformanceTesting is PRBTest, StdCheats, PerformanceTestHelper {
     HypercertMinter internal hypercertMinter;
     string _uri = "https://example.com/ipfsHash";
     bytes32 root = bytes32(bytes.concat("f1ef5e66fa78313ec3d3617a44c21a9061f1c87437f512625a50a5a29335a647"));
