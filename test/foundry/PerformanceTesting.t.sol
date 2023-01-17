@@ -101,7 +101,7 @@ contract PerformanceTesting is PRBTest, StdCheats, PerformanceTestHelper {
 
     function testClaimSingleFractionFuzz(address account, uint256 units) public {
         vm.assume(units > 0);
-        vm.assume(account != address(0) && account != address(this) && account != address(hypercertMinter));
+        vm.assume(!isContract(account) && account != address(0) && account != address(this));
 
         changePrank(account);
         hypercertMinter.mintClaim(units, _uri);
@@ -139,7 +139,7 @@ contract PerformanceTesting is PRBTest, StdCheats, PerformanceTestHelper {
 
     function testCreateAllowlistFuzz(address account, uint256 units) public {
         vm.assume(units > 0);
-        vm.assume(!isContract(account) && account != address(0));
+        vm.assume(!isContract(account) && account != address(0) && account != address(this));
 
         changePrank(account);
         hypercertMinter.createAllowlist(units, root, _uri);
