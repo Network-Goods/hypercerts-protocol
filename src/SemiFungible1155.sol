@@ -177,6 +177,32 @@ contract SemiFungible1155 is Upgradeable1155 {
         _mint(_account, tokenID, 1, "");
     }
 
+    /// @dev Mint new tokens for existing types
+    /// @notice Enables batch claiming from multiple allowlists
+    function _batchMintClaims(
+        uint256[] calldata _typeIDs,
+        uint256[] calldata _units
+    ) internal returns (uint256 tokenID) {
+        address _account = _msgSender();
+
+        uint256 len = _typeIDs.length;
+        uint256[] memory tokenIDs = new uint256[](len);
+        uint256[] memory amounts = new uint256[](len);
+
+        for (uint256 i = 0; i < len; i++) {
+            uint256 _typeID = _typeIDs[i];
+            maxIndex[_typeID] += 1;
+            tokenID = _typeID + maxIndex[_typeID]; //1 based indexing, 0 holds type data
+
+            owners[tokenID] = _account;
+            tokenValues[tokenID] = _units[i];
+            tokenIDs[i] = tokenID;
+            amounts[i] = 1;
+        }
+
+        _mintBatch(_account, tokenIDs, amounts, "");
+    }
+
     /// @dev Split the units of `_tokenID` owned by `account` across `_values`
     /// @dev `_values` must sum to total `units` held at `_tokenID`
     function _splitValue(address _account, uint256 _tokenID, uint256[] memory _values) internal {
