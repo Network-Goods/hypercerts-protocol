@@ -14,9 +14,6 @@ contract Bitshifter {
     /// @dev Bitmask used to expose only lower 128 bits of uint256
     uint256 public constant NF_INDEX_MASK = type(uint128).max;
 
-    /// @dev Identify non-fungible index. Use to find index of token belonging to `typeID`
-    uint256 public constant TYPE_NF_BIT = 1 << 255;
-
     /// @dev Identify if token at `_id` is non-fungible.
     /// @dev Non-fungible tokens are used to represent the base type for hypercert tokens
     function isNonFungible(uint256 _id) internal pure returns (bool) {
@@ -29,12 +26,13 @@ contract Bitshifter {
         return (_id & NF_INDEX_MASK) > 0;
     }
 
-    /// @dev Get index of fractional token as `_id`
+    /// @dev Get index of fractional token at `_id` by returning lower 128 bit values
+    /// @dev Returns 0 if `_id` is a baseType
     function getItemIndex(uint256 _id) internal pure returns (uint256) {
         return _id & NF_INDEX_MASK;
     }
 
-    /// @dev Get base type ID for token at `_id`
+    /// @dev Get base type ID for token at `_id` by returning upper 128 bit values
     function getBaseType(uint256 _id) internal pure returns (uint256) {
         return _id & TYPE_MASK;
     }
@@ -65,9 +63,6 @@ contract BitshiftingTest is PRBTest, StdCheats, StdUtils, Bitshifter {
 
         // 128 0s, 128 1s
         assertEq(NF_INDEX_MASK, 340282366920938463463374607431768211455);
-
-        // 1 << 255
-        assertEq(TYPE_NF_BIT, 57896044618658097711785492504343953926634992332820282019728792003956564819968);
     }
 
     function testBaseType() public {
