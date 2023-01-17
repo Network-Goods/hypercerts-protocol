@@ -9,7 +9,7 @@ import { SemiFungible1155Helper } from "./SemiFungibleHelper.sol";
 
 /// @dev See the "Writing Tests" section in the Foundry Book if this is your first time with Forge.
 /// https://book.getfoundry.sh/forge/writing-tests
-contract SemiFungible1155TransferTest is PRBTest, StdCheats, StdUtils {
+contract SemiFungible1155UnitsTest is PRBTest, StdCheats, StdUtils {
     SemiFungible1155Helper internal semiFungible;
     string internal _uri;
     address internal alice;

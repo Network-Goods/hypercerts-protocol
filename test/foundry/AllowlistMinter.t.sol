@@ -13,7 +13,7 @@ contract MerkleHelper is AllowlistMinter, Merkle {
     function generateCustomData(
         address[] calldata addresses,
         uint256[] calldata units
-    ) public view returns (bytes32[] memory data) {
+    ) public pure returns (bytes32[] memory data) {
         data = new bytes32[](addresses.length);
         for (uint256 i = 0; i < addresses.length; i++) {
             data[i] = _calculateLeaf(addresses[i], units[i]);
@@ -80,7 +80,7 @@ contract AllowlistTest is PRBTest, StdCheats, StdUtils {
         }
         uint256 claimID = 1;
 
-        merkle.createAllowlist(claimID, root);
+        assertTrue(merkle.createAllowlist(claimID, root));
 
         assertTrue(merkle.isAllowedToClaim(proof, claimID, data[0]));
     }
@@ -92,7 +92,7 @@ contract AllowlistTest is PRBTest, StdCheats, StdUtils {
 
         uint256 claimID = 1;
 
-        merkle.createAllowlist(claimID, root);
+        assertTrue(merkle.createAllowlist(claimID, root));
 
         assertTrue(merkle.isAllowedToClaim(proof, claimID, data[2]));
     }
@@ -105,7 +105,7 @@ contract AllowlistTest is PRBTest, StdCheats, StdUtils {
 
         uint256 claimID = 1;
 
-        merkle.createAllowlist(claimID, root);
+        assertTrue(merkle.createAllowlist(claimID, root));
 
         assertTrue(merkle.isAllowedToClaim(proof, claimID, data[2]));
     }
@@ -119,15 +119,12 @@ contract AllowlistTest is PRBTest, StdCheats, StdUtils {
 
         uint256 claimID = 1;
 
-        merkle.createAllowlist(claimID, root);
+        assertTrue(merkle.createAllowlist(claimID, root));
 
-        bool allowed = merkle.isAllowedToClaim(proof, claimID, data[2]);
-        assertTrue(allowed);
+        assertTrue(merkle.isAllowedToClaim(proof, claimID, data[2]));
 
-        bool processed = merkle.processClaim(proof, claimID, value);
-        assertTrue(processed);
+        assertTrue(merkle.processClaim(proof, claimID, value));
 
-        bool claimed = merkle.hasBeenClaimed(claimID, data[2]);
-        assertTrue(claimed);
+        assertTrue(merkle.hasBeenClaimed(claimID, data[2]));
     }
 }
