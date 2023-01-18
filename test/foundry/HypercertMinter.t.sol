@@ -8,7 +8,7 @@ import { PRBTest } from "prb-test/PRBTest.sol";
 import { HypercertMinter } from "../../src/HypercertMinter.sol";
 import { TransferRestrictions } from "../../src/interfaces/IHypercertToken.sol";
 
-contract HelperContract {
+contract MinterTestHelper {
     event ClaimStored(uint256 indexed claimID, string uri, uint256 totalUnits);
 
     function noOverflow(uint256[] memory values) public pure returns (bool) {
@@ -52,7 +52,7 @@ contract HelperContract {
 
 /// @dev See the "Writing Tests" section in the Foundry Book if this is your first time with Forge.
 /// https://book.getfoundry.sh/forge/writing-tests
-contract HypercertMinterTest is PRBTest, StdCheats, StdUtils, HelperContract {
+contract HypercertMinterTest is PRBTest, StdCheats, StdUtils, MinterTestHelper {
     Merkle internal merkle;
     HypercertMinter internal hypercertMinter;
     string internal _uri;
