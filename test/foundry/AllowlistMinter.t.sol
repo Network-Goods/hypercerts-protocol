@@ -63,21 +63,14 @@ contract AllowlistTest is PRBTest, StdCheats, StdUtils {
         units[2] = 600;
 
         bytes32[] memory data = merkle.generateCustomData(accounts, units);
-        console2.log("DATA");
         for (uint256 i = 0; i < data.length; i++) {
             console2.logBytes32(data[i]);
         }
 
         bytes32 root = merkle.getRoot(data);
 
-        console2.log("ROOT");
-        console2.logBytes32(root);
         bytes32[] memory proof = merkle.getProof(data, 0);
 
-        console2.log("PROOF");
-        for (uint256 i = 0; i < proof.length; i++) {
-            console2.logBytes32(proof[i]);
-        }
         uint256 claimID = 1;
 
         assertTrue(merkle.createAllowlist(claimID, root));

@@ -63,6 +63,22 @@ contract HypercertMinter is IHypercertToken, SemiFungible1155, AllowlistMinter {
         _mintClaim(claimID, units);
     }
 
+    /// @notice Mint semi-fungible tokens representing a fraction of the claims in `claimIDs`
+    /// @dev Calls AllowlistMinter to verify `proofs`.
+    /// @dev Mints the `amount` of units for the hypercert stored under `claimIDs`
+    function batchMintClaimsFromAllowlists(
+        bytes32[][] calldata proofs,
+        uint256[] calldata claimIDs,
+        uint256[] calldata units
+    ) external {
+        //TODO determine size limit as a function of gas cap
+        uint256 len = claimIDs.length;
+        for (uint256 i = 0; i < len; i++) {
+            _processClaim(proofs[i], claimIDs[i], units[i]);
+        }
+        _batchMintClaims(claimIDs, units);
+    }
+
     /// @notice Register a claim and the whitelist for minting token(s) belonging to that claim
     /// @dev Calls SemiFungible1155 to store the claim referenced in `uri` with amount of `units`
     /// @dev Calls AlloslistMinter to store the `merkleRoot` as proof to authorize claims
