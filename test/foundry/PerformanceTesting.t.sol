@@ -5,6 +5,7 @@ import { console2 } from "forge-std/console2.sol";
 import { PRBTest } from "prb-test/PRBTest.sol";
 import { StdCheats } from "forge-std/StdCheats.sol";
 import { HypercertMinter } from "../../src/HypercertMinter.sol";
+import { TransferRestrictions } from "../../src/interfaces/IHypercertToken.sol";
 import { Merkle } from "murky/Merkle.sol";
 
 // forge test -vv --match-path test/foundry/PerformanceTesting.t.sol
@@ -82,7 +83,7 @@ contract PerformanceTesting is PRBTest, StdCheats, PerformanceTestHelper {
         proof = getProof(data, 6);
 
         startHoax(alice, 10 ether);
-        hypercertMinter.createAllowlist(200000, rootHash, _uri);
+        hypercertMinter.createAllowlist(200000, rootHash, _uri, TransferRestrictions.AllowAll);
     }
 
     /// @dev Run Forge with `-vvvv` to see console logs.
@@ -96,7 +97,7 @@ contract PerformanceTesting is PRBTest, StdCheats, PerformanceTestHelper {
 
     // Mint Hypercert with 1 fraction
     function testClaimSingleFraction() public {
-        hypercertMinter.mintClaim(10000, _uri);
+        hypercertMinter.mintClaim(10000, _uri, TransferRestrictions.AllowAll);
     }
 
     function testClaimSingleFractionFuzz(address account, uint256 units) public {
@@ -104,7 +105,7 @@ contract PerformanceTesting is PRBTest, StdCheats, PerformanceTestHelper {
         vm.assume(!isContract(account) && account != address(0) && account != address(this));
 
         changePrank(account);
-        hypercertMinter.mintClaim(units, _uri);
+        hypercertMinter.mintClaim(units, _uri, TransferRestrictions.AllowAll);
     }
 
     // Mint Hypercert with multiple fractions
@@ -113,14 +114,14 @@ contract PerformanceTesting is PRBTest, StdCheats, PerformanceTestHelper {
         uint256[] memory fractions = buildFractions(2);
         uint256 totalUnits = getSum(fractions);
 
-        hypercertMinter.mintClaimWithFractions(totalUnits, fractions, _uri);
+        hypercertMinter.mintClaimWithFractions(totalUnits, fractions, _uri, TransferRestrictions.AllowAll);
     }
 
     function testClaimHundredFractions() public {
         uint256[] memory fractions = buildFractions(100);
         uint256 totalUnits = getSum(fractions);
 
-        hypercertMinter.mintClaimWithFractions(totalUnits, fractions, _uri);
+        hypercertMinter.mintClaimWithFractions(totalUnits, fractions, _uri, TransferRestrictions.AllowAll);
     }
 
     function testClaimFractionsFuzz(uint256[] memory fractions) public {
@@ -129,25 +130,11 @@ contract PerformanceTesting is PRBTest, StdCheats, PerformanceTestHelper {
         vm.assume(fractions.length > 0 && fractions.length < 253);
         uint256 totalUnits = getSum(fractions);
 
-        hypercertMinter.mintClaimWithFractions(totalUnits, fractions, _uri);
-    }
-
-    // Store allowlist and reserve Hypercert ID
-    function testCreateAllowlist() public {
-        hypercertMinter.createAllowlist(10000, root, _uri);
-    }
-
-    function testCreateAllowlistFuzz(address account, uint256 units) public {
-        vm.assume(units > 0);
-        vm.assume(!isContract(account) && account != address(0) && account != address(this));
-
-        changePrank(account);
-        hypercertMinter.createAllowlist(units, root, _uri);
-    }
-
-    // Mint claim from allowlist
-    function testClaimAllowlistFraction() public {
-        changePrank(alice);
-        hypercertMinter.mintClaimFromAllowlist(proof, 340282366920938463463374607431768211456, 200000);
+        hypercertMinter.mintClaimWithFractions(
+            totalUnits,
+            fractions,
+            "https://example.com/ipfsHash",
+            TransferRestrictions.AllowAll
+        );
     }
 }
