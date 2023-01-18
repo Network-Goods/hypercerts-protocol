@@ -317,6 +317,24 @@ Mint a semi-fungible token for the impact claim referenced via `uri`
 ### mintClaimFromAllowlist
 
 ```solidity
+function mintClaimFromAllowlist(bytes32[][] proofs, uint256[] claimIDs, uint256[] units) external nonpayable
+```
+
+Mint semi-fungible tokens representing a fraction of the claims in `claimIDs`
+
+*Calls AllowlistMinter to verify `proofs`.Mints the `amount` of units for the hypercert stored under `claimIDs`*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| proofs | bytes32[][] | undefined |
+| claimIDs | uint256[] | undefined |
+| units | uint256[] | undefined |
+
+### mintClaimFromAllowlist
+
+```solidity
 function mintClaimFromAllowlist(bytes32[] proof, uint256 claimID, uint256 units) external nonpayable
 ```
 
