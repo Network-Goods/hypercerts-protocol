@@ -56,12 +56,7 @@ contract BatchMintingHelper is Merkle, ERC1155HolderUpgradeable {
         data = generateCustomData(users, units);
 
         root = getRoot(data);
-        MerkleDataSet memory merkle;
-        merkle.accounts = users;
-        merkle.data = data;
-        merkle.units = units;
-        merkle.root = root;
-        return merkle;
+        return MerkleDataSet(users, units, data, root);
     }
 }
 
