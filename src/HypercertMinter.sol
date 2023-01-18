@@ -1,9 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-import { IHypercertToken } from "./interfaces/IHypercertToken.sol";
+import { IHypercertToken, TransferRestrictions } from "./interfaces/IHypercertToken.sol";
 import { SemiFungible1155 } from "./SemiFungible1155.sol";
 import { AllowlistMinter } from "./AllowlistMinter.sol";
+
+// Custom Errors
+error TransfersNotAllowed();
 
 /// @title Contract for managing hypercert claims and whitelists
 /// @author bitbeckers
@@ -13,6 +16,8 @@ import { AllowlistMinter } from "./AllowlistMinter.sol";
 contract HypercertMinter is IHypercertToken, SemiFungible1155, AllowlistMinter {
     // solhint-disable-next-line const-name-snakecase
     string public constant name = "HypercertMinter";
+    /// @dev from typeID to a transfer policy
+    mapping(uint256 => TransferRestrictions) internal typeRestrictions;
 
     /// INIT
 
@@ -31,15 +36,22 @@ contract HypercertMinter is IHypercertToken, SemiFungible1155, AllowlistMinter {
 
     /// @notice Mint a semi-fungible token for the impact claim referenced via `uri`
     /// @dev see {IHypercertToken}
-    function mintClaim(uint256 units, string memory _uri) external {
+    function mintClaim(uint256 units, string memory _uri, TransferRestrictions restrictions) external {
         uint256 claimID = _mintValue(msg.sender, units, _uri);
+        typeRestrictions[claimID] = restrictions;
         emit ClaimStored(claimID, _uri, units);
     }
 
     /// @notice Mint semi-fungible tokens for the impact claim referenced via `uri`
     /// @dev see {IHypercertToken}
-    function mintClaimWithFractions(uint256 units, uint256[] memory fractions, string memory _uri) external {
+    function mintClaimWithFractions(
+        uint256 units,
+        uint256[] memory fractions,
+        string memory _uri,
+        TransferRestrictions restrictions
+    ) external {
         uint256 claimID = _mintValue(msg.sender, fractions, _uri);
+        typeRestrictions[claimID] = restrictions;
         emit ClaimStored(claimID, _uri, units);
     }
 
@@ -70,9 +82,15 @@ contract HypercertMinter is IHypercertToken, SemiFungible1155, AllowlistMinter {
     /// @notice Register a claim and the whitelist for minting token(s) belonging to that claim
     /// @dev Calls SemiFungible1155 to store the claim referenced in `uri` with amount of `units`
     /// @dev Calls AlloslistMinter to store the `merkleRoot` as proof to authorize claims
-    function createAllowlist(uint256 units, bytes32 merkleRoot, string memory _uri) external {
+    function createAllowlist(
+        uint256 units,
+        bytes32 merkleRoot,
+        string memory _uri,
+        TransferRestrictions restrictions
+    ) external {
         uint256 claimID = _createTokenType(units, _uri);
         _createAllowlist(claimID, merkleRoot);
+        typeRestrictions[claimID] = restrictions;
         emit ClaimStored(claimID, _uri, units);
     }
 
@@ -116,5 +134,26 @@ contract HypercertMinter is IHypercertToken, SemiFungible1155, AllowlistMinter {
     /// @dev see { openzeppelin-contracts-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol }
     function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {
         // solhint-disable-previous-line no-empty-blocks
+    }
+
+    function _beforeTokenTransfer(
+        address operator,
+        address from,
+        address to,
+        uint256[] memory ids,
+        uint256[] memory amounts,
+        bytes memory data
+    ) internal virtual override(SemiFungible1155) {
+        super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
+        for (uint256 i = 0; i < ids.length; i++) {
+            uint256 tokenID = ids[i];
+            uint256 typeID = getNonFungibleBaseType(tokenID);
+            TransferRestrictions policy = typeRestrictions[typeID];
+            if (policy == TransferRestrictions.DisallowAll) {
+                revert TransfersNotAllowed();
+            } else if (policy == TransferRestrictions.FromCreatorOnly && from != creators[typeID]) {
+                revert TransfersNotAllowed();
+            }
+        }
     }
 }

@@ -175,6 +175,7 @@ contract SemiFungible1155 is Upgradeable1155 {
         tokenValues[tokenID] = _units;
 
         _mint(_account, tokenID, 1, "");
+        emit ValueTransfer(_typeID, 0, tokenID, _units);
     }
 
     /// @dev Mint new tokens for existing types

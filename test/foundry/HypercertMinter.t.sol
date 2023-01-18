@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.4;
 
-import { PRBTest } from "prb-test/PRBTest.sol";
 import { StdCheats } from "forge-std/StdCheats.sol";
 import { StdUtils } from "forge-std/StdUtils.sol";
-import { HypercertMinter } from "../../src/HypercertMinter.sol";
 import { Merkle } from "murky/Merkle.sol";
+import { PRBTest } from "prb-test/PRBTest.sol";
+import { HypercertMinter } from "../../src/HypercertMinter.sol";
+import { TransferRestrictions } from "../../src/interfaces/IHypercertToken.sol";
 
-contract HelperContract {
+contract MinterTestHelper {
     event ClaimStored(uint256 indexed claimID, string uri, uint256 totalUnits);
 
     function noOverflow(uint256[] memory values) public pure returns (bool) {
@@ -51,7 +52,7 @@ contract HelperContract {
 
 /// @dev See the "Writing Tests" section in the Foundry Book if this is your first time with Forge.
 /// https://book.getfoundry.sh/forge/writing-tests
-contract HypercertMinterTest is PRBTest, StdCheats, StdUtils, HelperContract {
+contract HypercertMinterTest is PRBTest, StdCheats, StdUtils, MinterTestHelper {
     Merkle internal merkle;
     HypercertMinter internal hypercertMinter;
     string internal _uri;
@@ -81,7 +82,7 @@ contract HypercertMinterTest is PRBTest, StdCheats, StdUtils, HelperContract {
 
         vm.expectEmit(true, true, true, true);
         emit ClaimStored(1 << 128, _uri, units);
-        hypercertMinter.mintClaim(units, _uri);
+        hypercertMinter.mintClaim(units, _uri, TransferRestrictions.AllowAll);
     }
 
     function testClaimTenFractions() public {
@@ -89,7 +90,7 @@ contract HypercertMinterTest is PRBTest, StdCheats, StdUtils, HelperContract {
         uint256 totalUnits = getSum(fractions);
         vm.expectEmit(true, true, true, true);
         emit ClaimStored(1 << 128, _uri, totalUnits);
-        hypercertMinter.mintClaimWithFractions(totalUnits, fractions, _uri);
+        hypercertMinter.mintClaimWithFractions(totalUnits, fractions, _uri, TransferRestrictions.AllowAll);
     }
 
     function testClaimHundredFractions() public {
@@ -98,6 +99,6 @@ contract HypercertMinterTest is PRBTest, StdCheats, StdUtils, HelperContract {
 
         vm.expectEmit(true, true, true, true);
         emit ClaimStored(1 << 128, _uri, totalUnits);
-        hypercertMinter.mintClaimWithFractions(totalUnits, fractions, _uri);
+        hypercertMinter.mintClaimWithFractions(totalUnits, fractions, _uri, TransferRestrictions.AllowAll);
     }
 }
