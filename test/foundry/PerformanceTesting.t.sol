@@ -5,6 +5,7 @@ import { console2 } from "forge-std/console2.sol";
 import { PRBTest } from "prb-test/PRBTest.sol";
 import { StdCheats } from "forge-std/StdCheats.sol";
 import { HypercertMinter } from "../../src/HypercertMinter.sol";
+import { TransferRestrictions } from "../../src/interfaces/IHypercertToken.sol";
 
 contract HelperContract {
     function noOverflow(uint256[] memory values) public pure returns (bool) {
@@ -66,7 +67,7 @@ contract PerformanceTesting is PRBTest, StdCheats, HelperContract {
 
     function testClaimSingleFraction() public {
         vm.prank(address(1));
-        hypercertMinter.mintClaim(10000, "https://example.com/ipfsHash");
+        hypercertMinter.mintClaim(10000, "https://example.com/ipfsHash", TransferRestrictions.AllowAll);
     }
 
     function testClaimTwoFractions() public {
@@ -74,7 +75,12 @@ contract PerformanceTesting is PRBTest, StdCheats, HelperContract {
         uint256 totalUnits = getSum(fractions);
 
         vm.prank(address(1));
-        hypercertMinter.mintClaimWithFractions(totalUnits, fractions, "https://example.com/ipfsHash");
+        hypercertMinter.mintClaimWithFractions(
+            totalUnits,
+            fractions,
+            "https://example.com/ipfsHash",
+            TransferRestrictions.AllowAll
+        );
     }
 
     function testClaimHundredFractions() public {
@@ -82,7 +88,12 @@ contract PerformanceTesting is PRBTest, StdCheats, HelperContract {
         uint256 totalUnits = getSum(fractions);
 
         vm.prank(address(1));
-        hypercertMinter.mintClaimWithFractions(totalUnits, fractions, "https://example.com/ipfsHash");
+        hypercertMinter.mintClaimWithFractions(
+            totalUnits,
+            fractions,
+            "https://example.com/ipfsHash",
+            TransferRestrictions.AllowAll
+        );
     }
 
     function testClaimFractionsFuzz(uint256[] memory fractions) public {
@@ -92,6 +103,11 @@ contract PerformanceTesting is PRBTest, StdCheats, HelperContract {
         uint256 totalUnits = getSum(fractions);
 
         vm.prank(address(1));
-        hypercertMinter.mintClaimWithFractions(totalUnits, fractions, "https://example.com/ipfsHash");
+        hypercertMinter.mintClaimWithFractions(
+            totalUnits,
+            fractions,
+            "https://example.com/ipfsHash",
+            TransferRestrictions.AllowAll
+        );
     }
 }
