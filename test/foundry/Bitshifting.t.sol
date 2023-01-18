@@ -14,18 +14,6 @@ contract Bitshifter {
     /// @dev Bitmask used to expose only lower 128 bits of uint256
     uint256 public constant NF_INDEX_MASK = type(uint128).max;
 
-    /// @dev Identify if token at `_id` is non-fungible.
-    /// @dev Non-fungible tokens are used to represent the base type for hypercert tokens
-    function isNonFungible(uint256 _id) internal pure returns (bool) {
-        return (_id & TYPE_MASK) == TYPE_MASK;
-    }
-
-    /// @dev Identify if token at `_id` is fungible.
-    /// @dev Fungible tokens are used to represent (fractional) ownership of a claim
-    function isFungible(uint256 _id) internal pure returns (bool) {
-        return (_id & NF_INDEX_MASK) > 0;
-    }
-
     /// @dev Get index of fractional token at `_id` by returning lower 128 bit values
     /// @dev Returns 0 if `_id` is a baseType
     function getItemIndex(uint256 _id) internal pure returns (uint256) {
@@ -72,7 +60,6 @@ contract BitshiftingTest is PRBTest, StdCheats, StdUtils, Bitshifter {
         assertEq(baseID, 340282366920938463463374607431768211456);
 
         assertTrue(isBaseType(baseID));
-        assertFalse(isFungible(baseID));
         assertEq(getItemIndex(baseID), 0);
         assertEq(getBaseType(baseID), 340282366920938463463374607431768211456);
         assertFalse(isTypedItem(baseID));
@@ -85,7 +72,6 @@ contract BitshiftingTest is PRBTest, StdCheats, StdUtils, Bitshifter {
         vm.assume(baseType > 0);
 
         assertTrue(isBaseType(baseType));
-        assertFalse(isFungible(baseType));
         assertEq(getItemIndex(baseType), 0);
         assertFalse(isTypedItem(baseType));
     }
@@ -97,7 +83,6 @@ contract BitshiftingTest is PRBTest, StdCheats, StdUtils, Bitshifter {
         assertEq(baseID, 1);
 
         assertFalse(isBaseType(baseID));
-        assertTrue(isFungible(baseID));
         assertEq(getItemIndex(baseID), 1);
         assertEq(getBaseType(baseID), 0);
         assertFalse(isTypedItem(baseID)); // baseType 0
@@ -109,7 +94,6 @@ contract BitshiftingTest is PRBTest, StdCheats, StdUtils, Bitshifter {
         uint256 itemID = type(uint128).max;
 
         assertFalse(isBaseType(itemID));
-        assertTrue(isFungible(itemID));
         assertEq(getItemIndex(itemID), itemID);
         assertEq(getBaseType(itemID), 0);
         assertFalse(isTypedItem(itemID));
@@ -121,7 +105,6 @@ contract BitshiftingTest is PRBTest, StdCheats, StdUtils, Bitshifter {
 
         assertFalse(isBaseType(typedItem)); //has fungible ID
         assertTrue(isTypedItem(typedItem)); //has fungible iD
-        assertTrue(isFungible(typedItem));
         assertEq(getItemIndex(typedItem), itemID);
         assertEq(getBaseType(typedItem), baseType);
 
@@ -130,7 +113,6 @@ contract BitshiftingTest is PRBTest, StdCheats, StdUtils, Bitshifter {
 
         assertTrue(isBaseType(overflowItem)); //has fungible ID
         assertFalse(isTypedItem(overflowItem)); //has fungible iD
-        assertFalse(isFungible(overflowItem));
         assertEq(getItemIndex(overflowItem), 0);
         assertEq(getBaseType(overflowItem), 2 << 128);
     }
