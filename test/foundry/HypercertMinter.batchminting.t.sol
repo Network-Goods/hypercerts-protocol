@@ -6,6 +6,7 @@ import { PRBTest } from "prb-test/PRBTest.sol";
 import { StdCheats } from "forge-std/StdCheats.sol";
 import { StdUtils } from "forge-std/StdUtils.sol";
 import { HypercertMinter } from "../../src/HypercertMinter.sol";
+import { TransferRestrictions } from "../../src/interfaces/IHypercertToken.sol";
 import {
     ERC1155HolderUpgradeable
 } from "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC1155/utils/ERC1155HolderUpgradeable.sol";
@@ -96,7 +97,7 @@ contract HypercertBatchMintingTest is PRBTest, StdCheats, StdUtils, BatchMinting
             proofs[i] = getProof(dataset.data, index);
             ids[i] = (i + 1) << 128;
             units[i] = dataset.units[index];
-            minter.createAllowlist(10000, dataset.root, _uri);
+            minter.createAllowlist(10000, dataset.root, _uri, TransferRestrictions.AllowAll);
         }
 
         units[3] = 0;
@@ -134,8 +135,8 @@ contract HypercertBatchMintingTest is PRBTest, StdCheats, StdUtils, BatchMinting
         units[0] = one.units[index];
         units[1] = two.units[index];
 
-        minter.createAllowlist(10000, one.root, _uri);
-        minter.createAllowlist(10000, two.root, _uri);
+        minter.createAllowlist(10000, one.root, _uri, TransferRestrictions.AllowAll);
+        minter.createAllowlist(10000, two.root, _uri, TransferRestrictions.AllowAll);
 
         startHoax(user, 10 ether);
 
@@ -158,7 +159,7 @@ contract HypercertBatchMintingTest is PRBTest, StdCheats, StdUtils, BatchMinting
             proofs[i] = getProof(dataset.data, index);
             ids[i] = (i + 1) << 128;
             units[i] = dataset.units[index];
-            minter.createAllowlist(10000, dataset.root, _uri);
+            minter.createAllowlist(10000, dataset.root, _uri, TransferRestrictions.AllowAll);
         }
 
         startHoax(user, 10 ether);
@@ -187,7 +188,7 @@ contract HypercertBatchMintingTest is PRBTest, StdCheats, StdUtils, BatchMinting
             proofs[i] = getProof(dataset.data, index);
             ids[i] = (i + 1) << 128;
             units[i] = dataset.units[index];
-            minter.createAllowlist(10000, dataset.root, _uri);
+            minter.createAllowlist(10000, dataset.root, _uri, TransferRestrictions.AllowAll);
         }
 
         startHoax(user, 10 ether);
