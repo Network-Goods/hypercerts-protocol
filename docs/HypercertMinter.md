@@ -129,6 +129,24 @@ function balanceOfBatch(address[] accounts, uint256[] ids) external view returns
 |---|---|---|
 | _0 | uint256[] | undefined |
 
+### batchMintClaimsFromAllowlists
+
+```solidity
+function batchMintClaimsFromAllowlists(bytes32[][] proofs, uint256[] claimIDs, uint256[] units) external nonpayable
+```
+
+Mint semi-fungible tokens representing a fraction of the claims in `claimIDs`
+
+*Calls AllowlistMinter to verify `proofs`.Mints the `amount` of units for the hypercert stored under `claimIDs`*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| proofs | bytes32[][] | undefined |
+| claimIDs | uint256[] | undefined |
+| units | uint256[] | undefined |
+
 ### burn
 
 ```solidity
@@ -313,24 +331,6 @@ Mint a semi-fungible token for the impact claim referenced via `uri`
 |---|---|---|
 | units | uint256 | undefined |
 | _uri | string | undefined |
-
-### mintClaimFromAllowlist
-
-```solidity
-function mintClaimFromAllowlist(bytes32[][] proofs, uint256[] claimIDs, uint256[] units) external nonpayable
-```
-
-Mint semi-fungible tokens representing a fraction of the claims in `claimIDs`
-
-*Calls AllowlistMinter to verify `proofs`.Mints the `amount` of units for the hypercert stored under `claimIDs`*
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| proofs | bytes32[][] | undefined |
-| claimIDs | uint256[] | undefined |
-| units | uint256[] | undefined |
 
 ### mintClaimFromAllowlist
 
