@@ -103,7 +103,7 @@ contract SemiFungible1155Helper is SemiFungible1155, PRBTest, StdCheats, StdUtil
 
     function validateOwnerBalanceUnits(uint256 tokenID, address owner, uint256 balance, uint256 units) public {
         uint256 _expectedUnits = 0;
-        if (getNonFungibleIndex(tokenID) != 0 && ownerOf(tokenID) == owner) {
+        if (getItemIndex(tokenID) != 0 && ownerOf(tokenID) == owner) {
             _expectedUnits = units;
         }
         assertEq(ownerOf(tokenID), owner);

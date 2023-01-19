@@ -6,7 +6,7 @@ import { StdCheats } from "forge-std/StdCheats.sol";
 import { StdUtils } from "forge-std/StdUtils.sol";
 import { PRBTest } from "prb-test/PRBTest.sol";
 import { HypercertMinter, TransfersNotAllowed } from "../../src/HypercertMinter.sol";
-import { TransferRestrictions } from "../../src/interfaces/IHypercertToken.sol";
+import { IHypercertToken } from "../../src/interfaces/IHypercertToken.sol";
 
 /// @dev Testing transfer restrictions on hypercerts
 contract HypercertMinterTransferTest is PRBTest, StdCheats, StdUtils {
@@ -33,7 +33,7 @@ contract HypercertMinterTransferTest is PRBTest, StdCheats, StdUtils {
     function testTransferAllowAll() public {
         // Alice creates a hypercert
         vm.prank(alice);
-        hypercertMinter.mintClaim(_units, _uri, TransferRestrictions.AllowAll);
+        hypercertMinter.mintClaim(_units, _uri, IHypercertToken.TransferRestrictions.AllowAll);
         assertEq(hypercertMinter.balanceOf(alice, tokenID), 1);
         assertEq(hypercertMinter.balanceOf(bob, tokenID), 0);
 
@@ -53,7 +53,7 @@ contract HypercertMinterTransferTest is PRBTest, StdCheats, StdUtils {
     function testTransferDisallowAll() public {
         // Alice creates a hypercert
         vm.prank(alice);
-        hypercertMinter.mintClaim(_units, _uri, TransferRestrictions.DisallowAll);
+        hypercertMinter.mintClaim(_units, _uri, IHypercertToken.TransferRestrictions.DisallowAll);
         assertEq(hypercertMinter.balanceOf(alice, tokenID), 1);
         assertEq(hypercertMinter.balanceOf(bob, tokenID), 0);
 
@@ -68,7 +68,7 @@ contract HypercertMinterTransferTest is PRBTest, StdCheats, StdUtils {
     function testTransferFromCreatorOnly() public {
         // Alice creates a hypercert
         vm.prank(alice);
-        hypercertMinter.mintClaim(_units, _uri, TransferRestrictions.FromCreatorOnly);
+        hypercertMinter.mintClaim(_units, _uri, IHypercertToken.TransferRestrictions.FromCreatorOnly);
         assertEq(hypercertMinter.balanceOf(alice, tokenID), 1);
         assertEq(hypercertMinter.balanceOf(bob, tokenID), 0);
 

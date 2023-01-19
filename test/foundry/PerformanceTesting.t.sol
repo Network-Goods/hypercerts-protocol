@@ -5,8 +5,8 @@ import { console2 } from "forge-std/console2.sol";
 import { PRBTest } from "prb-test/PRBTest.sol";
 import { StdCheats } from "forge-std/StdCheats.sol";
 import { HypercertMinter } from "../../src/HypercertMinter.sol";
-import { TransferRestrictions } from "../../src/interfaces/IHypercertToken.sol";
 import { Merkle } from "murky/Merkle.sol";
+import { IHypercertToken } from "../../src/interfaces/IHypercertToken.sol";
 
 // forge test -vv --match-path test/foundry/PerformanceTesting.t.sol
 
@@ -83,7 +83,7 @@ contract PerformanceTesting is PRBTest, StdCheats, PerformanceTestHelper {
         proof = getProof(data, 6);
 
         startHoax(alice, 10 ether);
-        hypercertMinter.createAllowlist(200000, rootHash, _uri, TransferRestrictions.AllowAll);
+        hypercertMinter.createAllowlist(200000, rootHash, _uri, IHypercertToken.TransferRestrictions.AllowAll);
     }
 
     /// @dev Run Forge with `-vvvv` to see console logs.
@@ -97,7 +97,7 @@ contract PerformanceTesting is PRBTest, StdCheats, PerformanceTestHelper {
 
     // Mint Hypercert with 1 fraction
     function testClaimSingleFraction() public {
-        hypercertMinter.mintClaim(10000, _uri, TransferRestrictions.AllowAll);
+        hypercertMinter.mintClaim(10000, _uri, IHypercertToken.TransferRestrictions.AllowAll);
     }
 
     function testClaimSingleFractionFuzz(address account, uint256 units) public {
@@ -105,7 +105,7 @@ contract PerformanceTesting is PRBTest, StdCheats, PerformanceTestHelper {
         vm.assume(!isContract(account) && account != address(0) && account != address(this));
 
         changePrank(account);
-        hypercertMinter.mintClaim(units, _uri, TransferRestrictions.AllowAll);
+        hypercertMinter.mintClaim(units, _uri, IHypercertToken.TransferRestrictions.AllowAll);
     }
 
     // Mint Hypercert with multiple fractions
@@ -114,14 +114,24 @@ contract PerformanceTesting is PRBTest, StdCheats, PerformanceTestHelper {
         uint256[] memory fractions = buildFractions(2);
         uint256 totalUnits = getSum(fractions);
 
-        hypercertMinter.mintClaimWithFractions(totalUnits, fractions, _uri, TransferRestrictions.AllowAll);
+        hypercertMinter.mintClaimWithFractions(
+            totalUnits,
+            fractions,
+            _uri,
+            IHypercertToken.TransferRestrictions.AllowAll
+        );
     }
 
     function testClaimHundredFractions() public {
         uint256[] memory fractions = buildFractions(100);
         uint256 totalUnits = getSum(fractions);
 
-        hypercertMinter.mintClaimWithFractions(totalUnits, fractions, _uri, TransferRestrictions.AllowAll);
+        hypercertMinter.mintClaimWithFractions(
+            totalUnits,
+            fractions,
+            _uri,
+            IHypercertToken.TransferRestrictions.AllowAll
+        );
     }
 
     function testClaimFractionsFuzz(uint256[] memory fractions) public {
@@ -134,7 +144,7 @@ contract PerformanceTesting is PRBTest, StdCheats, PerformanceTestHelper {
             totalUnits,
             fractions,
             "https://example.com/ipfsHash",
-            TransferRestrictions.AllowAll
+            IHypercertToken.TransferRestrictions.AllowAll
         );
     }
 }

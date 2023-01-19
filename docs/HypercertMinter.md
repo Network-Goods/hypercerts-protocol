@@ -203,7 +203,7 @@ Burn a claimtoken
 ### createAllowlist
 
 ```solidity
-function createAllowlist(uint256 units, bytes32 merkleRoot, string _uri, enum TransferRestrictions restrictions) external nonpayable
+function createAllowlist(uint256 units, bytes32 merkleRoot, string _uri, enum IHypercertToken.TransferRestrictions restrictions) external nonpayable
 ```
 
 Register a claim and the whitelist for minting token(s) belonging to that claim
@@ -217,7 +217,7 @@ Register a claim and the whitelist for minting token(s) belonging to that claim
 | units | uint256 | undefined |
 | merkleRoot | bytes32 | undefined |
 | _uri | string | undefined |
-| restrictions | enum TransferRestrictions | undefined |
+| restrictions | enum IHypercertToken.TransferRestrictions | undefined |
 
 ### hasBeenClaimed
 
@@ -319,7 +319,7 @@ Merge the value of tokens belonging to the same claim
 ### mintClaim
 
 ```solidity
-function mintClaim(uint256 units, string _uri, enum TransferRestrictions restrictions) external nonpayable
+function mintClaim(uint256 units, string _uri, enum IHypercertToken.TransferRestrictions restrictions) external nonpayable
 ```
 
 Mint a semi-fungible token for the impact claim referenced via `uri`
@@ -332,7 +332,7 @@ Mint a semi-fungible token for the impact claim referenced via `uri`
 |---|---|---|
 | units | uint256 | undefined |
 | _uri | string | undefined |
-| restrictions | enum TransferRestrictions | undefined |
+| restrictions | enum IHypercertToken.TransferRestrictions | undefined |
 
 ### mintClaimFromAllowlist
 
@@ -355,7 +355,7 @@ Mint a semi-fungible token representing a fraction of the claim
 ### mintClaimWithFractions
 
 ```solidity
-function mintClaimWithFractions(uint256 units, uint256[] fractions, string _uri, enum TransferRestrictions restrictions) external nonpayable
+function mintClaimWithFractions(uint256 units, uint256[] fractions, string _uri, enum IHypercertToken.TransferRestrictions restrictions) external nonpayable
 ```
 
 Mint semi-fungible tokens for the impact claim referenced via `uri`
@@ -369,7 +369,7 @@ Mint semi-fungible tokens for the impact claim referenced via `uri`
 | units | uint256 | undefined |
 | fractions | uint256[] | undefined |
 | _uri | string | undefined |
-| restrictions | enum TransferRestrictions | undefined |
+| restrictions | enum IHypercertToken.TransferRestrictions | undefined |
 
 ### name
 
