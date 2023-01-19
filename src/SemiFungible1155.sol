@@ -6,6 +6,7 @@ pragma solidity ^0.8.9;
 import { Upgradeable1155 } from "./Upgradeable1155.sol";
 import { IERC1155ReceiverUpgradeable } from "oz-upgradeable/token/ERC1155/IERC1155ReceiverUpgradeable.sol";
 
+import "forge-std/console2.sol";
 // TODO shared error lib
 error ArraySize();
 error ToZeroAddress();
@@ -13,12 +14,14 @@ error NotApprovedOrOwner();
 error NotAllowed();
 error TypeMismatch();
 error FractionalBurn();
+error MaxValue();
 
 /// @title Contract for minting semi-fungible EIP1155 tokens
 /// @author bitbeckers
 /// @notice Extends { Upgradeable1155 } token with semi-fungible properties and the concept of `units`
 /// @dev Adds split bit strategy as described in [EIP-1155](https://eips.ethereum.org/EIPS/eip-1155#non-fungible-tokens)
 contract SemiFungible1155 is Upgradeable1155 {
+    //TODO public can become internal
     /// @dev Counter used to generate next typeID.
     uint256 public typeCounter;
 
@@ -59,10 +62,6 @@ contract SemiFungible1155 is Upgradeable1155 {
     function __SemiFungible1155_init() public virtual onlyInitializing {
         __Upgradeable1155_init();
     }
-
-    /// ENJIN EXAMPLE IMPLEMENTATION
-    // Only to make code clearer. Should not be functions
-    // TODO cleanup functions
 
     /// @dev Get index of fractional token at `_id` by returning lower 128 bit values
     /// @dev Returns 0 if `_id` is a baseType
@@ -114,7 +113,8 @@ contract SemiFungible1155 is Upgradeable1155 {
     /// @dev create token type ID based of token counter
     // TODO should creator be msg.sender or submit account?
     function _createTokenType(uint256 units, string memory _uri) internal returns (uint256 typeID) {
-        typeID = (++typeCounter << 128); //TODO max value check?
+        _notMaxType(typeCounter);
+        typeID = (++typeCounter << 128);
 
         owners[typeID] = _msgSender();
         creators[typeID] = _msgSender();
@@ -130,11 +130,12 @@ contract SemiFungible1155 is Upgradeable1155 {
             revert NotAllowed();
         }
         typeID = _createTokenType(_value, _uri);
-        maxIndex[typeID] += 1;
-        uint256 tokenID = typeID + maxIndex[typeID]; //1 based indexing, 0 holds type data
+
+        uint256 itemIndex = ++maxIndex[typeID];
+        uint256 tokenID = typeID + itemIndex; //1 based indexing, 0 holds type data
 
         owners[tokenID] = _account;
-        tokenValues[tokenID] = _value; //first fraction
+        tokenValues[tokenID] = _value;
 
         _mint(_account, tokenID, 1, "");
         emit ValueTransfer(typeID, 0, tokenID, _value);
@@ -160,8 +161,8 @@ contract SemiFungible1155 is Upgradeable1155 {
 
     /// @dev Mint a new token for an existing type
     function _mintClaim(uint256 _typeID, uint256 _units) internal returns (uint256 tokenID) {
-        maxIndex[_typeID] += 1;
-        tokenID = _typeID + maxIndex[_typeID]; //1 based indexing, 0 holds type data
+        _notMaxItem(maxIndex[_typeID]);
+        tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
 
         address _account = _msgSender();
         owners[tokenID] = _account;
@@ -185,8 +186,9 @@ contract SemiFungible1155 is Upgradeable1155 {
 
         for (uint256 i = 0; i < len; i++) {
             uint256 _typeID = _typeIDs[i];
-            maxIndex[_typeID] += 1;
-            tokenID = _typeID + maxIndex[_typeID]; //1 based indexing, 0 holds type data
+
+            _notMaxItem(maxIndex[_typeID]);
+            tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
 
             owners[tokenID] = _account;
             tokenValues[tokenID] = _units[i];
@@ -195,6 +197,8 @@ contract SemiFungible1155 is Upgradeable1155 {
         }
 
         _mintBatch(_account, tokenIDs, amounts, "");
+
+        //TODO something cleaner than instantiating zeroes array
         uint256[] memory zeroes = new uint256[](len);
         emit BatchValueTransfer(_typeIDs, zeroes, tokenIDs, _units);
     }
@@ -202,31 +206,35 @@ contract SemiFungible1155 is Upgradeable1155 {
     /// @dev Split the units of `_tokenID` owned by `account` across `_values`
     /// @dev `_values` must sum to total `units` held at `_tokenID`
     function _splitValue(address _account, uint256 _tokenID, uint256[] memory _values) internal {
-        if (_values.length > 253) {
+        if (_values.length > 253 || _values.length < 2) {
             revert ArraySize();
         }
 
-        if (getItemIndex(_tokenID) == 0) {
+        if (isBaseType(_tokenID)) {
             revert NotAllowed();
         }
 
         uint256 _typeID = getBaseType(_tokenID);
-        uint256 newFractionsStartID = maxIndex[_typeID];
+        uint256 currentID = _tokenID;
 
         uint256 len = _values.length;
-        uint256 left = tokenValues[_tokenID];
+        uint256 value = tokenValues[_tokenID];
 
+        _notMaxItem(currentID + len);
+
+        // starts with 1 because 0 remains the same
         for (uint256 i = 1; i < len; i++) {
-            uint256 tokenID = _typeID + newFractionsStartID + i;
+            uint256 tokenID = currentID + i;
 
             owners[tokenID] = _account;
             tokenValues[tokenID] = _values[i];
-            left -= _values[i];
+            value -= _values[i];
+            _notMaxItem(tokenID);
             _mint(_account, tokenID, 1, ""); //TODO batchmint?
-            emit ValueTransfer(_typeID, _tokenID, tokenID, _values[i]);
+            emit ValueTransfer(_typeID, currentID, tokenID, _values[i]);
         }
 
-        tokenValues[_tokenID] = left;
+        tokenValues[currentID] = value;
 
         maxIndex[_typeID] += len;
     }
@@ -236,7 +244,7 @@ contract SemiFungible1155 is Upgradeable1155 {
     // TODO optimise merge, possibly batch burn and mint 1 new?
     // TODO emit events
     function _mergeValue(uint256[] memory _fractionIDs) internal {
-        if (_fractionIDs.length > 253) {
+        if (_fractionIDs.length > 253 || _fractionIDs.length < 2) {
             revert ArraySize();
         }
         uint256 len = _fractionIDs.length;
@@ -272,7 +280,7 @@ contract SemiFungible1155 is Upgradeable1155 {
     /// @dev `_tokenID` must hold all value declared at base type
     function _burnValue(address _account, uint256 _tokenID) internal {
         uint256 _typeID = getBaseType(_tokenID);
-        if (getItemIndex(_tokenID) == 0) revert NotAllowed();
+        if (isBaseType(_tokenID)) revert NotAllowed();
         if (tokenValues[_tokenID] != tokenValues[_typeID]) revert FractionalBurn();
 
         delete owners[_typeID];
@@ -286,6 +294,7 @@ contract SemiFungible1155 is Upgradeable1155 {
 
     /// TRANSFERS
 
+    //TODO into beforeTokenTransfer
     function safeTransferFrom(
         address _from,
         address _to,
@@ -295,7 +304,7 @@ contract SemiFungible1155 is Upgradeable1155 {
     ) public override {
         if (_to == address(0x0)) revert ToZeroAddress();
         if (_from != msg.sender) revert NotApprovedOrOwner(); //TODO Allowance approval
-        if (getItemIndex(_id) == 0) revert NotAllowed();
+        if (isBaseType(_id)) revert NotAllowed();
 
         owners[_id] = _to;
 
@@ -337,6 +346,24 @@ contract SemiFungible1155 is Upgradeable1155 {
         _uri = Upgradeable1155.uri(getBaseType(tokenID));
     }
 
+    /// UTILS
+
+    /**
+     * @dev Check is value is below max item index
+     */
+    function _notMaxItem(uint256 tokenID) internal pure {
+        uint128 _count = uint128(tokenID);
+        ++_count;
+    }
+
+    /**
+     * @dev Check is value is below max type index
+     */
+    function _notMaxType(uint256 tokenID) internal pure {
+        uint128 _count = uint128(tokenID >> 128);
+        ++_count;
+    }
+
     /**
      * @dev calculate the sum of the elements of an array
      */
@@ -350,7 +377,5 @@ contract SemiFungible1155 is Upgradeable1155 {
             if (array[i] == 0) revert NotAllowed();
             sum += array[i];
         }
-
-        return sum;
     }
 }

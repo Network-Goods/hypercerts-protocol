@@ -50,7 +50,7 @@ function TYPE_MASK() external view returns (uint256)
 function TYPE_NF_BIT() external view returns (uint256)
 ```
 
-
+TODO remove unused var
 
 
 
@@ -740,6 +740,25 @@ event ApprovalForAll(address indexed account, address indexed operator, bool app
 | account `indexed` | address | undefined |
 | operator `indexed` | address | undefined |
 | approved  | bool | undefined |
+
+### BatchValueTransfer
+
+```solidity
+event BatchValueTransfer(uint256[] claimIDs, uint256[] fromTokenIDs, uint256[] toTokenIDs, uint256[] values)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| claimIDs  | uint256[] | undefined |
+| fromTokenIDs  | uint256[] | undefined |
+| toTokenIDs  | uint256[] | undefined |
+| values  | uint256[] | undefined |
 
 ### BeaconUpgraded
 

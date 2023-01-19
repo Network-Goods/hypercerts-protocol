@@ -112,7 +112,7 @@ contract SemiFungible1155DefaultTest is PRBTest, StdCheats, StdUtils, SemiFungib
     }
 
     function testMergeValueFuzz(uint256 size) public {
-        size = bound(size, 1, 253);
+        size = bound(size, 2, 253);
 
         uint256 baseID = 1 << 128;
         uint256 value = 2000;

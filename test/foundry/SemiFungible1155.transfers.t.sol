@@ -156,7 +156,7 @@ contract SemiFungible1155TransferTest is PRBTest, StdCheats, StdUtils {
     function testFuzzTransferFraction(address from, address to, uint256 size) public {
         vm.assume(from != to && from != address(0) && to != address(0));
         vm.assume(!semiFungible.isContract(from) && !semiFungible.isContract(to));
-        size = bound(size, 1, 253);
+        size = bound(size, 2, 253);
 
         uint256 baseID = 1 << 128;
 

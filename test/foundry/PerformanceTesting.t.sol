@@ -137,7 +137,7 @@ contract PerformanceTesting is PRBTest, StdCheats, PerformanceTestHelper {
     function testClaimFractionsFuzz(uint256[] memory fractions) public {
         vm.assume(noOverflow(fractions));
         vm.assume(noZeroes(fractions));
-        vm.assume(fractions.length > 0 && fractions.length < 253);
+        vm.assume(fractions.length > 1 && fractions.length < 253);
         uint256 totalUnits = getSum(fractions);
 
         hypercertMinter.mintClaimWithFractions(
