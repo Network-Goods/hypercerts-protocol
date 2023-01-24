@@ -11,6 +11,13 @@ import { Merkle } from "murky/Merkle.sol";
 // forge test -vv --match-path test/foundry/PerformanceTesting.t.sol
 
 contract PerformanceTestHelper is Merkle {
+    struct MerkleDataSet {
+        address[] accounts;
+        uint256[] units;
+        bytes32[] data;
+        bytes32 root;
+    }
+
     function noOverflow(uint256[] memory values) public pure returns (bool) {
         uint256 total;
         for (uint256 i = 0; i < values.length; i++) {
@@ -63,6 +70,39 @@ contract PerformanceTestHelper is Merkle {
         }
         return (size > 0);
     }
+
+    function _calculateLeaf(address account, uint256 amount) internal pure returns (bytes32 leaf) {
+        leaf = keccak256(bytes.concat(keccak256(abi.encode(account, amount))));
+    }
+
+    function generateCustomData(
+        address[] memory addresses,
+        uint256[] memory units
+    ) public pure returns (bytes32[] memory data) {
+        data = new bytes32[](addresses.length);
+        for (uint256 i = 0; i < addresses.length; i++) {
+            data[i] = _calculateLeaf(addresses[i], units[i]);
+        }
+    }
+
+    function buildFullDataset(uint256 size) internal pure returns (MerkleDataSet memory) {
+        address[] memory users;
+        uint256[] memory units;
+        bytes32[] memory data;
+        bytes32 root;
+        users = new address[](size);
+        units = new uint256[](size);
+
+        for (uint256 i = 0; i < size; i++) {
+            users[i] = address(uint160(i + 1));
+            units[i] = 100 * size * (i + 1);
+        }
+
+        data = generateCustomData(users, units);
+
+        root = getRoot(data);
+        return MerkleDataSet(users, units, data, root);
+    }
 }
 
 /// @dev See the "Writing Tests" section in the Foundry Book if this is your first time with Forge.
@@ -74,6 +114,14 @@ contract PerformanceTesting is PRBTest, StdCheats, PerformanceTestHelper {
     bytes32 rootHash;
     bytes32[] proof;
     address alice;
+    address allowlistUser;
+
+    uint256 setSize = 30;
+
+    MerkleDataSet[] internal datasets;
+    bytes32[][] proofs = new bytes32[][](setSize);
+    uint256[] ids = new uint256[](setSize);
+    uint256[] units = new uint256[](setSize);
 
     function setUp() public {
         alice = address(1);
@@ -83,7 +131,23 @@ contract PerformanceTesting is PRBTest, StdCheats, PerformanceTestHelper {
         proof = getProof(data, 6);
 
         startHoax(alice, 10 ether);
-        hypercertMinter.createAllowlist(200000, rootHash, _uri, TransferRestrictions.AllowAll);
+
+        if (datasets.length == 0) {
+            for (uint256 i = 0; i < setSize; i++) {
+                datasets.push(buildFullDataset(10 * (i + 1)));
+            }
+
+            uint256 index = 1;
+            allowlistUser = datasets[0].accounts[index];
+
+            for (uint256 i = 0; i < setSize; i++) {
+                MerkleDataSet memory dataset = datasets[i];
+                proofs[i] = getProof(dataset.data, index);
+                ids[i] = (i + 1) << 128;
+                units[i] = dataset.units[index];
+                hypercertMinter.createAllowlist(10000, dataset.root, _uri, TransferRestrictions.AllowAll);
+            }
+        }
     }
 
     /// @dev Run Forge with `-vvvv` to see console logs.
@@ -136,5 +200,10 @@ contract PerformanceTesting is PRBTest, StdCheats, PerformanceTestHelper {
             "https://example.com/ipfsHash",
             TransferRestrictions.AllowAll
         );
+    }
+
+    function testBatchMintAllowlistLoad() public {
+        changePrank(allowlistUser);
+        hypercertMinter.batchMintClaimsFromAllowlists(proofs, ids, units);
     }
 }
