@@ -23,10 +23,43 @@ error ArraySize()
 
 
 
+### DoesNotExist
+
+```solidity
+error DoesNotExist()
+```
+
+
+
+
+
+
+### DuplicateEntry
+
+```solidity
+error DuplicateEntry()
+```
+
+
+
+
+
+
 ### FractionalBurn
 
 ```solidity
 error FractionalBurn()
+```
+
+
+
+
+
+
+### Invalid
+
+```solidity
+error Invalid()
 ```
 
 
