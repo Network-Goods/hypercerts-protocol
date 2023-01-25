@@ -10,57 +10,6 @@ Extends { Upgradeable1155 } token with semi-fungible properties and the concept 
 
 ## Methods
 
-### NF_INDEX_MASK
-
-```solidity
-function NF_INDEX_MASK() external view returns (uint256)
-```
-
-
-
-*Bitmask used to expose only lower 128 bits of uint256*
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
-### TYPE_MASK
-
-```solidity
-function TYPE_MASK() external view returns (uint256)
-```
-
-
-
-*Bitmask used to expose only upper 128 bits of uint256*
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
-### TYPE_NF_BIT
-
-```solidity
-function TYPE_NF_BIT() external view returns (uint256)
-```
-
-TODO remove unused var
-
-*Identify non-fungible index. Use to find index of token belonging to `typeID`*
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
 ### __SemiFungible1155_init
 
 ```solidity
@@ -278,22 +227,22 @@ function safeBatchTransferFrom(address from, address to, uint256[] ids, uint256[
 ### safeTransferFrom
 
 ```solidity
-function safeTransferFrom(address _from, address _to, uint256 _id, uint256 _value, bytes _data) external nonpayable
+function safeTransferFrom(address from, address to, uint256 id, uint256 amount, bytes data) external nonpayable
 ```
 
-TRANSFERS
 
 
+*See {IERC1155-safeTransferFrom}.*
 
 #### Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| _from | address | undefined |
-| _to | address | undefined |
-| _id | uint256 | undefined |
-| _value | uint256 | undefined |
-| _data | bytes | undefined |
+| from | address | undefined |
+| to | address | undefined |
+| id | uint256 | undefined |
+| amount | uint256 | undefined |
+| data | bytes | undefined |
 
 ### setApprovalForAll
 
@@ -349,23 +298,6 @@ function transferOwnership(address newOwner) external nonpayable
 | Name | Type | Description |
 |---|---|---|
 | newOwner | address | undefined |
-
-### typeCounter
-
-```solidity
-function typeCounter() external view returns (uint256)
-```
-
-
-
-*Counter used to generate next typeID.*
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
 
 ### upgradeTo
 
@@ -629,17 +561,6 @@ event ValueTransfer(uint256 claimID, uint256 fromTokenID, uint256 toTokenID, uin
 
 ```solidity
 error NotAllowed()
-```
-
-
-
-
-
-
-### NotApprovedOrOwner
-
-```solidity
-error NotApprovedOrOwner()
 ```
 
 
