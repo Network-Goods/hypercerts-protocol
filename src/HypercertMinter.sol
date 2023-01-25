@@ -5,8 +5,7 @@ import { IHypercertToken } from "./interfaces/IHypercertToken.sol";
 import { SemiFungible1155 } from "./SemiFungible1155.sol";
 import { AllowlistMinter } from "./AllowlistMinter.sol";
 
-// Custom Errors
-error TransfersNotAllowed();
+import { Errors } from "./libs/Errors.sol";
 
 /// @title Contract for managing hypercert claims and whitelists
 /// @author bitbeckers
@@ -149,9 +148,9 @@ contract HypercertMinter is IHypercertToken, SemiFungible1155, AllowlistMinter {
             uint256 typeID = getBaseType(ids[i]);
             TransferRestrictions policy = typeRestrictions[typeID];
             if (policy == TransferRestrictions.DisallowAll) {
-                revert TransfersNotAllowed();
+                revert Errors.TransfersNotAllowed();
             } else if (policy == TransferRestrictions.FromCreatorOnly && from != creators[typeID]) {
-                revert TransfersNotAllowed();
+                revert Errors.TransfersNotAllowed();
             }
         }
     }

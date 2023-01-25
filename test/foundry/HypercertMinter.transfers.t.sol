@@ -5,7 +5,8 @@ import { console2 } from "forge-std/console2.sol";
 import { StdCheats } from "forge-std/StdCheats.sol";
 import { StdUtils } from "forge-std/StdUtils.sol";
 import { PRBTest } from "prb-test/PRBTest.sol";
-import { HypercertMinter, TransfersNotAllowed } from "../../src/HypercertMinter.sol";
+import { Errors } from "../../src/libs/Errors.sol";
+import { HypercertMinter } from "../../src/HypercertMinter.sol";
 import { IHypercertToken } from "../../src/interfaces/IHypercertToken.sol";
 
 /// @dev Testing transfer restrictions on hypercerts
@@ -59,7 +60,7 @@ contract HypercertMinterTransferTest is PRBTest, StdCheats, StdUtils {
 
         // Alice fails to transfer token
         vm.prank(alice);
-        vm.expectRevert(TransfersNotAllowed.selector);
+        vm.expectRevert(Errors.TransfersNotAllowed.selector);
         hypercertMinter.safeTransferFrom(alice, bob, tokenID, 1, "");
         assertEq(hypercertMinter.balanceOf(alice, tokenID), 1);
         assertEq(hypercertMinter.balanceOf(bob, tokenID), 0);
@@ -80,7 +81,7 @@ contract HypercertMinterTransferTest is PRBTest, StdCheats, StdUtils {
 
         // Bob fails to transfer token
         vm.prank(bob);
-        vm.expectRevert(TransfersNotAllowed.selector);
+        vm.expectRevert(Errors.TransfersNotAllowed.selector);
         hypercertMinter.safeTransferFrom(bob, alice, tokenID, 1, "");
         assertEq(hypercertMinter.balanceOf(alice, tokenID), 0);
         assertEq(hypercertMinter.balanceOf(bob, tokenID), 1);

@@ -58,8 +58,6 @@ contract HypercertMinterTest is PRBTest, StdCheats, StdUtils, MinterTestHelper {
     string internal _uri;
     address internal alice;
 
-    //TODO restore memoizze, gave weird memory issues (stuck..)
-
     function setUp() public {
         merkle = new Merkle();
         hypercertMinter = new HypercertMinter();

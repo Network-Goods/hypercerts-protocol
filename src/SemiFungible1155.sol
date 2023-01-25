@@ -6,15 +6,7 @@ pragma solidity ^0.8.9;
 import { Upgradeable1155 } from "./Upgradeable1155.sol";
 import { IERC1155ReceiverUpgradeable } from "oz-upgradeable/token/ERC1155/IERC1155ReceiverUpgradeable.sol";
 
-import "forge-std/console2.sol";
-// TODO shared error lib
-error ArraySize();
-error ToZeroAddress();
-error NotApprovedOrOwner();
-error NotAllowed();
-error TypeMismatch();
-error FractionalBurn();
-error MaxValue();
+import { Errors } from "./libs/Errors.sol";
 
 /// @title Contract for minting semi-fungible EIP1155 tokens
 /// @author bitbeckers
@@ -118,7 +110,7 @@ contract SemiFungible1155 is Upgradeable1155 {
     /// @dev Mint a new token type and the initial value
     function _mintValue(address _account, uint256 _value, string memory _uri) internal returns (uint256 typeID) {
         if (_value == 0) {
-            revert NotAllowed();
+            revert Errors.NotAllowed();
         }
         typeID = _createTokenType(_value, _uri);
 
@@ -140,7 +132,7 @@ contract SemiFungible1155 is Upgradeable1155 {
     ) internal returns (uint256 typeID) {
         if (_values.length > 253) {
             //TODO determine array limits (use testing)
-            revert ArraySize();
+            revert Errors.ArraySize();
         }
 
         uint256 totalValue = _getSum(_values);
@@ -198,11 +190,11 @@ contract SemiFungible1155 is Upgradeable1155 {
     /// @dev `_values` must sum to total `units` held at `_tokenID`
     function _splitValue(address _account, uint256 _tokenID, uint256[] memory _values) internal {
         if (_values.length > 253 || _values.length < 2) {
-            revert ArraySize();
+            revert Errors.ArraySize();
         }
 
         if (isBaseType(_tokenID)) {
-            revert NotAllowed();
+            revert Errors.NotAllowed();
         }
 
         uint256 _typeID = getBaseType(_tokenID);
@@ -236,7 +228,7 @@ contract SemiFungible1155 is Upgradeable1155 {
     // TODO emit events
     function _mergeValue(uint256[] memory _fractionIDs) internal {
         if (_fractionIDs.length > 253 || _fractionIDs.length < 2) {
-            revert ArraySize();
+            revert Errors.ArraySize();
         }
         uint256 len = _fractionIDs.length;
 
@@ -249,7 +241,7 @@ contract SemiFungible1155 is Upgradeable1155 {
 
         address _account = _msgSender();
         for (uint256 i = 0; i < len; i++) {
-            if (getBaseType(_fractionIDs[i]) != _typeID) revert TypeMismatch();
+            if (getBaseType(_fractionIDs[i]) != _typeID) revert Errors.TypeMismatch();
             uint256 _fractionID = _fractionIDs[i];
             if (_fractionID != target) {
                 _idsToBurn[i] = _fractionID;
@@ -271,8 +263,8 @@ contract SemiFungible1155 is Upgradeable1155 {
     /// @dev `_tokenID` must hold all value declared at base type
     function _burnValue(address _account, uint256 _tokenID) internal {
         uint256 _typeID = getBaseType(_tokenID);
-        if (isBaseType(_tokenID)) revert NotAllowed();
-        if (tokenValues[_tokenID] != tokenValues[_typeID]) revert FractionalBurn();
+        if (isBaseType(_tokenID)) revert Errors.NotAllowed();
+        if (tokenValues[_tokenID] != tokenValues[_typeID]) revert Errors.FractionalBurn();
 
         delete owners[_typeID];
         delete owners[_tokenID];
@@ -295,7 +287,7 @@ contract SemiFungible1155 is Upgradeable1155 {
         bytes memory data
     ) internal virtual override {
         for (uint256 i = 0; i < ids.length; ++i) {
-            if (isBaseType(ids[i]) && from != address(0)) revert NotAllowed();
+            if (isBaseType(ids[i]) && from != address(0)) revert Errors.NotAllowed();
             owners[ids[i]] = to;
         }
 
@@ -353,7 +345,7 @@ contract SemiFungible1155 is Upgradeable1155 {
         }
 
         for (uint256 i = 0; i < array.length; i++) {
-            if (array[i] == 0) revert NotAllowed();
+            if (array[i] == 0) revert Errors.NotAllowed();
             sum += array[i];
         }
     }

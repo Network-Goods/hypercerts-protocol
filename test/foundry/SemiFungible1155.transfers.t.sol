@@ -57,7 +57,6 @@ contract SemiFungible1155TransferTest is PRBTest, StdCheats, StdUtils {
         uint128 tokenID = 1;
 
         // Pass because zero-value in call
-        //TODO think about UX, cheaper on gas for calls containing value
         semiFungible.safeTransferFrom(alice, bob, baseID + tokenID, 0, "");
     }
 
