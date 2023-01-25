@@ -46,7 +46,7 @@ Tokens that have been merged are burned.
 ### mintClaim
 
 ```solidity
-function mintClaim(uint256 units, string uri, enum TransferRestrictions restrictions) external nonpayable
+function mintClaim(uint256 units, string uri, enum IHypercertToken.TransferRestrictions restrictions) external nonpayable
 ```
 
 
@@ -59,12 +59,12 @@ function mintClaim(uint256 units, string uri, enum TransferRestrictions restrict
 |---|---|---|
 | units | uint256 | undefined |
 | uri | string | undefined |
-| restrictions | enum TransferRestrictions | undefined |
+| restrictions | enum IHypercertToken.TransferRestrictions | undefined |
 
 ### mintClaimWithFractions
 
 ```solidity
-function mintClaimWithFractions(uint256 units, uint256[] fractions, string uri, enum TransferRestrictions restrictions) external nonpayable
+function mintClaimWithFractions(uint256 units, uint256[] fractions, string uri, enum IHypercertToken.TransferRestrictions restrictions) external nonpayable
 ```
 
 
@@ -78,7 +78,7 @@ function mintClaimWithFractions(uint256 units, uint256[] fractions, string uri, 
 | units | uint256 | undefined |
 | fractions | uint256[] | undefined |
 | uri | string | undefined |
-| restrictions | enum TransferRestrictions | undefined |
+| restrictions | enum IHypercertToken.TransferRestrictions | undefined |
 
 ### splitValue
 

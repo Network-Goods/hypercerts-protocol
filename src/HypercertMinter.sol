@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-import { IHypercertToken, TransferRestrictions } from "./interfaces/IHypercertToken.sol";
+import { IHypercertToken } from "./interfaces/IHypercertToken.sol";
 import { SemiFungible1155 } from "./SemiFungible1155.sol";
 import { AllowlistMinter } from "./AllowlistMinter.sol";
 
@@ -146,8 +146,7 @@ contract HypercertMinter is IHypercertToken, SemiFungible1155, AllowlistMinter {
     ) internal virtual override(SemiFungible1155) {
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
         for (uint256 i = 0; i < ids.length; i++) {
-            uint256 tokenID = ids[i];
-            uint256 typeID = getNonFungibleBaseType(tokenID);
+            uint256 typeID = getBaseType(ids[i]);
             TransferRestrictions policy = typeRestrictions[typeID];
             if (policy == TransferRestrictions.DisallowAll) {
                 revert TransfersNotAllowed();
