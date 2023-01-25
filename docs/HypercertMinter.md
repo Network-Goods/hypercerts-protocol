@@ -1017,17 +1017,6 @@ error NotApprovedOrOwner()
 
 
 
-### ToZeroAddress
-
-```solidity
-error ToZeroAddress()
-```
-
-
-
-
-
-
 ### TransfersNotAllowed
 
 ```solidity
