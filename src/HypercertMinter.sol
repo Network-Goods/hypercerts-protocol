@@ -70,7 +70,6 @@ contract HypercertMinter is IHypercertToken, SemiFungible1155, AllowlistMinter {
         uint256[] calldata claimIDs,
         uint256[] calldata units
     ) external {
-        //TODO determine size limit as a function of gas cap
         uint256 len = claimIDs.length;
         for (uint256 i = 0; i < len; i++) {
             _processClaim(proofs[i], claimIDs[i], units[i]);

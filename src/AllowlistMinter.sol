@@ -4,9 +4,7 @@ pragma solidity ^0.8.9;
 import { MerkleProofUpgradeable } from "oz-upgradeable/utils/cryptography/MerkleProofUpgradeable.sol";
 import { IAllowlist } from "./interfaces/IAllowlist.sol";
 
-error DuplicateEntry();
-error DoesNotExist();
-error Invalid();
+import { Errors } from "./libs/Errors.sol";
 
 /// @title Interface for hypercert token interactions
 /// @author bitbeckers
@@ -24,25 +22,25 @@ contract AllowlistMinter is IAllowlist {
         uint256 claimID,
         bytes32 leaf
     ) public view returns (bool isAllowed) {
-        if (merkleRoots[claimID].length == 0) revert DoesNotExist();
+        if (merkleRoots[claimID].length == 0) revert Errors.DoesNotExist();
         isAllowed = MerkleProofUpgradeable.verifyCalldata(proof, merkleRoots[claimID], leaf);
     }
 
     function _createAllowlist(uint256 claimID, bytes32 merkleRoot) internal {
-        if (merkleRoots[claimID] != "") revert DuplicateEntry();
+        if (merkleRoots[claimID] != "") revert Errors.DuplicateEntry();
 
         merkleRoots[claimID] = merkleRoot;
         emit AllowlistCreated(claimID, merkleRoot);
     }
 
     function _processClaim(bytes32[] calldata proof, uint256 claimID, uint256 amount) internal {
-        if (merkleRoots[claimID].length == 0) revert DoesNotExist();
+        if (merkleRoots[claimID].length == 0) revert Errors.DoesNotExist();
 
         bytes32 node = _calculateLeaf(msg.sender, amount);
 
-        if (hasBeenClaimed[claimID][node]) revert DuplicateEntry();
+        if (hasBeenClaimed[claimID][node]) revert Errors.DuplicateEntry();
 
-        if (!MerkleProofUpgradeable.verifyCalldata(proof, merkleRoots[claimID], node)) revert Invalid();
+        if (!MerkleProofUpgradeable.verifyCalldata(proof, merkleRoots[claimID], node)) revert Errors.Invalid();
         hasBeenClaimed[claimID][node] = true;
 
         emit LeafClaimed(claimID, node);
