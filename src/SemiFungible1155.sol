@@ -109,8 +109,7 @@ contract SemiFungible1155 is Upgradeable1155 {
         }
         typeID = _createTokenType(_value, _uri);
 
-        uint256 itemIndex = ++maxIndex[typeID];
-        uint256 tokenID = typeID + itemIndex; //1 based indexing, 0 holds type data
+        uint256 tokenID = typeID + ++maxIndex[typeID]; //1 based indexing, 0 holds type data
 
         tokenValues[tokenID] = _value;
 
@@ -129,9 +128,7 @@ contract SemiFungible1155 is Upgradeable1155 {
             revert Errors.ArraySize();
         }
 
-        uint256 totalValue = _getSum(_values);
-
-        typeID = _mintValue(_account, totalValue, _uri);
+        typeID = _mintValue(_account, _getSum(_values), _uri);
 
         _splitValue(_account, typeID + maxIndex[typeID], _values);
     }
