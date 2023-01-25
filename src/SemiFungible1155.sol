@@ -65,25 +65,25 @@ contract SemiFungible1155 is Upgradeable1155 {
 
     /// @dev Get index of fractional token at `_id` by returning lower 128 bit values
     /// @dev Returns 0 if `_id` is a baseType
-    function getItemIndex(uint256 _id) internal pure returns (uint256) {
-        return _id & NF_INDEX_MASK;
+    function getItemIndex(uint256 tokenID) internal pure returns (uint256) {
+        return tokenID & NF_INDEX_MASK;
     }
 
     /// @dev Get base type ID for token at `_id` by returning upper 128 bit values
-    function getBaseType(uint256 _id) internal pure returns (uint256) {
-        return _id & TYPE_MASK;
+    function getBaseType(uint256 tokenID) internal pure returns (uint256) {
+        return tokenID & TYPE_MASK;
     }
 
     /// @dev Identify that token at `_id` is base type.
     /// @dev Upper 128 bits identify base type ID, lower bits should be 0
-    function isBaseType(uint256 _id) internal pure returns (bool) {
-        return (_id & TYPE_MASK == _id) && (_id & NF_INDEX_MASK == 0);
+    function isBaseType(uint256 tokenID) internal pure returns (bool) {
+        return (tokenID & TYPE_MASK == tokenID) && (tokenID & NF_INDEX_MASK == 0);
     }
 
     /// @dev Identify that token at `_id` is fraction of a claim.
     /// @dev Upper 128 bits identify base type ID, lower bits should be > 0
-    function isTypedItem(uint256 _id) internal pure returns (bool) {
-        return (_id & TYPE_MASK > 0) && (_id & NF_INDEX_MASK > 0);
+    function isTypedItem(uint256 tokenID) internal pure returns (bool) {
+        return (tokenID & TYPE_MASK > 0) && (tokenID & NF_INDEX_MASK > 0);
     }
 
     /// READ
@@ -302,7 +302,6 @@ contract SemiFungible1155 is Upgradeable1155 {
         uint256 _value,
         bytes memory _data
     ) public override {
-        if (_to == address(0x0)) revert ToZeroAddress();
         if (_from != msg.sender) revert NotApprovedOrOwner(); //TODO Allowance approval
         if (isBaseType(_id)) revert NotAllowed();
 
