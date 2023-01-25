@@ -2244,7 +2244,7 @@
             "numberOfBytes": "32"
           },
           "t_enum(TransferRestrictions)6328": {
-            "label": "enum IHypercertToken.TransferRestrictions",
+            "label": "enum TransferRestrictions",
             "members": [
               "AllowAll",
               "DisallowAll",
@@ -2277,7 +2277,7 @@
             "numberOfBytes": "32"
           },
           "t_mapping(t_uint256,t_enum(TransferRestrictions)6328)": {
-            "label": "mapping(uint256 => enum IHypercertToken.TransferRestrictions)",
+            "label": "mapping(uint256 => enum TransferRestrictions)",
             "numberOfBytes": "32"
           },
           "t_mapping(t_uint256,t_mapping(t_address,t_uint256))": {

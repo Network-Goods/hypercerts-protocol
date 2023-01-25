@@ -155,4 +155,14 @@ contract HypercertMinter is IHypercertToken, SemiFungible1155, AllowlistMinter {
             }
         }
     }
+
+    /**
+     * @dev This empty reserved space is put in place to allow future versions to add new
+     * variables without shifting down storage in the inheritance chain.
+     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
+     * Assuming 30 available slots (slots cost space, cost gas)
+     * 1. name
+     * 2. typeRestrictions
+     */
+    uint256[28] private __gap;
 }

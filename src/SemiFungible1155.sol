@@ -48,6 +48,7 @@ contract SemiFungible1155 is Upgradeable1155 {
     // TODO should have max value depending on split Types | Items
     mapping(uint256 => uint256) internal maxIndex;
 
+    /// TODO remove unused var
     /// @dev Mapping from `tokenID` to user at `address` to get `units` owned
     mapping(uint256 => mapping(address => uint256)) internal tokenUserBalances;
 
@@ -377,4 +378,21 @@ contract SemiFungible1155 is Upgradeable1155 {
             sum += array[i];
         }
     }
+
+    /**
+     * @dev This empty reserved space is put in place to allow future versions to add new
+     * variables without shifting down storage in the inheritance chain.
+     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
+     * Assuming 30 available slots (slots cost space, cost gas)
+     * 1. typeCounter
+     * 2. TYPE_MASK
+     * 3. NF_INDEX_MASK
+     * 4. TYPE_NF_BIT
+     * 5. owners
+     * 6. creators
+     * 7. tokenValues
+     * 8. maxIndex
+     * 9. tokenUserBalances
+     */
+    uint256[21] private __gap;
 }
