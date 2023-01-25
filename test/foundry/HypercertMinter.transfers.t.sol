@@ -12,10 +12,10 @@ import { IHypercertToken } from "../../src/interfaces/IHypercertToken.sol";
 contract HypercertMinterTransferTest is PRBTest, StdCheats, StdUtils {
     HypercertMinter internal hypercertMinter;
     string internal _uri;
-    uint256 _units;
-    uint256 baseID;
-    uint128 tokenIndex;
-    uint256 tokenID;
+    uint256 internal _units;
+    uint256 internal baseID;
+    uint128 internal tokenIndex;
+    uint256 internal tokenID;
     address internal alice;
     address internal bob;
 

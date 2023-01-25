@@ -4,6 +4,7 @@ pragma solidity >=0.8.4;
 import { console2 } from "forge-std/console2.sol";
 import { PRBTest } from "prb-test/PRBTest.sol";
 import { StdCheats } from "forge-std/StdCheats.sol";
+import { StdUtils } from "forge-std/StdUtils.sol";
 import { HypercertMinter } from "../../src/HypercertMinter.sol";
 import { Merkle } from "murky/Merkle.sol";
 import { IHypercertToken } from "../../src/interfaces/IHypercertToken.sol";
@@ -11,6 +12,13 @@ import { IHypercertToken } from "../../src/interfaces/IHypercertToken.sol";
 // forge test -vv --match-path test/foundry/PerformanceTesting.t.sol
 
 contract PerformanceTestHelper is Merkle {
+    struct MerkleDataSet {
+        address[] accounts;
+        uint256[] units;
+        bytes32[] data;
+        bytes32 root;
+    }
+
     function noOverflow(uint256[] memory values) public pure returns (bool) {
         uint256 total;
         for (uint256 i = 0; i < values.length; i++) {
@@ -63,17 +71,58 @@ contract PerformanceTestHelper is Merkle {
         }
         return (size > 0);
     }
+
+    function _calculateLeaf(address account, uint256 amount) internal pure returns (bytes32 leaf) {
+        leaf = keccak256(bytes.concat(keccak256(abi.encode(account, amount))));
+    }
+
+    function generateCustomData(
+        address[] memory addresses,
+        uint256[] memory units
+    ) public pure returns (bytes32[] memory data) {
+        data = new bytes32[](addresses.length);
+        for (uint256 i = 0; i < addresses.length; i++) {
+            data[i] = _calculateLeaf(addresses[i], units[i]);
+        }
+    }
+
+    function buildFullDataset(uint256 size) internal pure returns (MerkleDataSet memory) {
+        address[] memory users;
+        uint256[] memory units;
+        bytes32[] memory data;
+        bytes32 root;
+        users = new address[](size);
+        units = new uint256[](size);
+
+        for (uint256 i = 0; i < size; i++) {
+            users[i] = address(uint160(i + 1));
+            units[i] = 100 * size * (i + 1);
+        }
+
+        data = generateCustomData(users, units);
+
+        root = getRoot(data);
+        return MerkleDataSet(users, units, data, root);
+    }
 }
 
 /// @dev See the "Writing Tests" section in the Foundry Book if this is your first time with Forge.
 /// https://book.getfoundry.sh/forge/writing-tests
-contract PerformanceTesting is PRBTest, StdCheats, PerformanceTestHelper {
+contract PerformanceTesting is PRBTest, StdCheats, StdUtils, PerformanceTestHelper {
     HypercertMinter internal hypercertMinter;
-    string _uri = "https://example.com/ipfsHash";
-    bytes32 root = bytes32(bytes.concat("f1ef5e66fa78313ec3d3617a44c21a9061f1c87437f512625a50a5a29335a647"));
-    bytes32 rootHash;
-    bytes32[] proof;
-    address alice;
+    string internal _uri = "https://example.com/ipfsHash";
+    bytes32 internal root = bytes32(bytes.concat("f1ef5e66fa78313ec3d3617a44c21a9061f1c87437f512625a50a5a29335a647"));
+    bytes32 internal rootHash;
+    bytes32[] internal proof;
+    address internal alice;
+    address internal allowlistUser;
+
+    uint256 internal setSize = 30;
+
+    MerkleDataSet[] internal datasets;
+    bytes32[][] internal proofs = new bytes32[][](setSize);
+    uint256[] internal ids = new uint256[](setSize);
+    uint256[] internal units = new uint256[](setSize);
 
     function setUp() public {
         alice = address(1);
@@ -83,7 +132,28 @@ contract PerformanceTesting is PRBTest, StdCheats, PerformanceTestHelper {
         proof = getProof(data, 6);
 
         startHoax(alice, 10 ether);
-        hypercertMinter.createAllowlist(200000, rootHash, _uri, IHypercertToken.TransferRestrictions.AllowAll);
+
+        if (datasets.length == 0) {
+            for (uint256 i = 0; i < setSize; i++) {
+                datasets.push(buildFullDataset(10 * (i + 1)));
+            }
+
+            uint256 index = 1;
+            allowlistUser = datasets[0].accounts[index];
+
+            for (uint256 i = 0; i < setSize; i++) {
+                MerkleDataSet memory dataset = datasets[i];
+                proofs[i] = getProof(dataset.data, index);
+                ids[i] = (i + 1) << 128;
+                units[i] = dataset.units[index];
+                hypercertMinter.createAllowlist(
+                    10000,
+                    dataset.root,
+                    _uri,
+                    IHypercertToken.TransferRestrictions.AllowAll
+                );
+            }
+        }
     }
 
     /// @dev Run Forge with `-vvvv` to see console logs.
@@ -100,12 +170,12 @@ contract PerformanceTesting is PRBTest, StdCheats, PerformanceTestHelper {
         hypercertMinter.mintClaim(10000, _uri, IHypercertToken.TransferRestrictions.AllowAll);
     }
 
-    function testClaimSingleFractionFuzz(address account, uint256 units) public {
-        vm.assume(units > 0);
+    function testClaimSingleFractionFuzz(address account, uint256 value) public {
+        vm.assume(value > 0);
         vm.assume(!isContract(account) && account != address(0) && account != address(this));
 
         changePrank(account);
-        hypercertMinter.mintClaim(units, _uri, IHypercertToken.TransferRestrictions.AllowAll);
+        hypercertMinter.mintClaim(value, _uri, IHypercertToken.TransferRestrictions.AllowAll);
     }
 
     // Mint Hypercert with multiple fractions
@@ -134,10 +204,9 @@ contract PerformanceTesting is PRBTest, StdCheats, PerformanceTestHelper {
         );
     }
 
-    function testClaimFractionsFuzz(uint256[] memory fractions) public {
-        vm.assume(noOverflow(fractions));
-        vm.assume(noZeroes(fractions));
-        vm.assume(fractions.length > 1 && fractions.length < 253);
+    function testClaimFractionsFuzz(uint8 size) public {
+        uint256 scopedSize = bound(uint256(size), 2, 253);
+        uint256[] memory fractions = buildFractions(scopedSize);
         uint256 totalUnits = getSum(fractions);
 
         hypercertMinter.mintClaimWithFractions(
@@ -146,5 +215,10 @@ contract PerformanceTesting is PRBTest, StdCheats, PerformanceTestHelper {
             "https://example.com/ipfsHash",
             IHypercertToken.TransferRestrictions.AllowAll
         );
+    }
+
+    function testBatchMintAllowlistLoad() public {
+        changePrank(allowlistUser);
+        hypercertMinter.batchMintClaimsFromAllowlists(proofs, ids, units);
     }
 }
