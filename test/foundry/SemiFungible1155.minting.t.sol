@@ -3,6 +3,7 @@ pragma solidity >=0.8.4;
 
 import { console2 } from "forge-std/console2.sol";
 import { PRBTest } from "prb-test/PRBTest.sol";
+import { stdError } from "forge-std/StdError.sol";
 import { StdCheats } from "forge-std/StdCheats.sol";
 import { StdUtils } from "forge-std/StdUtils.sol";
 import { SemiFungible1155Helper } from "./SemiFungibleHelper.sol";
@@ -45,6 +46,33 @@ contract SemiFungible1155MintingTest is PRBTest, StdCheats, StdUtils, SemiFungib
 
         vm.expectRevert(ArraySize.selector);
         semiFungible.mintValue(alice, values, _uri);
+    }
+
+    function testOverflowItemIndex() public {
+        uint256 baseID = 1 << 128;
+        semiFungible.setMaxIndex(baseID, type(uint128).max - 2);
+
+        uint256[] memory values = new uint256[](4);
+        values[0] = 10;
+        values[1] = 20;
+        values[2] = 30;
+        values[3] = 40;
+
+        vm.expectRevert(stdError.arithmeticError);
+        semiFungible.mintValue(alice, values, _uri);
+
+        baseID = 2 << 128;
+        semiFungible.setMaxIndex(baseID, type(uint128).max);
+
+        vm.expectRevert(stdError.arithmeticError);
+        semiFungible.mintClaim(baseID, 1000);
+    }
+
+    function testOverflowTypes() public {
+        semiFungible.setMaxType();
+
+        vm.expectRevert(stdError.arithmeticError);
+        semiFungible.mintValue(alice, 10000, _uri);
     }
 
     // HAPPY MINTING
@@ -115,7 +143,7 @@ contract SemiFungible1155MintingTest is PRBTest, StdCheats, StdUtils, SemiFungib
     }
 
     function testFuzzMintValueArray(uint256[] memory values, address other) public {
-        vm.assume(values.length > 0 && values.length < 254);
+        vm.assume(values.length > 2 && values.length < 254);
         vm.assume(semiFungible.noOverflow(values));
         vm.assume(semiFungible.noZeroes(values));
         vm.assume(other != address(1) && other != address(0));

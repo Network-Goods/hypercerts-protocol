@@ -6,7 +6,7 @@ import { StdUtils } from "forge-std/StdUtils.sol";
 import { Merkle } from "murky/Merkle.sol";
 import { PRBTest } from "prb-test/PRBTest.sol";
 import { HypercertMinter } from "../../src/HypercertMinter.sol";
-import { TransferRestrictions } from "../../src/interfaces/IHypercertToken.sol";
+import { IHypercertToken } from "../../src/interfaces/IHypercertToken.sol";
 
 contract MinterTestHelper {
     event ClaimStored(uint256 indexed claimID, string uri, uint256 totalUnits);
@@ -82,7 +82,7 @@ contract HypercertMinterTest is PRBTest, StdCheats, StdUtils, MinterTestHelper {
 
         vm.expectEmit(true, true, true, true);
         emit ClaimStored(1 << 128, _uri, units);
-        hypercertMinter.mintClaim(units, _uri, TransferRestrictions.AllowAll);
+        hypercertMinter.mintClaim(units, _uri, IHypercertToken.TransferRestrictions.AllowAll);
     }
 
     function testClaimTenFractions() public {
@@ -90,7 +90,12 @@ contract HypercertMinterTest is PRBTest, StdCheats, StdUtils, MinterTestHelper {
         uint256 totalUnits = getSum(fractions);
         vm.expectEmit(true, true, true, true);
         emit ClaimStored(1 << 128, _uri, totalUnits);
-        hypercertMinter.mintClaimWithFractions(totalUnits, fractions, _uri, TransferRestrictions.AllowAll);
+        hypercertMinter.mintClaimWithFractions(
+            totalUnits,
+            fractions,
+            _uri,
+            IHypercertToken.TransferRestrictions.AllowAll
+        );
     }
 
     function testClaimHundredFractions() public {
@@ -99,6 +104,11 @@ contract HypercertMinterTest is PRBTest, StdCheats, StdUtils, MinterTestHelper {
 
         vm.expectEmit(true, true, true, true);
         emit ClaimStored(1 << 128, _uri, totalUnits);
-        hypercertMinter.mintClaimWithFractions(totalUnits, fractions, _uri, TransferRestrictions.AllowAll);
+        hypercertMinter.mintClaimWithFractions(
+            totalUnits,
+            fractions,
+            _uri,
+            IHypercertToken.TransferRestrictions.AllowAll
+        );
     }
 }

@@ -4,9 +4,10 @@ pragma solidity >=0.8.4;
 import { console2 } from "forge-std/console2.sol";
 import { PRBTest } from "prb-test/PRBTest.sol";
 import { StdCheats } from "forge-std/StdCheats.sol";
+import { StdUtils } from "forge-std/StdUtils.sol";
 import { HypercertMinter } from "../../src/HypercertMinter.sol";
-import { TransferRestrictions } from "../../src/interfaces/IHypercertToken.sol";
 import { Merkle } from "murky/Merkle.sol";
+import { IHypercertToken } from "../../src/interfaces/IHypercertToken.sol";
 
 // forge test -vv --match-path test/foundry/PerformanceTesting.t.sol
 
@@ -107,21 +108,21 @@ contract PerformanceTestHelper is Merkle {
 
 /// @dev See the "Writing Tests" section in the Foundry Book if this is your first time with Forge.
 /// https://book.getfoundry.sh/forge/writing-tests
-contract PerformanceTesting is PRBTest, StdCheats, PerformanceTestHelper {
+contract PerformanceTesting is PRBTest, StdCheats, StdUtils, PerformanceTestHelper {
     HypercertMinter internal hypercertMinter;
-    string _uri = "https://example.com/ipfsHash";
-    bytes32 root = bytes32(bytes.concat("f1ef5e66fa78313ec3d3617a44c21a9061f1c87437f512625a50a5a29335a647"));
-    bytes32 rootHash;
-    bytes32[] proof;
-    address alice;
-    address allowlistUser;
+    string internal _uri = "https://example.com/ipfsHash";
+    bytes32 internal root = bytes32(bytes.concat("f1ef5e66fa78313ec3d3617a44c21a9061f1c87437f512625a50a5a29335a647"));
+    bytes32 internal rootHash;
+    bytes32[] internal proof;
+    address internal alice;
+    address internal allowlistUser;
 
-    uint256 setSize = 30;
+    uint256 internal setSize = 30;
 
     MerkleDataSet[] internal datasets;
-    bytes32[][] proofs = new bytes32[][](setSize);
-    uint256[] ids = new uint256[](setSize);
-    uint256[] units = new uint256[](setSize);
+    bytes32[][] internal proofs = new bytes32[][](setSize);
+    uint256[] internal ids = new uint256[](setSize);
+    uint256[] internal units = new uint256[](setSize);
 
     function setUp() public {
         alice = address(1);
@@ -145,7 +146,12 @@ contract PerformanceTesting is PRBTest, StdCheats, PerformanceTestHelper {
                 proofs[i] = getProof(dataset.data, index);
                 ids[i] = (i + 1) << 128;
                 units[i] = dataset.units[index];
-                hypercertMinter.createAllowlist(10000, dataset.root, _uri, TransferRestrictions.AllowAll);
+                hypercertMinter.createAllowlist(
+                    10000,
+                    dataset.root,
+                    _uri,
+                    IHypercertToken.TransferRestrictions.AllowAll
+                );
             }
         }
     }
@@ -161,15 +167,15 @@ contract PerformanceTesting is PRBTest, StdCheats, PerformanceTestHelper {
 
     // Mint Hypercert with 1 fraction
     function testClaimSingleFraction() public {
-        hypercertMinter.mintClaim(10000, _uri, TransferRestrictions.AllowAll);
+        hypercertMinter.mintClaim(10000, _uri, IHypercertToken.TransferRestrictions.AllowAll);
     }
 
-    function testClaimSingleFractionFuzz(address account, uint256 units) public {
-        vm.assume(units > 0);
+    function testClaimSingleFractionFuzz(address account, uint256 value) public {
+        vm.assume(value > 0);
         vm.assume(!isContract(account) && account != address(0) && account != address(this));
 
         changePrank(account);
-        hypercertMinter.mintClaim(units, _uri, TransferRestrictions.AllowAll);
+        hypercertMinter.mintClaim(value, _uri, IHypercertToken.TransferRestrictions.AllowAll);
     }
 
     // Mint Hypercert with multiple fractions
@@ -178,27 +184,36 @@ contract PerformanceTesting is PRBTest, StdCheats, PerformanceTestHelper {
         uint256[] memory fractions = buildFractions(2);
         uint256 totalUnits = getSum(fractions);
 
-        hypercertMinter.mintClaimWithFractions(totalUnits, fractions, _uri, TransferRestrictions.AllowAll);
+        hypercertMinter.mintClaimWithFractions(
+            totalUnits,
+            fractions,
+            _uri,
+            IHypercertToken.TransferRestrictions.AllowAll
+        );
     }
 
     function testClaimHundredFractions() public {
         uint256[] memory fractions = buildFractions(100);
         uint256 totalUnits = getSum(fractions);
 
-        hypercertMinter.mintClaimWithFractions(totalUnits, fractions, _uri, TransferRestrictions.AllowAll);
+        hypercertMinter.mintClaimWithFractions(
+            totalUnits,
+            fractions,
+            _uri,
+            IHypercertToken.TransferRestrictions.AllowAll
+        );
     }
 
-    function testClaimFractionsFuzz(uint256[] memory fractions) public {
-        vm.assume(noOverflow(fractions));
-        vm.assume(noZeroes(fractions));
-        vm.assume(fractions.length > 0 && fractions.length < 253);
+    function testClaimFractionsFuzz(uint8 size) public {
+        uint256 scopedSize = bound(uint256(size), 2, 253);
+        uint256[] memory fractions = buildFractions(scopedSize);
         uint256 totalUnits = getSum(fractions);
 
         hypercertMinter.mintClaimWithFractions(
             totalUnits,
             fractions,
             "https://example.com/ipfsHash",
-            TransferRestrictions.AllowAll
+            IHypercertToken.TransferRestrictions.AllowAll
         );
     }
 

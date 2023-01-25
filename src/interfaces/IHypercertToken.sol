@@ -1,23 +1,23 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-/**
- * AllowAll = Unrestricted
- * DisallowAll = Transfers disabled after minting
- * FromCreatorOnly = Only the original creator can transfer
- */
-/// @dev Transfer restriction policies on hypercerts
-enum TransferRestrictions {
-    AllowAll,
-    DisallowAll,
-    FromCreatorOnly
-}
-
 /// @title Interface for hypercert token interactions
 /// @author bitbeckers
 /// @notice This interface declares the required functionality for a hypercert token
 /// @notice This interface does not specify the underlying token type (e.g. 721 or 1155)
 interface IHypercertToken {
+    /**
+     * AllowAll = Unrestricted
+     * DisallowAll = Transfers disabled after minting
+     * FromCreatorOnly = Only the original creator can transfer
+     */
+    /// @dev Transfer restriction policies on hypercerts
+    enum TransferRestrictions {
+        AllowAll,
+        DisallowAll,
+        FromCreatorOnly
+    }
+
     /// @dev Emitted when token with tokenID `claimID` is stored, with external data reference via `uri`.
     event ClaimStored(uint256 indexed claimID, string uri, uint256 totalUnits);
 

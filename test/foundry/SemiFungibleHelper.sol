@@ -11,6 +11,14 @@ contract SemiFungible1155Helper is SemiFungible1155, PRBTest, StdCheats, StdUtil
     error NotApprovedOrOwner();
     error ArraySize();
 
+    function setMaxIndex(uint256 typeID, uint256 index) public {
+        maxIndex[typeID] = index;
+    }
+
+    function setMaxType() public {
+        typeCounter = type(uint256).max;
+    }
+
     function creator(uint256 tokenID) public view returns (address _creator) {
         _creator = creators[tokenID];
     }
@@ -25,6 +33,10 @@ contract SemiFungible1155Helper is SemiFungible1155, PRBTest, StdCheats, StdUtil
 
     function mintValue(address user, uint256[] memory values, string memory uri) public returns (uint256 tokenID) {
         return _mintValue(user, values, uri);
+    }
+
+    function mintClaim(uint256 typeID, uint256 units) public returns (uint256 tokenID) {
+        return _mintClaim(typeID, units);
     }
 
     function splitValue(address user, uint256 tokenID, uint256[] memory values) public {
@@ -103,7 +115,7 @@ contract SemiFungible1155Helper is SemiFungible1155, PRBTest, StdCheats, StdUtil
 
     function validateOwnerBalanceUnits(uint256 tokenID, address owner, uint256 balance, uint256 units) public {
         uint256 _expectedUnits = 0;
-        if (getNonFungibleIndex(tokenID) != 0 && ownerOf(tokenID) == owner) {
+        if (getItemIndex(tokenID) != 0 && ownerOf(tokenID) == owner) {
             _expectedUnits = units;
         }
         assertEq(ownerOf(tokenID), owner);

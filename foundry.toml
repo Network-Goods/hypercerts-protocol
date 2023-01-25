@@ -3,7 +3,7 @@
 [profile.default]
 auto_detect_solc = false
 bytecode_hash = "none"
-fuzz = { runs = 512 }
+fuzz = { runs = 1025 }
 gas_reports = ["*"]
 libs = ["lib"]
 optimizer = true
@@ -15,5 +15,5 @@ test = "test/foundry"
 
 
 [profile.ci]
-fuzz = { runs = 512 }
+fuzz = { runs = 1024 }
 verbosity = 1
