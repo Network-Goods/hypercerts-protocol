@@ -21,19 +21,14 @@ error MaxValue();
 /// @notice Extends { Upgradeable1155 } token with semi-fungible properties and the concept of `units`
 /// @dev Adds split bit strategy as described in [EIP-1155](https://eips.ethereum.org/EIPS/eip-1155#non-fungible-tokens)
 contract SemiFungible1155 is Upgradeable1155 {
-    //TODO public can become internal
     /// @dev Counter used to generate next typeID.
-    uint256 public typeCounter;
+    uint256 internal typeCounter;
 
     /// @dev Bitmask used to expose only upper 128 bits of uint256
-    uint256 public constant TYPE_MASK = uint256(uint128(int128(~0))) << 128;
+    uint256 internal constant TYPE_MASK = uint256(uint128(int128(~0))) << 128;
 
     /// @dev Bitmask used to expose only lower 128 bits of uint256
-    uint256 public constant NF_INDEX_MASK = uint128(int128(~0));
-
-    /// TODO remove unused var
-    /// @dev Identify non-fungible index. Use to find index of token belonging to `typeID`
-    uint256 public constant TYPE_NF_BIT = uint256(1 << 255);
+    uint256 internal constant NF_INDEX_MASK = uint128(int128(~0));
 
     /// @dev Mapping of `tokenID` to address of `owner`
     mapping(uint256 => address) internal owners;
@@ -45,11 +40,7 @@ contract SemiFungible1155 is Upgradeable1155 {
     mapping(uint256 => uint256) internal tokenValues;
 
     /// @dev Used to find highest index of token belonging to token at `typeID`
-    // TODO should have max value depending on split Types | Items
     mapping(uint256 => uint256) internal maxIndex;
-
-    /// @dev Mapping from `tokenID` to user at `address` to get `units` owned
-    mapping(uint256 => mapping(address => uint256)) internal tokenUserBalances;
 
     /// @dev Emitted on transfer of `value` between `fromTokenID` to `toTokenID` of the same `claimID`
     event ValueTransfer(uint256 claimID, uint256 fromTokenID, uint256 toTokenID, uint256 value);
@@ -294,22 +285,6 @@ contract SemiFungible1155 is Upgradeable1155 {
 
     /// TRANSFERS
 
-    //TODO into beforeTokenTransfer
-    function safeTransferFrom(
-        address _from,
-        address _to,
-        uint256 _id,
-        uint256 _value,
-        bytes memory _data
-    ) public override {
-        if (_from != msg.sender) revert NotApprovedOrOwner(); //TODO Allowance approval
-        if (isBaseType(_id)) revert NotAllowed();
-
-        owners[_id] = _to;
-
-        super.safeTransferFrom(_from, _to, _id, _value, _data);
-    }
-
     // The following functions are overrides required by Solidity.
     function _beforeTokenTransfer(
         address operator,
@@ -318,7 +293,12 @@ contract SemiFungible1155 is Upgradeable1155 {
         uint256[] memory ids,
         uint256[] memory amounts,
         bytes memory data
-    ) internal virtual override(Upgradeable1155) {
+    ) internal virtual override {
+        for (uint256 i = 0; i < ids.length; ++i) {
+            if (isBaseType(ids[i]) && from != address(0)) revert NotAllowed();
+            owners[ids[i]] = to;
+        }
+
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
     }
 
