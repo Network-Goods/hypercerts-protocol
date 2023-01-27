@@ -7,7 +7,6 @@ import { Upgradeable1155 } from "./Upgradeable1155.sol";
 import { IERC1155ReceiverUpgradeable } from "oz-upgradeable/token/ERC1155/IERC1155ReceiverUpgradeable.sol";
 
 import { Errors } from "./libs/Errors.sol";
-import "forge-std/console2.sol";
 
 /// @title Contract for minting semi-fungible EIP1155 tokens
 /// @author bitbeckers
@@ -227,7 +226,6 @@ contract SemiFungible1155 is Upgradeable1155 {
             _valuesToBurn[i] = 1;
             _totalValue += tokenValues[_fractionID];
 
-            // delete owners[_fractionID];
             delete tokenValues[_fractionID];
             emit ValueTransfer(_typeID, _fractionID, target, tokenValues[_fractionID]);
         }

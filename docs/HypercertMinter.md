@@ -976,17 +976,6 @@ error DuplicateEntry()
 
 
 
-### FractionalBurn
-
-```solidity
-error FractionalBurn()
-```
-
-
-
-
-
-
 ### Invalid
 
 ```solidity
