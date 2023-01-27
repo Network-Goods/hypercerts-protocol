@@ -98,14 +98,10 @@ contract SemiFungible1155 is Upgradeable1155 {
 
     /// @dev see {IHypercertToken}
     function _unitsOf(address account, uint256 tokenID) internal view returns (uint256 units) {
-        units = 0;
-
         // Check if fraction token and accounts owns it
         if (getItemIndex(tokenID) != 0 && ownerOf(tokenID) == account) {
             units = tokenValues[tokenID];
         }
-
-        return units;
     }
 
     /// MUTATE
@@ -223,7 +219,7 @@ contract SemiFungible1155 is Upgradeable1155 {
         _notMaxItem(currentID + len);
 
         // starts with 1 because 0 remains the same
-        for (uint256 i = 1; i < len; i++) {
+        for (uint256 i = 1; i < len; ++i) {
             uint256 tokenID = currentID + i;
 
             owners[tokenID] = _account;
@@ -252,12 +248,12 @@ contract SemiFungible1155 is Upgradeable1155 {
         uint256 target = _fractionIDs[len - 1];
         uint256 _typeID = getBaseType(target);
 
-        uint256 _totalValue = 0;
+        uint256 _totalValue;
         uint256[] memory _valuesToBurn = new uint256[](len - 1);
         uint256[] memory _idsToBurn = new uint256[](len - 1);
 
         address _account = _msgSender();
-        for (uint256 i = 0; i < len; i++) {
+        for (uint256 i = 0; i < len; ++i) {
             if (getBaseType(_fractionIDs[i]) != _typeID) revert TypeMismatch();
             uint256 _fractionID = _fractionIDs[i];
             if (_fractionID != target) {
@@ -367,12 +363,11 @@ contract SemiFungible1155 is Upgradeable1155 {
      * @dev calculate the sum of the elements of an array
      */
     function _getSum(uint256[] memory array) internal pure returns (uint256 sum) {
-        sum = 0;
         if (array.length == 0) {
             return sum;
         }
 
-        for (uint256 i = 0; i < array.length; i++) {
+        for (uint256 i = 0; i < array.length; ++i) {
             if (array[i] == 0) revert NotAllowed();
             sum += array[i];
         }
