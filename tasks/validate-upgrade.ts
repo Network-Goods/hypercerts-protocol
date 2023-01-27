@@ -11,5 +11,10 @@ task("validate-upgrade", "Verify implementation upgrades")
       .then(() => console.log("Valid implementation"));
 
     console.log("Validating upgrade..");
-    await upgrades.validateUpgrade(proxy, HypercertMinter, { kind: "uups" }).then(() => console.log("Valid upgrade"));
+    await upgrades
+      .validateUpgrade(proxy, HypercertMinter, { kind: "uups" })
+      .then(() => console.log("Valid upgrade"))
+      .catch((error) => {
+        console.error(error);
+      });
   });
