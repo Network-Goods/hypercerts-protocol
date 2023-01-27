@@ -22,7 +22,7 @@ contract SemiFungible1155BurnTest is PRBTest, StdCheats, StdUtils, SemiFungible1
         bob = address(2);
     }
 
-    function testBurnValue() public {
+    function testBurnFraction() public {
         uint256 baseID = 1 << 128;
 
         uint256 size = 20;
@@ -33,25 +33,25 @@ contract SemiFungible1155BurnTest is PRBTest, StdCheats, StdUtils, SemiFungible1
         startHoax(alice, 100 ether);
 
         semiFungible.mintValue(alice, values, _uri);
+        semiFungible.validateOwnerBalanceUnits(tokenIDs[1], alice, 1, values[1]);
 
-        //TODO No burn of base token?
-        vm.expectRevert(SemiFungible1155Helper.NotAllowed.selector);
-        semiFungible.burnValue(alice, baseID);
-
-        // No fractional burn
-        vm.expectRevert(SemiFungible1155Helper.FractionalBurn.selector);
+        vm.expectEmit(true, true, true, true);
+        emit TransferSingle(alice, alice, address(0), tokenIDs[1], 1);
         semiFungible.burnValue(alice, tokenIDs[1]);
 
-        // Need to merge to only allow burn of full token
-        semiFungible.mergeValue(tokenIDs);
+        semiFungible.validateNotOwnerNoBalanceNoUnits(tokenIDs[1], alice);
+    }
 
-        // Burn merged token
-        semiFungible.burnValue(alice, tokenIDs[tokenIDs.length - 1]);
+    function testCannotBurnClaim() public {
+        uint256 size = 20;
+        uint256 value = 2000;
+        uint256[] memory values = semiFungible.buildValues(size, value);
 
-        semiFungible.validateNotOwnerNoBalanceNoUnits(baseID, alice);
+        startHoax(alice, 100 ether);
 
-        for (uint256 i = 0; i < tokenIDs.length; i++) {
-            semiFungible.validateNotOwnerNoBalanceNoUnits(tokenIDs[i], alice);
-        }
+        uint256 baseID = semiFungible.mintValue(alice, values, _uri);
+
+        vm.expectRevert(SemiFungible1155Helper.NotAllowed.selector);
+        semiFungible.burnValue(alice, baseID);
     }
 }

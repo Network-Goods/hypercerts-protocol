@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.8.4;
+pragma solidity ^0.8.16;
 
 import { StdCheats } from "forge-std/StdCheats.sol";
 import { StdUtils } from "forge-std/StdUtils.sol";
@@ -57,8 +57,6 @@ contract HypercertMinterTest is PRBTest, StdCheats, StdUtils, MinterTestHelper {
     HypercertMinter internal hypercertMinter;
     string internal _uri;
     address internal alice;
-
-    //TODO restore memoizze, gave weird memory issues (stuck..)
 
     function setUp() public {
         merkle = new Merkle();

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.8.4;
+pragma solidity ^0.8.16;
 
 import { console2 } from "forge-std/console2.sol";
 import { PRBTest } from "prb-test/PRBTest.sol";
@@ -41,7 +41,6 @@ contract SemiFungible1155DefaultTest is PRBTest, StdCheats, StdUtils, SemiFungib
 
         assertEq(semiFungible.unitsOf(baseID), 10000);
 
-        semiFungible.validateOwnerBalanceUnits(baseID, alice, 1, values[0] + values[1]);
         semiFungible.validateOwnerBalanceUnits(tokenID, alice, 1, values[0]);
         semiFungible.validateOwnerBalanceUnits(tokenID + 1, alice, 1, values[1]);
 
@@ -67,7 +66,7 @@ contract SemiFungible1155DefaultTest is PRBTest, StdCheats, StdUtils, SemiFungib
 
         semiFungible.splitValue(alice, tokenID, values);
 
-        semiFungible.validateOwnerBalanceUnits(baseID, alice, 1, totalValue);
+        semiFungible.validateNotOwnerNoBalanceNoUnits(baseID, alice);
 
         for (uint256 i = 0; i < tokenIDs.length; i++) {
             semiFungible.validateOwnerBalanceUnits(tokenIDs[i], alice, 1, value);
@@ -87,7 +86,7 @@ contract SemiFungible1155DefaultTest is PRBTest, StdCheats, StdUtils, SemiFungib
         startHoax(alice, 100 ether);
 
         semiFungible.mintValue(alice, values, _uri);
-        semiFungible.validateOwnerBalanceUnits(baseID, alice, 1, totalValue);
+        assertEq(semiFungible.unitsOf(baseID), totalValue);
 
         for (uint256 i = 0; i < (tokenIDs.length - 1); i++) {
             semiFungible.validateOwnerBalanceUnits(tokenIDs[i], alice, 1, value);
@@ -96,10 +95,6 @@ contract SemiFungible1155DefaultTest is PRBTest, StdCheats, StdUtils, SemiFungib
         }
 
         semiFungible.mergeValue(tokenIDs);
-
-        semiFungible.validateOwnerBalanceUnits(baseID, alice, 1, totalValue);
-
-        assertEq(semiFungible.unitsOf(baseID), totalValue);
 
         for (uint256 i = 0; i < (tokenIDs.length - 1); i++) {
             assertEq(semiFungible.ownerOf(tokenIDs[i]), address(0));
@@ -124,11 +119,9 @@ contract SemiFungible1155DefaultTest is PRBTest, StdCheats, StdUtils, SemiFungib
         startHoax(alice, 100 ether);
 
         semiFungible.mintValue(alice, values, _uri);
-        semiFungible.mergeValue(tokenIDs);
-
-        semiFungible.validateOwnerBalanceUnits(baseID, alice, 1, totalValue);
-
         assertEq(semiFungible.unitsOf(baseID), totalValue);
+
+        semiFungible.mergeValue(tokenIDs);
 
         for (uint256 i = 0; i < (tokenIDs.length - 1); i++) {
             assertEq(semiFungible.ownerOf(tokenIDs[i]), address(0));

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.8.4;
+pragma solidity ^0.8.16;
 
 import { console2 } from "forge-std/console2.sol";
 import { PRBTest } from "prb-test/PRBTest.sol";
@@ -41,7 +41,9 @@ contract Bitshifter {
 /// @dev See the "Writing Tests" section in the Foundry Book if this is your first time with Forge.
 /// https://book.getfoundry.sh/forge/writing-tests
 contract BitshiftingTest is PRBTest, StdCheats, StdUtils, Bitshifter {
-    function setUp() public {}
+    function setUp() public {
+        // solhint-disable-previous-line no-empty-blocks
+    }
 
     // HAPPY MINTING
 

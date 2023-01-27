@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.8.4;
+pragma solidity ^0.8.16;
 import { SemiFungible1155 } from "../../src/SemiFungible1155.sol";
 import { PRBTest } from "prb-test/PRBTest.sol";
 import { StdCheats } from "forge-std/StdCheats.sol";
@@ -115,7 +115,7 @@ contract SemiFungible1155Helper is SemiFungible1155, PRBTest, StdCheats, StdUtil
 
     function validateOwnerBalanceUnits(uint256 tokenID, address owner, uint256 balance, uint256 units) public {
         uint256 _expectedUnits = 0;
-        if (getItemIndex(tokenID) != 0 && ownerOf(tokenID) == owner) {
+        if (ownerOf(tokenID) == owner) {
             _expectedUnits = units;
         }
         assertEq(ownerOf(tokenID), owner);

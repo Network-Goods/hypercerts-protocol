@@ -16,17 +16,12 @@ token implementation or standard.
 
 ### HypercertMinter
 
-Example implementation for a hypercert token that is an `ERC1155 NFT` under the hood with an `Allowlist` extenstion.
+Example implementation for a hypercert token that is an `ERC1155 NFT` under the hood with an `Allowlist` extension.
 
 #### Goerli
 
 HypercertMinter (UUPS Proxy) is deployed to proxy address:
-[0xcC08266250930E98256182734913Bf1B36102072](https://goerli.etherscan.io/address/0xcC08266250930E98256182734913Bf1B36102072#code)
-
-#### Sepolia
-
-HypercertMinter (UUPS Proxy) is deployed to proxy address: 0x2E5C3A3015a4A25819Bb2277C65df7Fe2e909CC8
-[0x2E5C3A3015a4A25819Bb2277C65df7Fe2e909CC8](https://sepolia.etherscan.io/address/0x2E5C3A3015a4A25819Bb2277C65df7Fe2e909CC8#code)
+[0x94a04Ce2e537eaf2Bdabd629dE503797e7021E87](https://goerli.etherscan.io/address/0x94a04Ce2e537eaf2Bdabd629dE503797e7021E87#code)
 
 ## Usage
 
@@ -56,13 +51,21 @@ Compile the contracts:
 $ forge build
 ```
 
+### Validate
+
+Validate contract upgradeability agains deployment.
+
+For example `goerli` deployment:
+
+`yarn validate:upgrade --network goerli --proxy 0xcC08266250930E98256182734913Bf1B36102072`
+
 ### Deploy
 
 Deployment of the contract to EVM compatible net is managed by
 [OpenZeppelin](https://docs.openzeppelin.com/upgrades-plugins/1.x/api-hardhat-upgrades). Primarily because of proxy
 management and safety checks.
 
-Run: `yarn hardhat deploy --network sepolia`
+Run: `yarn hardhat deploy --network goerli`
 
 ### Format
 

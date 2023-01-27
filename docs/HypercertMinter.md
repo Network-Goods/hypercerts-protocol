@@ -10,57 +10,6 @@ Implementation of the HypercertTokenInterface using { SemiFungible1155 } as unde
 
 ## Methods
 
-### NF_INDEX_MASK
-
-```solidity
-function NF_INDEX_MASK() external view returns (uint256)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
-### TYPE_MASK
-
-```solidity
-function TYPE_MASK() external view returns (uint256)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
-### TYPE_NF_BIT
-
-```solidity
-function TYPE_NF_BIT() external view returns (uint256)
-```
-
-TODO remove unused var
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
 ### __SemiFungible1155_init
 
 ```solidity
@@ -427,6 +376,34 @@ READ
 |---|---|---|
 | _owner | address | undefined |
 
+### pause
+
+```solidity
+function pause() external nonpayable
+```
+
+PAUSABLE
+
+
+
+
+### paused
+
+```solidity
+function paused() external view returns (bool)
+```
+
+
+
+*Returns true if the contract is paused, and false otherwise.*
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+
 ### proxiableUUID
 
 ```solidity
@@ -478,22 +455,22 @@ function safeBatchTransferFrom(address from, address to, uint256[] ids, uint256[
 ### safeTransferFrom
 
 ```solidity
-function safeTransferFrom(address _from, address _to, uint256 _id, uint256 _value, bytes _data) external nonpayable
+function safeTransferFrom(address from, address to, uint256 id, uint256 amount, bytes data) external nonpayable
 ```
 
-TRANSFERS
 
 
+*See {IERC1155-safeTransferFrom}.*
 
 #### Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| _from | address | undefined |
-| _to | address | undefined |
-| _id | uint256 | undefined |
-| _value | uint256 | undefined |
-| _data | bytes | undefined |
+| from | address | undefined |
+| to | address | undefined |
+| id | uint256 | undefined |
+| amount | uint256 | undefined |
+| data | bytes | undefined |
 
 ### setApprovalForAll
 
@@ -568,23 +545,6 @@ function transferOwnership(address newOwner) external nonpayable
 |---|---|---|
 | newOwner | address | undefined |
 
-### typeCounter
-
-```solidity
-function typeCounter() external view returns (uint256)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
 ### unitsOf
 
 ```solidity
@@ -629,6 +589,17 @@ function unitsOf(uint256 tokenID) external view returns (uint256 units)
 | Name | Type | Description |
 |---|---|---|
 | units | uint256 | undefined |
+
+### unpause
+
+```solidity
+function unpause() external nonpayable
+```
+
+
+
+
+
 
 ### upgradeTo
 
@@ -844,6 +815,22 @@ event OwnershipTransferred(address indexed previousOwner, address indexed newOwn
 | previousOwner `indexed` | address | undefined |
 | newOwner `indexed` | address | undefined |
 
+### Paused
+
+```solidity
+event Paused(address account)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| account  | address | undefined |
+
 ### TransferBatch
 
 ```solidity
@@ -900,6 +887,22 @@ event URI(string value, uint256 indexed id)
 |---|---|---|
 | value  | string | undefined |
 | id `indexed` | uint256 | undefined |
+
+### Unpaused
+
+```solidity
+event Unpaused(address account)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| account  | address | undefined |
 
 ### Upgraded
 
@@ -999,17 +1002,6 @@ error Invalid()
 
 ```solidity
 error NotAllowed()
-```
-
-
-
-
-
-
-### NotApprovedOrOwner
-
-```solidity
-error NotApprovedOrOwner()
 ```
 
 
