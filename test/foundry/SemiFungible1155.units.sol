@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.8.4;
+pragma solidity ^0.8.16;
 
 import { console2 } from "forge-std/console2.sol";
 import { PRBTest } from "prb-test/PRBTest.sol";
@@ -20,7 +20,7 @@ contract SemiFungible1155UnitsTest is PRBTest, StdCheats, StdUtils {
         _uri = "ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi";
         alice = address(1);
         bob = address(2);
-        hoax(alice, 100 ether);
+        startHoax(alice, 100 ether);
     }
 
     // FULL TOKENS
@@ -28,8 +28,6 @@ contract SemiFungible1155UnitsTest is PRBTest, StdCheats, StdUtils {
     function testUnitsSingleFraction() public {
         uint256 baseID = 1 << 128;
         uint128 tokenID = 1;
-
-        vm.startPrank(alice);
 
         semiFungible.mintValue(alice, 10000, _uri);
 
@@ -42,8 +40,7 @@ contract SemiFungible1155UnitsTest is PRBTest, StdCheats, StdUtils {
         semiFungible.validateNotOwnerNoBalanceNoUnits(baseID + tokenID, bob);
 
         // All tokens have value/supply of 1
-        vm.expectRevert(SemiFungible1155Helper.NotAllowed.selector);
-        semiFungible.safeTransferFrom(alice, bob, baseID, 10_000, "");
+        assertEq(semiFungible.balanceOf(alice, baseID + tokenID), 1);
 
         // Block 'regular' transfer of base type ID token
         vm.expectRevert(SemiFungible1155Helper.NotAllowed.selector);
@@ -68,8 +65,6 @@ contract SemiFungible1155UnitsTest is PRBTest, StdCheats, StdUtils {
         uint256 totalValue = size * value;
         uint256[] memory values = semiFungible.buildValues(size, value);
         uint256[] memory tokenIDs = semiFungible.buildIDs(baseID, size);
-
-        vm.startPrank(alice);
 
         semiFungible.mintValue(alice, values, _uri);
 

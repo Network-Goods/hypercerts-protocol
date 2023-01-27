@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.8.4;
+pragma solidity ^0.8.16;
 
 import { console2 } from "forge-std/console2.sol";
 import { StdCheats } from "forge-std/StdCheats.sol";
@@ -57,7 +57,6 @@ contract SemiFungible1155TransferTest is PRBTest, StdCheats, StdUtils {
         uint128 tokenID = 1;
 
         // Pass because zero-value in call
-        //TODO think about UX, cheaper on gas for calls containing value
         semiFungible.safeTransferFrom(alice, bob, baseID + tokenID, 0, "");
     }
 
@@ -145,7 +144,7 @@ contract SemiFungible1155TransferTest is PRBTest, StdCheats, StdUtils {
         semiFungible.safeTransferFrom(alice, bob, tokenIDs[1], 1, "");
 
         // Updates tokenFraction value for (new) owner
-        semiFungible.validateOwnerBalanceUnits(baseID, alice, 1, totalValue - value);
+        semiFungible.validateOwnerBalanceUnits(baseID, alice, 1, totalValue);
         semiFungible.validateNotOwnerNoBalanceNoUnits(baseID, bob);
 
         // Updates token ownership

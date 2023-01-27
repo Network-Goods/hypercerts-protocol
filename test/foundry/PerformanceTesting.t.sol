@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.8.4;
+pragma solidity ^0.8.16;
 
 import { console2 } from "forge-std/console2.sol";
 import { PRBTest } from "prb-test/PRBTest.sol";
@@ -67,6 +67,7 @@ contract PerformanceTestHelper is Merkle {
     function isContract(address _addr) internal view returns (bool) {
         uint32 size;
         assembly {
+            // solhint-disable-next-line no-inline-assembly
             size := extcodesize(_addr)
         }
         return (size > 0);

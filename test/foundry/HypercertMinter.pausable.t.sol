@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.8.4;
+pragma solidity ^0.8.16;
 
 import { console2 } from "forge-std/console2.sol";
 import { StdCheats } from "forge-std/StdCheats.sol";
@@ -49,8 +49,8 @@ contract PausableTestHelper {
 contract HypercertMinterPausableTest is PRBTest, StdCheats, StdUtils, PausableTestHelper {
     HypercertMinter internal hypercertMinter;
     string internal _uri;
-    address owner;
-    address alice;
+    address internal owner;
+    address internal alice;
 
     function setUp() public {
         owner = address(0);
