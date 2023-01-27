@@ -56,13 +56,21 @@ Compile the contracts:
 $ forge build
 ```
 
+### Validate
+
+Validate contract upgradeability agains deployment.
+
+For example `goerli` deployment:
+
+`yarn hardhat --network goerli validate-upgrade --proxy 0xcC08266250930E98256182734913Bf1B36102072`
+
 ### Deploy
 
 Deployment of the contract to EVM compatible net is managed by
 [OpenZeppelin](https://docs.openzeppelin.com/upgrades-plugins/1.x/api-hardhat-upgrades). Primarily because of proxy
 management and safety checks.
 
-Run: `yarn hardhat deploy --network sepolia`
+Run: `yarn hardhat deploy --network goerli`
 
 ### Format
 
