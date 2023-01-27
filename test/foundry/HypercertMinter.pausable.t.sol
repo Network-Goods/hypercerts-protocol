@@ -49,8 +49,8 @@ contract PausableTestHelper {
 contract HypercertMinterPausableTest is PRBTest, StdCheats, StdUtils, PausableTestHelper {
     HypercertMinter internal hypercertMinter;
     string internal _uri;
-    address owner;
-    address alice;
+    address internal owner;
+    address internal alice;
 
     function setUp() public {
         owner = address(0);

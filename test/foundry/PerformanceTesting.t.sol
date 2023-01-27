@@ -67,6 +67,7 @@ contract PerformanceTestHelper is Merkle {
     function isContract(address _addr) internal view returns (bool) {
         uint32 size;
         assembly {
+            // solhint-disable-next-line no-inline-assembly
             size := extcodesize(_addr)
         }
         return (size > 0);
