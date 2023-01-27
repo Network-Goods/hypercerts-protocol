@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.8.4;
+pragma solidity ^0.8.16;
 import { SemiFungible1155 } from "../../src/SemiFungible1155.sol";
 import { PRBTest } from "prb-test/PRBTest.sol";
 import { StdCheats } from "forge-std/StdCheats.sol";
