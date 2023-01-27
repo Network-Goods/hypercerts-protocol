@@ -336,12 +336,10 @@ contract SemiFungible1155 is Upgradeable1155 {
      * 1. typeCounter
      * 2. TYPE_MASK
      * 3. NF_INDEX_MASK
-     * 4. TYPE_NF_BIT
-     * 5. owners
-     * 6. creators
-     * 7. tokenValues
-     * 8. maxIndex
-     * 9. tokenUserBalances
+     * 4. owners
+     * 5. creators
+     * 6. tokenValues
+     * 7. maxIndex
      */
-    uint256[21] private __gap;
+    uint256[23] private __gap;
 }
