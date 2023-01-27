@@ -427,6 +427,34 @@ READ
 |---|---|---|
 | _owner | address | undefined |
 
+### pause
+
+```solidity
+function pause() external nonpayable
+```
+
+PAUSABLE
+
+
+
+
+### paused
+
+```solidity
+function paused() external view returns (bool)
+```
+
+
+
+*Returns true if the contract is paused, and false otherwise.*
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+
 ### proxiableUUID
 
 ```solidity
@@ -629,6 +657,17 @@ function unitsOf(uint256 tokenID) external view returns (uint256 units)
 | Name | Type | Description |
 |---|---|---|
 | units | uint256 | undefined |
+
+### unpause
+
+```solidity
+function unpause() external nonpayable
+```
+
+
+
+
+
 
 ### upgradeTo
 
@@ -844,6 +883,22 @@ event OwnershipTransferred(address indexed previousOwner, address indexed newOwn
 | previousOwner `indexed` | address | undefined |
 | newOwner `indexed` | address | undefined |
 
+### Paused
+
+```solidity
+event Paused(address account)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| account  | address | undefined |
+
 ### TransferBatch
 
 ```solidity
@@ -900,6 +955,22 @@ event URI(string value, uint256 indexed id)
 |---|---|---|
 | value  | string | undefined |
 | id `indexed` | uint256 | undefined |
+
+### Unpaused
+
+```solidity
+event Unpaused(address account)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| account  | address | undefined |
 
 ### Upgraded
 
