@@ -33,10 +33,8 @@ contract SemiFungible1155UnitsTest is PRBTest, StdCheats, StdUtils {
 
         assertEq(semiFungible.unitsOf(baseID), 10_000);
 
-        semiFungible.validateOwnerBalanceUnits(baseID, alice, 1, 10000);
         semiFungible.validateOwnerBalanceUnits(baseID + tokenID, alice, 1, 10000);
 
-        semiFungible.validateNotOwnerNoBalanceNoUnits(baseID, bob);
         semiFungible.validateNotOwnerNoBalanceNoUnits(baseID + tokenID, bob);
 
         // All tokens have value/supply of 1
@@ -70,7 +68,6 @@ contract SemiFungible1155UnitsTest is PRBTest, StdCheats, StdUtils {
 
         assertEq(semiFungible.unitsOf(baseID), totalValue);
 
-        semiFungible.validateOwnerBalanceUnits(baseID, alice, 1, totalValue);
         semiFungible.validateNotOwnerNoBalanceNoUnits(baseID, bob);
 
         for (uint256 i = 0; i < tokenIDs.length; i++) {

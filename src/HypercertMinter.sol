@@ -74,7 +74,7 @@ contract HypercertMinter is IHypercertToken, SemiFungible1155, AllowlistMinter, 
     ) external whenNotPaused {
         //TODO determine size limit as a function of gas cap
         uint256 len = claimIDs.length;
-        for (uint256 i = 0; i < len; i++) {
+        for (uint256 i = 0; i < len; ++i) {
             _processClaim(proofs[i], claimIDs[i], units[i]);
         }
         _batchMintClaims(claimIDs, units);
@@ -166,7 +166,9 @@ contract HypercertMinter is IHypercertToken, SemiFungible1155, AllowlistMinter, 
         bytes memory data
     ) internal virtual override(SemiFungible1155) {
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
-        for (uint256 i = 0; i < ids.length; i++) {
+        uint256 len = ids.length;
+
+        for (uint256 i = 0; i < len; ++i) {
             uint256 typeID = getBaseType(ids[i]);
             TransferRestrictions policy = typeRestrictions[typeID];
             if (policy == TransferRestrictions.DisallowAll) {
