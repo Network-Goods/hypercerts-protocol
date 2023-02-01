@@ -22,7 +22,7 @@ _Instances (1)_:
 ```solidity
 File: SemiFungible1155.sol
 
-331:             if (isBaseType(ids[i]) && from != address(0)) revert Errors.NotAllowed();
+319:             if (isBaseType(ids[i]) && from != address(0)) revert Errors.NotAllowed();
 
 ```
 
@@ -53,26 +53,26 @@ _Instances (8)_:
 ```solidity
 File: HypercertMinter.sol
 
-40:     function mintClaim(uint256 units, string memory _uri, TransferRestrictions restrictions) external whenNotPaused {
+43:         string memory _uri,
 
-51:         string memory _uri,
+57:         string memory _uri,
 
-91:         string memory _uri,
+104:         string memory _uri,
 
 ```
 
 ```solidity
 File: interfaces/IHypercertToken.sol
 
-25:     function mintClaim(uint256 units, string memory uri, TransferRestrictions restrictions) external;
+25:     function mintClaim(address account, uint256 units, string memory uri, TransferRestrictions restrictions) external;
 
-31:         uint256[] memory fractions,
+32:         uint256[] memory fractions,
 
-32:         string memory uri,
+33:         string memory uri,
 
 39:     function splitValue(address account, uint256 tokenID, uint256[] memory _values) external;
 
-43:     function mergeValue(uint256[] memory tokenIDs) external;
+43:     function mergeValue(address account, uint256[] memory tokenIDs) external;
 
 ```
 
@@ -122,13 +122,13 @@ File: HypercertMinter.sol
 
 9: import { Errors } from "./libs/Errors.sol";
 
-79:                 ++i;
+91:                 ++i;
 
-79:                 ++i;
+91:                 ++i;
 
-171:                 ++i;
+194:                 ++i;
 
-171:                 ++i;
+194:                 ++i;
 
 ```
 
@@ -163,89 +163,89 @@ File: SemiFungible1155.sol
 
 112:         uint256 tokenID = typeID + ++maxIndex[typeID]; //1 based indexing, 0 holds type data
 
-132:         _splitValue(_account, typeID + maxIndex[typeID], _values);
+127:         _splitValue(_account, typeID + maxIndex[typeID], _values);
 
-141:             tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
+136:             tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
 
-141:             tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
+136:             tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
 
-141:             tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
+136:             tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
 
-141:             tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
+136:             tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
 
-141:             tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
+136:             tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
 
-168:                 uint256 tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
+164:                 uint256 tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
 
-168:                 uint256 tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
+164:                 uint256 tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
 
-168:                 uint256 tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
+164:                 uint256 tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
 
-168:                 uint256 tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
+164:                 uint256 tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
 
-168:                 uint256 tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
+164:                 uint256 tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
 
-172:                 ++i;
+168:                 ++i;
 
-172:                 ++i;
+168:                 ++i;
 
-194:         uint256 len = _values.length - 1;
+188:         uint256 len = _values.length - 1;
 
-196:         maxIndex[_typeID] += len;
+190:         maxIndex[_typeID] += len;
 
-215:                 toIDs[i] = ++currentID;
+209:                 toIDs[i] = ++currentID;
 
-215:                 toIDs[i] = ++currentID;
+209:                 toIDs[i] = ++currentID;
 
-220:                     ++i;
+214:                     ++i;
 
-220:                     ++i;
+214:                     ++i;
 
-228:             valueLeft -= values[i];
+222:             valueLeft -= values[i];
 
-233:                 ++i;
+227:                 ++i;
 
-233:                 ++i;
+227:                 ++i;
 
-250:         uint256 len = _fractionIDs.length - 1;
+244:         uint256 len = _fractionIDs.length - 1;
 
-272:                     ++i;
+264:                     ++i;
 
-272:                     ++i;
+264:                     ++i;
 
-280:             _totalValue += values[i];
+272:             _totalValue += values[i];
 
-284:                 ++i;
+276:                 ++i;
 
-284:                 ++i;
+276:                 ++i;
 
-288:         tokenValues[target] += _totalValue;
+280:         tokenValues[target] += _totalValue;
 
-333:                 ++i;
+321:                 ++i;
 
-333:                 ++i;
+321:                 ++i;
 
-355:                 ++i;
+343:                 ++i;
 
-355:                 ++i;
+343:                 ++i;
 
-378:                 ++i;
+366:                 ++i;
 
-378:                 ++i;
+366:                 ++i;
 
-402:         ++_count;
+390:         ++_count;
 
-402:         ++_count;
+390:         ++_count;
 
-410:         ++_count;
+398:         ++_count;
 
-410:         ++_count;
+398:         ++_count;
 
-420:             sum += array[i];
+408:             sum += array[i];
 
-422:                 ++i;
+410:                 ++i;
 
-422:                 ++i;
+410:                 ++i;
 
 ```
 
@@ -315,11 +315,11 @@ _Instances (7)_:
 ```solidity
 File: HypercertMinter.sol
 
-130:     function pause() external onlyOwner {
+143:     function pause() external onlyOwner {
 
-134:     function unpause() external onlyOwner {
+147:     function unpause() external onlyOwner {
 
-148:     function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {
+171:     function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {
 
 ```
 
@@ -328,7 +328,7 @@ File: SemiFungible1155.sol
 
 45:     function __SemiFungible1155_init() public virtual onlyInitializing {
 
-383:     function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {
+371:     function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {
 
 ```
 
@@ -366,7 +366,7 @@ _Instances (1)_:
 ```solidity
 File: SemiFungible1155.sol
 
-375:             if (getBaseType(to) > 0 && getBaseType(from) != getBaseType(to)) revert Errors.TypeMismatch();
+363:             if (getBaseType(_to) > 0 && getBaseType(_from) != getBaseType(_to)) revert Errors.TypeMismatch();
 
 ```
 
@@ -390,13 +390,13 @@ File: SemiFungible1155.sol
 
 |               | Issue                                                                      | Instances |
 | ------------- | :------------------------------------------------------------------------- | :-------: |
-| [NC-1](#NC-1) | `require()` / `revert()` statements should have descriptive reason strings |    20     |
+| [NC-1](#NC-1) | `require()` / `revert()` statements should have descriptive reason strings |    18     |
 | [NC-2](#NC-2) | Event is missing `indexed` fields                                          |     5     |
 | [NC-3](#NC-3) | Functions not used internally could be marked external                     |     1     |
 
 ### <a name="NC-1"></a>[NC-1] `require()` / `revert()` statements should have descriptive reason strings
 
-_Instances (20)_:
+_Instances (18)_:
 
 ```solidity
 File: AllowlistMinter.sol
@@ -416,9 +416,9 @@ File: AllowlistMinter.sol
 ```solidity
 File: HypercertMinter.sol
 
-166:                 revert Errors.TransfersNotAllowed();
+189:                 revert Errors.TransfersNotAllowed();
 
-168:                 revert Errors.TransfersNotAllowed();
+191:                 revert Errors.TransfersNotAllowed();
 
 ```
 
@@ -427,29 +427,25 @@ File: SemiFungible1155.sol
 
 108:             revert Errors.NotAllowed();
 
-128:             revert Errors.ArraySize();
+132:         if (!isBaseType(_typeID)) revert Errors.NotAllowed();
 
-137:         if (!isBaseType(_typeID)) revert Errors.NotAllowed();
+160:             if (!isBaseType(_typeID)) revert Errors.NotAllowed();
 
-164:             if (!isBaseType(_typeID)) revert Errors.NotAllowed();
+179:         if (_values.length > 253 || _values.length < 2) revert Errors.ArraySize();
 
-184:         if (_values.length > 253 || _values.length < 2) revert Errors.ArraySize();
+180:         if (tokenValues[_tokenID] != _getSum(_values)) revert Errors.NotAllowed();
 
-185:         if (tokenValues[_tokenID] != _getSum(_values)) revert Errors.NotAllowed();
+242:             revert Errors.ArraySize();
 
-248:             revert Errors.ArraySize();
+319:             if (isBaseType(ids[i]) && from != address(0)) revert Errors.NotAllowed();
 
-298:         if (tokenValues[_tokenID] != tokenValues[_typeID]) revert Errors.FractionalBurn();
+362:             if (isBaseType(_from)) revert Errors.NotAllowed();
 
-331:             if (isBaseType(ids[i]) && from != address(0)) revert Errors.NotAllowed();
+363:             if (getBaseType(_to) > 0 && getBaseType(_from) != getBaseType(_to)) revert Errors.TypeMismatch();
 
-374:             if (isBaseType(from)) revert Errors.NotAllowed();
+364:             if (from != _msgSender() && !isApprovedForAll(from, _msgSender())) revert Errors.NotApprovedOrOwner();
 
-375:             if (getBaseType(to) > 0 && getBaseType(from) != getBaseType(to)) revert Errors.TypeMismatch();
-
-376:             if (ownerOf(from) != msg.sender) revert Errors.NotApprovedOrOwner();
-
-419:             if (array[i] == 0) revert Errors.NotAllowed();
+407:             if (array[i] == 0) revert Errors.NotAllowed();
 
 ```
 
@@ -494,7 +490,7 @@ _Instances (1)_:
 ```solidity
 File: HypercertMinter.sol
 
-141:     function uri(uint256 tokenID) public view override(IHypercertToken, SemiFungible1155) returns (string memory _uri) {
+154:     function uri(uint256 tokenID) public view override(IHypercertToken, SemiFungible1155) returns (string memory _uri) {
 
 ```
 
@@ -568,18 +564,18 @@ _Instances (5)_:
 ```solidity
 File: HypercertMinter.sol
 
-130:     function pause() external onlyOwner {
+143:     function pause() external onlyOwner {
 
-134:     function unpause() external onlyOwner {
+147:     function unpause() external onlyOwner {
 
-148:     function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {
+171:     function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {
 
 ```
 
 ```solidity
 File: SemiFungible1155.sol
 
-383:     function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {
+371:     function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {
 
 ```
 
