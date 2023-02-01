@@ -6,11 +6,12 @@
 | --------------- | :--------------------------------------------------------------------------------- | :-------: |
 | [GAS-1](#GAS-1) | Use assembly to check for `address(0)`                                             |     1     |
 | [GAS-2](#GAS-2) | Using bools for storage incurs overhead                                            |     1     |
-| [GAS-3](#GAS-3) | Use calldata instead of memory for function arguments that do not get mutated      |    11     |
-| [GAS-4](#GAS-4) | For Operations that will not overflow, you could use unchecked                     |    94     |
+| [GAS-3](#GAS-3) | Use calldata instead of memory for function arguments that do not get mutated      |     8     |
+| [GAS-4](#GAS-4) | For Operations that will not overflow, you could use unchecked                     |    102    |
 | [GAS-5](#GAS-5) | Functions guaranteed to revert when called by normal users can be marked `payable` |     7     |
 | [GAS-6](#GAS-6) | Using `private` rather than `public` for constants, saves gas                      |     1     |
-| [GAS-7](#GAS-7) | `internal` functions not called by the contract should be removed                  |     2     |
+| [GAS-7](#GAS-7) | Use != 0 instead of > 0 for unsigned integer comparison                            |     1     |
+| [GAS-8](#GAS-8) | `internal` functions not called by the contract should be removed                  |     2     |
 
 ### <a name="GAS-1"></a>[GAS-1] Use assembly to check for `address(0)`
 
@@ -21,7 +22,7 @@ _Instances (1)_:
 ```solidity
 File: SemiFungible1155.sol
 
-289:             if (isBaseType(ids[i]) && from != address(0)) revert Errors.NotAllowed();
+331:             if (isBaseType(ids[i]) && from != address(0)) revert Errors.NotAllowed();
 
 ```
 
@@ -47,22 +48,16 @@ loaded into memory. If the data passed into the function does not need to be cha
 it can be passed in as `calldata`. The one exception to this is if the argument must later be passed into another
 function that takes an argument that specifies `memory` storage.
 
-_Instances (11)_:
+_Instances (8)_:
 
 ```solidity
 File: HypercertMinter.sol
 
 40:     function mintClaim(uint256 units, string memory _uri, TransferRestrictions restrictions) external whenNotPaused {
 
-50:         uint256[] memory fractions,
-
 51:         string memory _uri,
 
 91:         string memory _uri,
-
-102:     function splitValue(address _account, uint256 _tokenID, uint256[] memory _values) external whenNotPaused {
-
-108:     function mergeValue(uint256[] memory _fractionIDs) external whenNotPaused {
 
 ```
 
@@ -83,7 +78,7 @@ File: interfaces/IHypercertToken.sol
 
 ### <a name="GAS-4"></a>[GAS-4] For Operations that will not overflow, you could use unchecked
 
-_Instances (94)_:
+_Instances (102)_:
 
 ```solidity
 File: AllowlistMinter.sol
@@ -168,73 +163,89 @@ File: SemiFungible1155.sol
 
 112:         uint256 tokenID = typeID + ++maxIndex[typeID]; //1 based indexing, 0 holds type data
 
-133:         _splitValue(_account, typeID + maxIndex[typeID], _values);
+132:         _splitValue(_account, typeID + maxIndex[typeID], _values);
 
-142:             tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
+141:             tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
 
-142:             tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
+141:             tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
 
-142:             tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
+141:             tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
 
-142:             tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
+141:             tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
 
-142:             tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
+141:             tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
 
-167:                 tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
+168:                 uint256 tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
 
-167:                 tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
+168:                 uint256 tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
 
-167:                 tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
+168:                 uint256 tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
 
-167:                 tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
+168:                 uint256 tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
 
-167:                 tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
+168:                 uint256 tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
 
-174:                 ++i;
+172:                 ++i;
 
-174:                 ++i;
+172:                 ++i;
 
-202:         maxIndex[_typeID] += len;
+194:         uint256 len = _values.length - 1;
 
-209:             currentID += 1;
+196:         maxIndex[_typeID] += len;
 
-213:             valueLeft -= value;
+215:                 toIDs[i] = ++currentID;
 
-219:                 ++i;
+215:                 toIDs[i] = ++currentID;
 
-219:                 ++i;
+220:                     ++i;
 
-232:         uint256 len = _fractionIDs.length - 1;
+220:                     ++i;
 
-246:             _totalValue += tokenValues[_fractionID];
+228:             valueLeft -= values[i];
 
-251:                 ++i;
+233:                 ++i;
 
-251:                 ++i;
+233:                 ++i;
 
-255:         tokenValues[target] += _totalValue;
+250:         uint256 len = _fractionIDs.length - 1;
 
-291:                 ++i;
+272:                     ++i;
 
-291:                 ++i;
+272:                     ++i;
 
-313:                 ++i;
+280:             _totalValue += values[i];
 
-313:                 ++i;
+284:                 ++i;
 
-337:         ++_count;
+284:                 ++i;
 
-337:         ++_count;
+288:         tokenValues[target] += _totalValue;
 
-345:         ++_count;
+333:                 ++i;
 
-345:         ++_count;
+333:                 ++i;
 
-355:             sum += array[i];
+355:                 ++i;
 
-357:                 ++i;
+355:                 ++i;
 
-357:                 ++i;
+378:                 ++i;
+
+378:                 ++i;
+
+402:         ++_count;
+
+402:         ++_count;
+
+410:         ++_count;
+
+410:         ++_count;
+
+420:             sum += array[i];
+
+422:                 ++i;
+
+422:                 ++i;
 
 ```
 
@@ -317,7 +328,7 @@ File: SemiFungible1155.sol
 
 45:     function __SemiFungible1155_init() public virtual onlyInitializing {
 
-318:     function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {
+383:     function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {
 
 ```
 
@@ -348,7 +359,18 @@ File: HypercertMinter.sol
 
 ```
 
-### <a name="GAS-7"></a>[GAS-7] `internal` functions not called by the contract should be removed
+### <a name="GAS-7"></a>[GAS-7] Use != 0 instead of > 0 for unsigned integer comparison
+
+_Instances (1)_:
+
+```solidity
+File: SemiFungible1155.sol
+
+375:             if (getBaseType(to) > 0 && getBaseType(from) != getBaseType(to)) revert Errors.TypeMismatch();
+
+```
+
+### <a name="GAS-8"></a>[GAS-8] `internal` functions not called by the contract should be removed
 
 If the functions are required by an interface, the contract should inherit from that interface and use the `override`
 keyword
@@ -368,13 +390,13 @@ File: SemiFungible1155.sol
 
 |               | Issue                                                                      | Instances |
 | ------------- | :------------------------------------------------------------------------- | :-------: |
-| [NC-1](#NC-1) | `require()` / `revert()` statements should have descriptive reason strings |    19     |
+| [NC-1](#NC-1) | `require()` / `revert()` statements should have descriptive reason strings |    20     |
 | [NC-2](#NC-2) | Event is missing `indexed` fields                                          |     5     |
 | [NC-3](#NC-3) | Functions not used internally could be marked external                     |     1     |
 
 ### <a name="NC-1"></a>[NC-1] `require()` / `revert()` statements should have descriptive reason strings
 
-_Instances (19)_:
+_Instances (20)_:
 
 ```solidity
 File: AllowlistMinter.sol
@@ -407,25 +429,27 @@ File: SemiFungible1155.sol
 
 128:             revert Errors.ArraySize();
 
-138:         if (!isBaseType(_typeID)) revert Errors.NotAllowed();
+137:         if (!isBaseType(_typeID)) revert Errors.NotAllowed();
 
-163:             if (!isBaseType(_typeID)) revert Errors.NotAllowed();
+164:             if (!isBaseType(_typeID)) revert Errors.NotAllowed();
 
-189:             revert Errors.ArraySize();
+184:         if (_values.length > 253 || _values.length < 2) revert Errors.ArraySize();
 
-193:             revert Errors.NotAllowed();
+185:         if (tokenValues[_tokenID] != _getSum(_values)) revert Errors.NotAllowed();
 
-230:             revert Errors.ArraySize();
+248:             revert Errors.ArraySize();
 
-242:             if (getBaseType(_fractionIDs[i]) != _typeID) revert Errors.TypeMismatch();
+298:         if (tokenValues[_tokenID] != tokenValues[_typeID]) revert Errors.FractionalBurn();
 
-265:         if (isBaseType(_tokenID)) revert Errors.NotAllowed();
+331:             if (isBaseType(ids[i]) && from != address(0)) revert Errors.NotAllowed();
 
-266:         if (tokenValues[_tokenID] != tokenValues[_typeID]) revert Errors.FractionalBurn();
+374:             if (isBaseType(from)) revert Errors.NotAllowed();
 
-289:             if (isBaseType(ids[i]) && from != address(0)) revert Errors.NotAllowed();
+375:             if (getBaseType(to) > 0 && getBaseType(from) != getBaseType(to)) revert Errors.TypeMismatch();
 
-354:             if (array[i] == 0) revert Errors.NotAllowed();
+376:             if (ownerOf(from) != msg.sender) revert Errors.NotApprovedOrOwner();
+
+419:             if (array[i] == 0) revert Errors.NotAllowed();
 
 ```
 
@@ -555,7 +579,7 @@ File: HypercertMinter.sol
 ```solidity
 File: SemiFungible1155.sol
 
-318:     function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {
+383:     function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {
 
 ```
 

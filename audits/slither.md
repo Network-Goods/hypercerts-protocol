@@ -320,4 +320,379 @@ src/HypercertMinter.sol#L184
 - [ ] ID-59 [SemiFungible1155.\_\_gap](src/SemiFungible1155.sol#L375) is never used in
       [SemiFungible1155](src/SemiFungible1155.sol#L15-L376)
 
-src/SemiFungible1155.sol#L375
+src/SemiFungible1155.sol#L375 Summary
+
+- [solc-version](#solc-version) (4 results) (Informational)
+- [naming-convention](#naming-convention) (17 results) (Informational)
+- [uninitialized-local](#uninitialized-local) (20 results) (Medium)
+- [shadowing-local](#shadowing-local) (2 results) (Low)
+- [dead-code](#dead-code) (25 results) (Informational)
+- [unused-state](#unused-state) (2 results) (Informational)
+
+## solc-version
+
+Impact: Informational Confidence: High
+
+- [ ] ID-0 solc-0.8.17 is not recommended for deployment
+
+- [ ] ID-1 solc-0.8.17 is not recommended for deployment
+
+- [ ] ID-2 solc-0.8.17 is not recommended for deployment
+
+- [ ] ID-3 solc-0.8.17 is not recommended for deployment
+
+## naming-convention
+
+Impact: Informational Confidence: High
+
+- [ ] ID-4 Function [Upgradeable1155.\_\_Upgradeable1155_init()](src/Upgradeable1155.sol#L21-L27) is not in mixedCase
+
+src/Upgradeable1155.sol#L21-L27
+
+- [ ] ID-5 Parameter [HypercertMinter.splitValue(address,uint256,uint256[]).\_values](src/HypercertMinter.sol#L102) is
+      not in mixedCase
+
+src/HypercertMinter.sol#L102
+
+- [ ] ID-6 Function [Upgradeable1155.\_\_Upgradeable1155_init()](src/Upgradeable1155.sol#L21-L27) is not in mixedCase
+
+src/Upgradeable1155.sol#L21-L27
+
+- [ ] ID-7 Function [SemiFungible1155.\_\_SemiFungible1155_init()](src/SemiFungible1155.sol#L45-L47) is not in mixedCase
+
+src/SemiFungible1155.sol#L45-L47
+
+- [ ] ID-8 Variable [HypercertMinter.\_\_gap](src/HypercertMinter.sol#L184) is not in mixedCase
+
+src/HypercertMinter.sol#L184
+
+- [ ] ID-9 Parameter [HypercertMinter.mergeValue(uint256[]).\_fractionIDs](src/HypercertMinter.sol#L108) is not in
+      mixedCase
+
+src/HypercertMinter.sol#L108
+
+- [ ] ID-10 Parameter [HypercertMinter.splitValue(address,uint256,uint256[]).\_tokenID](src/HypercertMinter.sol#L102) is
+      not in mixedCase
+
+src/HypercertMinter.sol#L102
+
+- [ ] ID-11 Parameter [HypercertMinter.burnValue(address,uint256).\_tokenID](src/HypercertMinter.sol#L114) is not in
+      mixedCase
+
+src/HypercertMinter.sol#L114
+
+- [ ] ID-12 Parameter [HypercertMinter.splitValue(address,uint256,uint256[]).\_account](src/HypercertMinter.sol#L102) is
+      not in mixedCase
+
+src/HypercertMinter.sol#L102
+
+- [ ] ID-13 Parameter
+      [HypercertMinter.mintClaimWithFractions(uint256,uint256[],string,IHypercertToken.TransferRestrictions).\_uri](src/HypercertMinter.sol#L51)
+      is not in mixedCase
+
+src/HypercertMinter.sol#L51
+
+- [ ] ID-14 Parameter
+      [HypercertMinter.mintClaim(uint256,string,IHypercertToken.TransferRestrictions).\_uri](src/HypercertMinter.sol#L40)
+      is not in mixedCase
+
+src/HypercertMinter.sol#L40
+
+- [ ] ID-15 Variable [SemiFungible1155.\_\_gap](src/SemiFungible1155.sol#L447) is not in mixedCase
+
+src/SemiFungible1155.sol#L447
+
+- [ ] ID-16 Parameter
+      [HypercertMinter.createAllowlist(uint256,bytes32,string,IHypercertToken.TransferRestrictions).\_uri](src/HypercertMinter.sol#L91)
+      is not in mixedCase
+
+src/HypercertMinter.sol#L91
+
+- [ ] ID-17 Parameter [HypercertMinter.burnValue(address,uint256).\_account](src/HypercertMinter.sol#L114) is not in
+      mixedCase
+
+src/HypercertMinter.sol#L114
+
+- [ ] ID-18 Function [Upgradeable1155.\_\_Upgradeable1155_init()](src/Upgradeable1155.sol#L21-L27) is not in mixedCase
+
+src/Upgradeable1155.sol#L21-L27
+
+- [ ] ID-19 Function [SemiFungible1155.\_\_SemiFungible1155_init()](src/SemiFungible1155.sol#L45-L47) is not in
+      mixedCase
+
+src/SemiFungible1155.sol#L45-L47
+
+- [ ] ID-20 Variable [SemiFungible1155.\_\_gap](src/SemiFungible1155.sol#L447) is not in mixedCase
+
+src/SemiFungible1155.sol#L447
+
+## uninitialized-local
+
+Impact: Medium Confidence: Medium
+
+- [ ] ID-21 [SemiFungible1155.\_mergeValue(uint256[]).i_scope_0](src/SemiFungible1155.sol#L279) is a local variable
+      never initialized
+
+src/SemiFungible1155.sol#L279
+
+- [ ] ID-22
+      [SemiFungible1155.\_beforeValueTransfer(address,address,uint256[],uint256[],uint256[],bytes).i](src/SemiFungible1155.sol#L370)
+      is a local variable never initialized
+
+src/SemiFungible1155.sol#L370
+
+- [ ] ID-23 [SemiFungible1155.\_getSum(uint256[]).i](src/SemiFungible1155.sol#L418) is a local variable never
+      initialized
+
+src/SemiFungible1155.sol#L418
+
+- [ ] ID-24 [SemiFungible1155.\_splitValue(address,uint256,uint256[]).i_scope_0](src/SemiFungible1155.sol#L227) is a
+      local variable never initialized
+
+src/SemiFungible1155.sol#L227
+
+- [ ] ID-25 [SemiFungible1155.\_batchMintClaims(uint256[],uint256[]).i](src/SemiFungible1155.sol#L162) is a local
+      variable never initialized
+
+src/SemiFungible1155.sol#L162
+
+- [ ] ID-26
+      [SemiFungible1155.\_beforeTokenTransfer(address,address,address,uint256[],uint256[],bytes).i](src/SemiFungible1155.sol#L330)
+      is a local variable never initialized
+
+src/SemiFungible1155.sol#L330
+
+- [ ] ID-27 [SemiFungible1155.\_splitValue(address,uint256,uint256[]).i](src/SemiFungible1155.sol#L210) is a local
+      variable never initialized
+
+src/SemiFungible1155.sol#L210
+
+- [ ] ID-28
+      [HypercertMinter.\_beforeTokenTransfer(address,address,address,uint256[],uint256[],bytes).i](src/HypercertMinter.sol#L162)
+      is a local variable never initialized
+
+src/HypercertMinter.sol#L162
+
+- [ ] ID-29 [SemiFungible1155.\_mergeValue(uint256[]).i](src/SemiFungible1155.sol#L264) is a local variable never
+      initialized
+
+src/SemiFungible1155.sol#L264
+
+- [ ] ID-30
+      [HypercertMinter.batchMintClaimsFromAllowlists(bytes32[][],uint256[],uint256[]).i](src/HypercertMinter.sol#L76) is
+      a local variable never initialized
+
+src/HypercertMinter.sol#L76
+
+- [ ] ID-31
+      [SemiFungible1155.\_afterTokenTransfer(address,address,address,uint256[],uint256[],bytes).i](src/SemiFungible1155.sol#L352)
+      is a local variable never initialized
+
+src/SemiFungible1155.sol#L352
+
+- [ ] ID-32 [SemiFungible1155.\_mergeValue(uint256[]).i_scope_0](src/SemiFungible1155.sol#L279) is a local variable
+      never initialized
+
+src/SemiFungible1155.sol#L279
+
+- [ ] ID-33
+      [SemiFungible1155.\_beforeValueTransfer(address,address,uint256[],uint256[],uint256[],bytes).i](src/SemiFungible1155.sol#L370)
+      is a local variable never initialized
+
+src/SemiFungible1155.sol#L370
+
+- [ ] ID-34 [SemiFungible1155.\_getSum(uint256[]).i](src/SemiFungible1155.sol#L418) is a local variable never
+      initialized
+
+src/SemiFungible1155.sol#L418
+
+- [ ] ID-35 [SemiFungible1155.\_splitValue(address,uint256,uint256[]).i_scope_0](src/SemiFungible1155.sol#L227) is a
+      local variable never initialized
+
+src/SemiFungible1155.sol#L227
+
+- [ ] ID-36 [SemiFungible1155.\_batchMintClaims(uint256[],uint256[]).i](src/SemiFungible1155.sol#L162) is a local
+      variable never initialized
+
+src/SemiFungible1155.sol#L162
+
+- [ ] ID-37
+      [SemiFungible1155.\_beforeTokenTransfer(address,address,address,uint256[],uint256[],bytes).i](src/SemiFungible1155.sol#L330)
+      is a local variable never initialized
+
+src/SemiFungible1155.sol#L330
+
+- [ ] ID-38 [SemiFungible1155.\_splitValue(address,uint256,uint256[]).i](src/SemiFungible1155.sol#L210) is a local
+      variable never initialized
+
+src/SemiFungible1155.sol#L210
+
+- [ ] ID-39 [SemiFungible1155.\_mergeValue(uint256[]).i](src/SemiFungible1155.sol#L264) is a local variable never
+      initialized
+
+src/SemiFungible1155.sol#L264
+
+- [ ] ID-40
+      [SemiFungible1155.\_afterTokenTransfer(address,address,address,uint256[],uint256[],bytes).i](src/SemiFungible1155.sol#L352)
+      is a local variable never initialized
+
+src/SemiFungible1155.sol#L352
+
+## shadowing-local
+
+Impact: Low Confidence: High
+
+- [ ] ID-41
+      [IHypercertToken.mintClaimWithFractions(uint256,uint256[],string,IHypercertToken.TransferRestrictions).uri](src/interfaces/IHypercertToken.sol#L32)
+      shadows: - [IHypercertToken.uri(uint256)](src/interfaces/IHypercertToken.sol#L62) (function)
+
+src/interfaces/IHypercertToken.sol#L32
+
+- [ ] ID-42
+      [IHypercertToken.mintClaim(uint256,string,IHypercertToken.TransferRestrictions).uri](src/interfaces/IHypercertToken.sol#L25)
+      shadows: - [IHypercertToken.uri(uint256)](src/interfaces/IHypercertToken.sol#L62) (function)
+
+src/interfaces/IHypercertToken.sol#L25
+
+## dead-code
+
+Impact: Informational Confidence: Medium
+
+- [ ] ID-43 [SemiFungible1155.isTypedItem(uint256)](src/SemiFungible1155.sol#L68-L70) is never used and should be
+      removed
+
+src/SemiFungible1155.sol#L68-L70
+
+- [ ] ID-44 [SemiFungible1155.\_authorizeUpgrade(address)](src/SemiFungible1155.sol#L383-L385) is never used and should
+      be removed
+
+src/SemiFungible1155.sol#L383-L385
+
+- [ ] ID-45 [Upgradeable1155.\_authorizeUpgrade(address)](src/Upgradeable1155.sol#L30-L32) is never used and should be
+      removed
+
+src/Upgradeable1155.sol#L30-L32
+
+- [ ] ID-46 [SemiFungible1155.getItemIndex(uint256)](src/SemiFungible1155.sol#L51-L53) is never used and should be
+      removed
+
+src/SemiFungible1155.sol#L51-L53
+
+- [ ] ID-47 [SemiFungible1155.\_getSum(uint256[])](src/SemiFungible1155.sol#L416-L425) is never used and should be
+      removed
+
+src/SemiFungible1155.sol#L416-L425
+
+- [ ] ID-48 [SemiFungible1155.\_notMaxItem(uint256)](src/SemiFungible1155.sol#L400-L403) is never used and should be
+      removed
+
+src/SemiFungible1155.sol#L400-L403
+
+- [ ] ID-49 [SemiFungible1155.\_notMaxType(uint256)](src/SemiFungible1155.sol#L408-L411) is never used and should be
+      removed
+
+src/SemiFungible1155.sol#L408-L411
+
+- [ ] ID-50 [SemiFungible1155.\_burnValue(address,uint256)](src/SemiFungible1155.sol#L296-L315) is never used and should
+      be removed
+
+src/SemiFungible1155.sol#L296-L315
+
+- [ ] ID-51
+      [SemiFungible1155.\_beforeValueTransfer(address,address,uint256[],uint256[],uint256[],bytes)](src/SemiFungible1155.sol#L360-L381)
+      is never used and should be removed
+
+src/SemiFungible1155.sol#L360-L381
+
+- [ ] ID-52 [SemiFungible1155.isTypedItem(uint256)](src/SemiFungible1155.sol#L68-L70) is never used and should be
+      removed
+
+src/SemiFungible1155.sol#L68-L70
+
+- [ ] ID-53 [SemiFungible1155.\_mergeValue(uint256[])](src/SemiFungible1155.sol#L246-L291) is never used and should be
+      removed
+
+src/SemiFungible1155.sol#L246-L291
+
+- [ ] ID-54 [SemiFungible1155.\_mintValue(address,uint256,string)](src/SemiFungible1155.sol#L106-L118) is never used and
+      should be removed
+
+src/SemiFungible1155.sol#L106-L118
+
+- [ ] ID-55 [Upgradeable1155.\_authorizeUpgrade(address)](src/Upgradeable1155.sol#L30-L32) is never used and should be
+      removed
+
+src/Upgradeable1155.sol#L30-L32
+
+- [ ] ID-56 [SemiFungible1155.\_mintValue(address,uint256[],string)](src/SemiFungible1155.sol#L121-L133) is never used
+      and should be removed
+
+src/SemiFungible1155.sol#L121-L133
+
+- [ ] ID-57 [SemiFungible1155.\_getSingletonArray(uint256)](src/SemiFungible1155.sol#L427-L432) is never used and should
+      be removed
+
+src/SemiFungible1155.sol#L427-L432
+
+- [ ] ID-58 [SemiFungible1155.\_unitsOf(uint256)](src/SemiFungible1155.sol#L78-L80) is never used and should be removed
+
+src/SemiFungible1155.sol#L78-L80
+
+- [ ] ID-59 [SemiFungible1155.\_mintClaim(uint256,uint256)](src/SemiFungible1155.sol#L136-L148) is never used and should
+      be removed
+
+src/SemiFungible1155.sol#L136-L148
+
+- [ ] ID-60 [SemiFungible1155.getItemIndex(uint256)](src/SemiFungible1155.sol#L51-L53) is never used and should be
+      removed
+
+src/SemiFungible1155.sol#L51-L53
+
+- [ ] ID-61 [SemiFungible1155.\_batchMintClaims(uint256[],uint256[])](src/SemiFungible1155.sol#L152-L178) is never used
+      and should be removed
+
+src/SemiFungible1155.sol#L152-L178
+
+- [ ] ID-62 [SemiFungible1155.\_splitValue(address,uint256,uint256[])](src/SemiFungible1155.sol#L183-L242) is never used
+      and should be removed
+
+src/SemiFungible1155.sol#L183-L242
+
+- [ ] ID-63 [SemiFungible1155.\_unitsOf(address,uint256)](src/SemiFungible1155.sol#L83-L88) is never used and should be
+      removed
+
+src/SemiFungible1155.sol#L83-L88
+
+- [ ] ID-64 [SemiFungible1155.\_createTokenType(uint256,string)](src/SemiFungible1155.sol#L94-L103) is never used and
+      should be removed
+
+src/SemiFungible1155.sol#L94-L103
+
+- [ ] ID-65 [AllowlistMinter.\_calculateLeaf(address,uint256)](src/AllowlistMinter.sol#L49-L51) is never used and should
+      be removed
+
+src/AllowlistMinter.sol#L49-L51
+
+- [ ] ID-66 [AllowlistMinter.\_createAllowlist(uint256,bytes32)](src/AllowlistMinter.sol#L29-L34) is never used and
+      should be removed
+
+src/AllowlistMinter.sol#L29-L34
+
+- [ ] ID-67 [AllowlistMinter.\_processClaim(bytes32[],uint256,uint256)](src/AllowlistMinter.sol#L36-L47) is never used
+      and should be removed
+
+src/AllowlistMinter.sol#L36-L47
+
+## unused-state
+
+Impact: Informational Confidence: High
+
+- [ ] ID-68 [HypercertMinter.\_\_gap](src/HypercertMinter.sol#L184) is never used in
+      [HypercertMinter](src/HypercertMinter.sol#L16-L185)
+
+src/HypercertMinter.sol#L184
+
+- [ ] ID-69 [SemiFungible1155.\_\_gap](src/SemiFungible1155.sol#L447) is never used in
+      [SemiFungible1155](src/SemiFungible1155.sol#L15-L448)
+
+src/SemiFungible1155.sol#L447
