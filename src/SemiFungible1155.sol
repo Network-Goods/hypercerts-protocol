@@ -279,7 +279,7 @@ contract SemiFungible1155 is Upgradeable1155 {
 
         tokenValues[target] += _totalValue;
 
-        _burnBatch(_msgSender(), fromIDs, amounts);
+        _burnBatch(_account, fromIDs, amounts);
     }
 
     /// @dev Burn the token at `_tokenID` owned by `_account`

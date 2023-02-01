@@ -86,4 +86,53 @@ contract HypercertMinterTransferTest is PRBTest, StdCheats, StdUtils {
         assertEq(hypercertMinter.balanceOf(alice, tokenID), 0);
         assertEq(hypercertMinter.balanceOf(bob, tokenID), 1);
     }
+
+    function testTransferAllowancesAllowAll() public {
+        // Alice creates a hypercert
+        vm.prank(alice);
+        hypercertMinter.mintClaim(alice, _units, _uri, IHypercertToken.TransferRestrictions.AllowAll);
+
+        changePrank(bob);
+        vm.expectRevert("ERC1155: caller is not token owner or approved");
+        hypercertMinter.safeTransferFrom(alice, bob, tokenID, 1, "");
+
+        changePrank(alice);
+        hypercertMinter.setApprovalForAll(bob, true);
+
+        changePrank(bob);
+        hypercertMinter.safeTransferFrom(alice, bob, tokenID, 1, "");
+    }
+
+    function testTransferAllowancesDisallowAll() public {
+        // Alice creates a hypercert
+        vm.prank(alice);
+        hypercertMinter.mintClaim(alice, _units, _uri, IHypercertToken.TransferRestrictions.DisallowAll);
+
+        changePrank(bob);
+        vm.expectRevert("ERC1155: caller is not token owner or approved");
+        hypercertMinter.safeTransferFrom(alice, bob, tokenID, 1, "");
+
+        changePrank(alice);
+        hypercertMinter.setApprovalForAll(bob, true);
+
+        changePrank(bob);
+        vm.expectRevert(Errors.TransfersNotAllowed.selector);
+        hypercertMinter.safeTransferFrom(alice, bob, tokenID, 1, "");
+    }
+
+    function testTransferAllowancesFromCreatorOnly() public {
+        // Alice creates a hypercert
+        vm.prank(alice);
+        hypercertMinter.mintClaim(alice, _units, _uri, IHypercertToken.TransferRestrictions.FromCreatorOnly);
+
+        changePrank(bob);
+        vm.expectRevert("ERC1155: caller is not token owner or approved");
+        hypercertMinter.safeTransferFrom(alice, bob, tokenID, 1, "");
+
+        changePrank(alice);
+        hypercertMinter.setApprovalForAll(bob, true);
+
+        changePrank(bob);
+        hypercertMinter.safeTransferFrom(alice, bob, tokenID, 1, "");
+    }
 }
