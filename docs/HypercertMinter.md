@@ -421,6 +421,28 @@ function proxiableUUID() external view returns (bytes32)
 |---|---|---|
 | _0 | bytes32 | undefined |
 
+### readTransferRestriction
+
+```solidity
+function readTransferRestriction(uint256 tokenID) external view returns (string)
+```
+
+TRANSFER RESTRICTIONS
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| tokenID | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | string | undefined |
+
 ### renounceOwnership
 
 ```solidity
@@ -969,17 +991,6 @@ error DoesNotExist()
 
 ```solidity
 error DuplicateEntry()
-```
-
-
-
-
-
-
-### FractionalBurn
-
-```solidity
-error FractionalBurn()
 ```
 
 

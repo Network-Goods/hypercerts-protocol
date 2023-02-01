@@ -70,7 +70,7 @@ contract SemiFungible1155TransferTest is PRBTest, StdCheats, StdUtils {
 
         semiFungible.mintValue(alice, 10000, _uri);
 
-        assertEq(semiFungible.balanceOf(alice, baseID), 1);
+        assertEq(semiFungible.balanceOf(alice, baseID), 0);
         semiFungible.validateOwnerBalanceUnits(baseID + tokenID, alice, 1, 10000);
 
         assertEq(semiFungible.balanceOf(bob, baseID), 0);
@@ -84,11 +84,9 @@ contract SemiFungible1155TransferTest is PRBTest, StdCheats, StdUtils {
         semiFungible.safeTransferFrom(alice, bob, baseID + tokenID, 1, "");
 
         // Updates tokenFraction value for (new) owner
-        assertEq(semiFungible.balanceOf(alice, baseID), 1);
         semiFungible.validateNotOwnerNoBalanceNoUnits(baseID + tokenID, alice);
 
         // Updates token ownership
-        assertEq(semiFungible.balanceOf(bob, baseID), 0);
         semiFungible.validateOwnerBalanceUnits(baseID + tokenID, bob, 1, 10000);
     }
 
@@ -104,7 +102,7 @@ contract SemiFungible1155TransferTest is PRBTest, StdCheats, StdUtils {
 
         semiFungible.mintValue(from, units, _uri);
 
-        semiFungible.validateOwnerBalanceUnits(baseID, from, 1, units);
+        semiFungible.validateNotOwnerNoBalanceNoUnits(baseID, from);
         semiFungible.validateOwnerBalanceUnits(baseID + tokenID, from, 1, units);
 
         semiFungible.validateNotOwnerNoBalanceNoUnits(baseID, to);
@@ -112,7 +110,7 @@ contract SemiFungible1155TransferTest is PRBTest, StdCheats, StdUtils {
 
         semiFungible.safeTransferFrom(from, to, baseID + tokenID, 1, "");
 
-        semiFungible.validateOwnerBalanceUnits(baseID, from, 1, units);
+        semiFungible.validateNotOwnerNoBalanceNoUnits(baseID, from);
         semiFungible.validateNotOwnerNoBalanceNoUnits(baseID + tokenID, from);
 
         semiFungible.validateNotOwnerNoBalanceNoUnits(baseID, to);
@@ -129,13 +127,11 @@ contract SemiFungible1155TransferTest is PRBTest, StdCheats, StdUtils {
         uint256[] memory values = semiFungible.buildValues(size, value);
         uint256[] memory tokenIDs = semiFungible.buildIDs(baseID, size);
 
-        uint256 totalValue = size * value;
-
         startHoax(alice, 100 ether);
 
         semiFungible.mintValue(alice, values, _uri);
 
-        semiFungible.validateOwnerBalanceUnits(baseID, alice, 1, totalValue);
+        semiFungible.validateNotOwnerNoBalanceNoUnits(baseID, alice);
         semiFungible.validateNotOwnerNoBalanceNoUnits(baseID, bob);
 
         semiFungible.validateOwnerBalanceUnits(tokenIDs[0], alice, 1, value);
@@ -144,7 +140,7 @@ contract SemiFungible1155TransferTest is PRBTest, StdCheats, StdUtils {
         semiFungible.safeTransferFrom(alice, bob, tokenIDs[1], 1, "");
 
         // Updates tokenFraction value for (new) owner
-        semiFungible.validateOwnerBalanceUnits(baseID, alice, 1, totalValue);
+        semiFungible.validateNotOwnerNoBalanceNoUnits(baseID, alice);
         semiFungible.validateNotOwnerNoBalanceNoUnits(baseID, bob);
 
         // Updates token ownership
@@ -167,7 +163,7 @@ contract SemiFungible1155TransferTest is PRBTest, StdCheats, StdUtils {
 
         semiFungible.mintValue(from, values, _uri);
 
-        assertEq(semiFungible.balanceOf(from, baseID), 1);
+        assertEq(semiFungible.balanceOf(from, baseID), 0);
         for (uint256 i = 0; i < tokenIDs.length; i++) {
             semiFungible.validateOwnerBalanceUnits(tokenIDs[i], from, 1, value);
         }
@@ -180,7 +176,7 @@ contract SemiFungible1155TransferTest is PRBTest, StdCheats, StdUtils {
         // Transfer all except last one
         semiFungible.safeTransferFrom(from, to, tokenIDs[size - 1], 1, "");
 
-        assertEq(semiFungible.balanceOf(from, baseID), 1);
+        assertEq(semiFungible.balanceOf(from, baseID), 0);
         assertEq(semiFungible.balanceOf(to, baseID), 0);
 
         for (uint256 i = 0; i < tokenIDs.length - 1; i++) {

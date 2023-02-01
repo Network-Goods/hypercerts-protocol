@@ -43,7 +43,6 @@ contract SemiFungible1155DefaultTest is PRBTest, StdCheats, StdUtils, SemiFungib
 
         assertEq(semiFungible.unitsOf(baseID), 10000);
 
-        semiFungible.validateOwnerBalanceUnits(baseID, alice, 1, values[0] + values[1]);
         semiFungible.validateOwnerBalanceUnits(tokenID, alice, 1, values[0]);
         semiFungible.validateOwnerBalanceUnits(tokenID + 1, alice, 1, values[1]);
 
@@ -69,7 +68,7 @@ contract SemiFungible1155DefaultTest is PRBTest, StdCheats, StdUtils, SemiFungib
 
         semiFungible.splitValue(alice, tokenID, values);
 
-        semiFungible.validateOwnerBalanceUnits(baseID, alice, 1, totalValue);
+        semiFungible.validateNotOwnerNoBalanceNoUnits(baseID, alice);
 
         for (uint256 i = 0; i < tokenIDs.length; i++) {
             semiFungible.validateOwnerBalanceUnits(tokenIDs[i], alice, 1, value);
@@ -89,7 +88,7 @@ contract SemiFungible1155DefaultTest is PRBTest, StdCheats, StdUtils, SemiFungib
         startHoax(alice, 100 ether);
 
         semiFungible.mintValue(alice, values, _uri);
-        semiFungible.validateOwnerBalanceUnits(baseID, alice, 1, totalValue);
+        assertEq(semiFungible.unitsOf(baseID), totalValue);
 
         for (uint256 i = 0; i < (tokenIDs.length - 1); i++) {
             semiFungible.validateOwnerBalanceUnits(tokenIDs[i], alice, 1, value);
@@ -98,10 +97,6 @@ contract SemiFungible1155DefaultTest is PRBTest, StdCheats, StdUtils, SemiFungib
         }
 
         semiFungible.mergeValue(tokenIDs);
-
-        semiFungible.validateOwnerBalanceUnits(baseID, alice, 1, totalValue);
-
-        assertEq(semiFungible.unitsOf(baseID), totalValue);
 
         for (uint256 i = 0; i < (tokenIDs.length - 1); i++) {
             assertEq(semiFungible.ownerOf(tokenIDs[i]), address(0));
@@ -126,11 +121,9 @@ contract SemiFungible1155DefaultTest is PRBTest, StdCheats, StdUtils, SemiFungib
         startHoax(alice, 100 ether);
 
         semiFungible.mintValue(alice, values, _uri);
-        semiFungible.mergeValue(tokenIDs);
-
-        semiFungible.validateOwnerBalanceUnits(baseID, alice, 1, totalValue);
-
         assertEq(semiFungible.unitsOf(baseID), totalValue);
+
+        semiFungible.mergeValue(tokenIDs);
 
         for (uint256 i = 0; i < (tokenIDs.length - 1); i++) {
             assertEq(semiFungible.ownerOf(tokenIDs[i]), address(0));
@@ -140,41 +133,5 @@ contract SemiFungible1155DefaultTest is PRBTest, StdCheats, StdUtils, SemiFungib
 
         assertEq(semiFungible.balanceOf(alice, tokenIDs[tokenIDs.length - 1]), 1);
         assertEq(semiFungible.unitsOf(alice, tokenIDs[tokenIDs.length - 1]), totalValue);
-    }
-
-    function testBurnValue() public {
-        uint256 baseID = 1 << 128;
-
-        uint256 size = 20;
-        uint256 value = 2000;
-        uint256[] memory values = semiFungible.buildValues(size, value);
-        uint256[] memory tokenIDs = semiFungible.buildIDs(baseID, size);
-
-        startHoax(alice, 100 ether);
-
-        semiFungible.mintValue(alice, values, _uri);
-
-        //TODO No burn of base token?
-        vm.expectRevert(SemiFungible1155Helper.NotAllowed.selector);
-        semiFungible.burnValue(alice, baseID);
-
-        // No fractional burn
-        vm.expectRevert(SemiFungible1155Helper.FractionalBurn.selector);
-        semiFungible.burnValue(alice, tokenIDs[1]);
-
-        // Need to merge to only allow burn of full token
-        semiFungible.mergeValue(tokenIDs);
-
-        // Burn merged token
-        // TODO fails on blocked transfer of ClaimToken
-        // TODO fix when implementing burn feature
-        vm.expectRevert(SemiFungible1155Helper.NotAllowed.selector);
-        semiFungible.burnValue(alice, tokenIDs[tokenIDs.length - 1]);
-
-        // semiFungible.validateNotOwnerNoBalanceNoUnits(baseID, alice);
-
-        // for (uint256 i = 0; i < tokenIDs.length; i++) {
-        //     semiFungible.validateNotOwnerNoBalanceNoUnits(tokenIDs[i], alice);
-        // }
     }
 }

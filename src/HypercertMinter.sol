@@ -155,6 +155,16 @@ contract HypercertMinter is IHypercertToken, SemiFungible1155, AllowlistMinter, 
         _uri = super.uri(tokenID);
     }
 
+    /// TRANSFER RESTRICTIONS
+
+    function readTransferRestriction(uint256 tokenID) external view returns (string memory) {
+        TransferRestrictions temp = typeRestrictions[getBaseType(tokenID)];
+        if (temp == TransferRestrictions.AllowAll) return "AllowAll";
+        if (temp == TransferRestrictions.DisallowAll) return "DisallowAll";
+        if (temp == TransferRestrictions.FromCreatorOnly) return "FromCreatorOnly";
+        return "";
+    }
+
     /// INTERNAL
 
     /// @dev see { openzeppelin-contracts-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol }

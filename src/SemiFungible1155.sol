@@ -98,8 +98,8 @@ contract SemiFungible1155 is Upgradeable1155 {
         creators[typeID] = _msgSender();
         tokenValues[typeID] = units;
 
-        _mint(_msgSender(), typeID, 1, "");
         _setURI(typeID, _uri);
+        emit TransferSingle(_msgSender(), address(0), address(0), typeID, 1);
     }
 
     /// @dev Mint a new token type and the initial value
@@ -298,14 +298,12 @@ contract SemiFungible1155 is Upgradeable1155 {
 
         _beforeValueTransfer(operator, _account, fromIDs, toIDs, amounts, "");
 
-        delete tokenValues[_typeID];
         delete tokenValues[_tokenID];
 
         emit ValueTransfer(_typeID, _typeID, 0, tokenValues[_typeID]);
         emit ValueTransfer(_typeID, _tokenID, 0, tokenValues[_tokenID]);
 
         _burn(_account, _tokenID, 1);
-        _burn(_account, _typeID, 1);
     }
 
     /// TRANSFERS
