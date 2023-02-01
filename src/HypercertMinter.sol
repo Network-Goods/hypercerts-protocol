@@ -37,7 +37,12 @@ contract HypercertMinter is IHypercertToken, SemiFungible1155, AllowlistMinter, 
 
     /// @notice Mint a semi-fungible token for the impact claim referenced via `uri`
     /// @dev see {IHypercertToken}
-    function mintClaim(uint256 units, string memory _uri, TransferRestrictions restrictions) external whenNotPaused {
+    function mintClaim(
+        address account,
+        uint256 units,
+        string memory _uri,
+        TransferRestrictions restrictions
+    ) external whenNotPaused {
         uint256 claimID = _mintValue(msg.sender, units, _uri);
         typeRestrictions[claimID] = restrictions;
         emit ClaimStored(claimID, _uri, units);
@@ -46,6 +51,7 @@ contract HypercertMinter is IHypercertToken, SemiFungible1155, AllowlistMinter, 
     /// @notice Mint semi-fungible tokens for the impact claim referenced via `uri`
     /// @dev see {IHypercertToken}
     function mintClaimWithFractions(
+        address account,
         uint256 units,
         uint256[] calldata fractions,
         string memory _uri,
@@ -59,7 +65,12 @@ contract HypercertMinter is IHypercertToken, SemiFungible1155, AllowlistMinter, 
     /// @notice Mint a semi-fungible token representing a fraction of the claim
     /// @dev Calls AllowlistMinter to verify `proof`.
     /// @dev Mints the `amount` of units for the hypercert stored under `claimID`
-    function mintClaimFromAllowlist(bytes32[] calldata proof, uint256 claimID, uint256 units) external whenNotPaused {
+    function mintClaimFromAllowlist(
+        address account,
+        bytes32[] calldata proof,
+        uint256 claimID,
+        uint256 units
+    ) external whenNotPaused {
         _processClaim(proof, claimID, units);
         _mintClaim(claimID, units);
     }
@@ -68,6 +79,7 @@ contract HypercertMinter is IHypercertToken, SemiFungible1155, AllowlistMinter, 
     /// @dev Calls AllowlistMinter to verify `proofs`.
     /// @dev Mints the `amount` of units for the hypercert stored under `claimIDs`
     function batchMintClaimsFromAllowlists(
+        address account,
         bytes32[][] calldata proofs,
         uint256[] calldata claimIDs,
         uint256[] calldata units
@@ -86,6 +98,7 @@ contract HypercertMinter is IHypercertToken, SemiFungible1155, AllowlistMinter, 
     /// @dev Calls SemiFungible1155 to store the claim referenced in `uri` with amount of `units`
     /// @dev Calls AlloslistMinter to store the `merkleRoot` as proof to authorize claims
     function createAllowlist(
+        address account,
         uint256 units,
         bytes32 merkleRoot,
         string memory _uri,
@@ -105,7 +118,7 @@ contract HypercertMinter is IHypercertToken, SemiFungible1155, AllowlistMinter, 
 
     /// @notice Merge the value of tokens belonging to the same claim
     /// @dev see {IHypercertToken}
-    function mergeValue(uint256[] calldata _fractionIDs) external whenNotPaused {
+    function mergeValue(address _account, uint256[] calldata _fractionIDs) external whenNotPaused {
         _mergeValue(_fractionIDs);
     }
 

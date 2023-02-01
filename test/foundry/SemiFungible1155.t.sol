@@ -15,6 +15,8 @@ contract SemiFungible1155DefaultTest is PRBTest, StdCheats, StdUtils, SemiFungib
     address internal alice;
     address internal bob;
 
+    //TODO check on allowances with ApprovalForAll
+
     function setUp() public {
         semiFungible = new SemiFungible1155Helper();
         _uri = "ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi";

@@ -41,13 +41,6 @@ contract SemiFungible1155MintingTest is PRBTest, StdCheats, StdUtils, SemiFungib
         semiFungible.mintValue(alice, values, _uri);
     }
 
-    function testMintWithToLargeArray() public {
-        uint256[] memory values = new uint256[](256);
-
-        vm.expectRevert(ArraySize.selector);
-        semiFungible.mintValue(alice, values, _uri);
-    }
-
     function testOverflowItemIndex() public {
         uint256 baseID = 1 << 128;
         semiFungible.setMaxIndex(baseID, type(uint128).max - 2);

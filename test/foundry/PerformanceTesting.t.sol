@@ -148,6 +148,7 @@ contract PerformanceTesting is PRBTest, StdCheats, StdUtils, PerformanceTestHelp
                 ids[i] = (i + 1) << 128;
                 units[i] = dataset.units[index];
                 hypercertMinter.createAllowlist(
+                    alice,
                     10000,
                     dataset.root,
                     _uri,
@@ -168,7 +169,7 @@ contract PerformanceTesting is PRBTest, StdCheats, StdUtils, PerformanceTestHelp
 
     // Mint Hypercert with 1 fraction
     function testClaimSingleFraction() public {
-        hypercertMinter.mintClaim(10000, _uri, IHypercertToken.TransferRestrictions.AllowAll);
+        hypercertMinter.mintClaim(alice, 10000, _uri, IHypercertToken.TransferRestrictions.AllowAll);
     }
 
     function testClaimSingleFractionFuzz(address account, uint256 value) public {
@@ -176,7 +177,7 @@ contract PerformanceTesting is PRBTest, StdCheats, StdUtils, PerformanceTestHelp
         vm.assume(!isContract(account) && account != address(0) && account != address(this));
 
         changePrank(account);
-        hypercertMinter.mintClaim(value, _uri, IHypercertToken.TransferRestrictions.AllowAll);
+        hypercertMinter.mintClaim(alice, value, _uri, IHypercertToken.TransferRestrictions.AllowAll);
     }
 
     // Mint Hypercert with multiple fractions
@@ -186,6 +187,7 @@ contract PerformanceTesting is PRBTest, StdCheats, StdUtils, PerformanceTestHelp
         uint256 totalUnits = getSum(fractions);
 
         hypercertMinter.mintClaimWithFractions(
+            alice,
             totalUnits,
             fractions,
             _uri,
@@ -198,6 +200,7 @@ contract PerformanceTesting is PRBTest, StdCheats, StdUtils, PerformanceTestHelp
         uint256 totalUnits = getSum(fractions);
 
         hypercertMinter.mintClaimWithFractions(
+            alice,
             totalUnits,
             fractions,
             _uri,
@@ -211,6 +214,7 @@ contract PerformanceTesting is PRBTest, StdCheats, StdUtils, PerformanceTestHelp
         uint256 totalUnits = getSum(fractions);
 
         hypercertMinter.mintClaimWithFractions(
+            alice,
             totalUnits,
             fractions,
             "https://example.com/ipfsHash",
@@ -220,6 +224,6 @@ contract PerformanceTesting is PRBTest, StdCheats, StdUtils, PerformanceTestHelp
 
     function testBatchMintAllowlistLoad() public {
         changePrank(allowlistUser);
-        hypercertMinter.batchMintClaimsFromAllowlists(proofs, ids, units);
+        hypercertMinter.batchMintClaimsFromAllowlists(alice, proofs, ids, units);
     }
 }

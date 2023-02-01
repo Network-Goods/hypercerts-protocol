@@ -123,11 +123,6 @@ contract SemiFungible1155 is Upgradeable1155 {
         uint256[] calldata _values,
         string memory _uri
     ) internal returns (uint256 typeID) {
-        if (_values.length > 253) {
-            //TODO determine array limits (use testing)
-            revert Errors.ArraySize();
-        }
-
         typeID = _mintValue(_account, _getSum(_values), _uri);
         _splitValue(_account, typeID + maxIndex[typeID], _values);
     }
@@ -179,7 +174,6 @@ contract SemiFungible1155 is Upgradeable1155 {
 
     /// @dev Split the units of `_tokenID` owned by `account` across `_values`
     /// @dev `_values` must sum to total `units` held at `_tokenID`
-    // TODO Should we move parsing to client-side?
     function _splitValue(address _account, uint256 _tokenID, uint256[] calldata _values) internal {
         if (_values.length > 253 || _values.length < 2) revert Errors.ArraySize();
         if (tokenValues[_tokenID] != _getSum(_values)) revert Errors.NotAllowed();

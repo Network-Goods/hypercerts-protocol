@@ -34,7 +34,7 @@ contract HypercertMinterTransferTest is PRBTest, StdCheats, StdUtils {
     function testTransferAllowAll() public {
         // Alice creates a hypercert
         vm.prank(alice);
-        hypercertMinter.mintClaim(_units, _uri, IHypercertToken.TransferRestrictions.AllowAll);
+        hypercertMinter.mintClaim(alice, _units, _uri, IHypercertToken.TransferRestrictions.AllowAll);
         assertEq(hypercertMinter.balanceOf(alice, tokenID), 1);
         assertEq(hypercertMinter.balanceOf(bob, tokenID), 0);
 
@@ -54,7 +54,7 @@ contract HypercertMinterTransferTest is PRBTest, StdCheats, StdUtils {
     function testTransferDisallowAll() public {
         // Alice creates a hypercert
         vm.prank(alice);
-        hypercertMinter.mintClaim(_units, _uri, IHypercertToken.TransferRestrictions.DisallowAll);
+        hypercertMinter.mintClaim(alice, _units, _uri, IHypercertToken.TransferRestrictions.DisallowAll);
         assertEq(hypercertMinter.balanceOf(alice, tokenID), 1);
         assertEq(hypercertMinter.balanceOf(bob, tokenID), 0);
 
@@ -69,7 +69,7 @@ contract HypercertMinterTransferTest is PRBTest, StdCheats, StdUtils {
     function testTransferFromCreatorOnly() public {
         // Alice creates a hypercert
         vm.prank(alice);
-        hypercertMinter.mintClaim(_units, _uri, IHypercertToken.TransferRestrictions.FromCreatorOnly);
+        hypercertMinter.mintClaim(alice, _units, _uri, IHypercertToken.TransferRestrictions.FromCreatorOnly);
         assertEq(hypercertMinter.balanceOf(alice, tokenID), 1);
         assertEq(hypercertMinter.balanceOf(bob, tokenID), 0);
 
