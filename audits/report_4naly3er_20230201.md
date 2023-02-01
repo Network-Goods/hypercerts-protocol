@@ -1,0 +1,567 @@
+# Report
+
+## Gas Optimizations
+
+|                 | Issue                                                                              | Instances |
+| --------------- | :--------------------------------------------------------------------------------- | :-------: |
+| [GAS-1](#GAS-1) | Use assembly to check for `address(0)`                                             |     1     |
+| [GAS-2](#GAS-2) | Using bools for storage incurs overhead                                            |     1     |
+| [GAS-3](#GAS-3) | Use calldata instead of memory for function arguments that do not get mutated      |    11     |
+| [GAS-4](#GAS-4) | For Operations that will not overflow, you could use unchecked                     |    94     |
+| [GAS-5](#GAS-5) | Functions guaranteed to revert when called by normal users can be marked `payable` |     7     |
+| [GAS-6](#GAS-6) | Using `private` rather than `public` for constants, saves gas                      |     1     |
+| [GAS-7](#GAS-7) | `internal` functions not called by the contract should be removed                  |     2     |
+
+### <a name="GAS-1"></a>[GAS-1] Use assembly to check for `address(0)`
+
+_Saves 6 gas per instance_
+
+_Instances (1)_:
+
+```solidity
+File: SemiFungible1155.sol
+
+289:             if (isBaseType(ids[i]) && from != address(0)) revert Errors.NotAllowed();
+
+```
+
+### <a name="GAS-2"></a>[GAS-2] Using bools for storage incurs overhead
+
+Use uint256(1) and uint256(2) for true/false to avoid a Gwarmaccess (100 gas), and to avoid Gsset (20000 gas) when
+changing from ‘false’ to ‘true’, after having been ‘true’ in the past. See
+[source](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/58f635312aa21f947cae5f8578638a85aa2519f5/contracts/security/ReentrancyGuard.sol#L23-L27).
+
+_Instances (1)_:
+
+```solidity
+File: AllowlistMinter.sol
+
+18:     mapping(uint256 => mapping(bytes32 => bool)) public hasBeenClaimed;
+
+```
+
+### <a name="GAS-3"></a>[GAS-3] Use calldata instead of memory for function arguments that do not get mutated
+
+Mark data types as `calldata` instead of `memory` where possible. This makes it so that the data is not automatically
+loaded into memory. If the data passed into the function does not need to be changed (like updating values in an array),
+it can be passed in as `calldata`. The one exception to this is if the argument must later be passed into another
+function that takes an argument that specifies `memory` storage.
+
+_Instances (11)_:
+
+```solidity
+File: HypercertMinter.sol
+
+40:     function mintClaim(uint256 units, string memory _uri, TransferRestrictions restrictions) external whenNotPaused {
+
+50:         uint256[] memory fractions,
+
+51:         string memory _uri,
+
+91:         string memory _uri,
+
+102:     function splitValue(address _account, uint256 _tokenID, uint256[] memory _values) external whenNotPaused {
+
+108:     function mergeValue(uint256[] memory _fractionIDs) external whenNotPaused {
+
+```
+
+```solidity
+File: interfaces/IHypercertToken.sol
+
+25:     function mintClaim(uint256 units, string memory uri, TransferRestrictions restrictions) external;
+
+31:         uint256[] memory fractions,
+
+32:         string memory uri,
+
+39:     function splitValue(address account, uint256 tokenID, uint256[] memory _values) external;
+
+43:     function mergeValue(uint256[] memory tokenIDs) external;
+
+```
+
+### <a name="GAS-4"></a>[GAS-4] For Operations that will not overflow, you could use unchecked
+
+_Instances (94)_:
+
+```solidity
+File: AllowlistMinter.sol
+
+4: import { MerkleProofUpgradeable } from "oz-upgradeable/utils/cryptography/MerkleProofUpgradeable.sol";
+
+4: import { MerkleProofUpgradeable } from "oz-upgradeable/utils/cryptography/MerkleProofUpgradeable.sol";
+
+4: import { MerkleProofUpgradeable } from "oz-upgradeable/utils/cryptography/MerkleProofUpgradeable.sol";
+
+4: import { MerkleProofUpgradeable } from "oz-upgradeable/utils/cryptography/MerkleProofUpgradeable.sol";
+
+5: import { IAllowlist } from "./interfaces/IAllowlist.sol";
+
+5: import { IAllowlist } from "./interfaces/IAllowlist.sol";
+
+7: import { Errors } from "./libs/Errors.sol";
+
+7: import { Errors } from "./libs/Errors.sol";
+
+```
+
+```solidity
+File: HypercertMinter.sol
+
+4: import { IHypercertToken } from "./interfaces/IHypercertToken.sol";
+
+4: import { IHypercertToken } from "./interfaces/IHypercertToken.sol";
+
+5: import { SemiFungible1155 } from "./SemiFungible1155.sol";
+
+6: import { AllowlistMinter } from "./AllowlistMinter.sol";
+
+7: import { PausableUpgradeable } from "oz-upgradeable/security/PausableUpgradeable.sol";
+
+7: import { PausableUpgradeable } from "oz-upgradeable/security/PausableUpgradeable.sol";
+
+7: import { PausableUpgradeable } from "oz-upgradeable/security/PausableUpgradeable.sol";
+
+9: import { Errors } from "./libs/Errors.sol";
+
+9: import { Errors } from "./libs/Errors.sol";
+
+79:                 ++i;
+
+79:                 ++i;
+
+171:                 ++i;
+
+171:                 ++i;
+
+```
+
+```solidity
+File: SemiFungible1155.sol
+
+6: import { Upgradeable1155 } from "./Upgradeable1155.sol";
+
+7: import { IERC1155ReceiverUpgradeable } from "oz-upgradeable/token/ERC1155/IERC1155ReceiverUpgradeable.sol";
+
+7: import { IERC1155ReceiverUpgradeable } from "oz-upgradeable/token/ERC1155/IERC1155ReceiverUpgradeable.sol";
+
+7: import { IERC1155ReceiverUpgradeable } from "oz-upgradeable/token/ERC1155/IERC1155ReceiverUpgradeable.sol";
+
+7: import { IERC1155ReceiverUpgradeable } from "oz-upgradeable/token/ERC1155/IERC1155ReceiverUpgradeable.sol";
+
+9: import { Errors } from "./libs/Errors.sol";
+
+9: import { Errors } from "./libs/Errors.sol";
+
+96:         typeID = ++typeCounter << 128;
+
+96:         typeID = ++typeCounter << 128;
+
+112:         uint256 tokenID = typeID + ++maxIndex[typeID]; //1 based indexing, 0 holds type data
+
+112:         uint256 tokenID = typeID + ++maxIndex[typeID]; //1 based indexing, 0 holds type data
+
+112:         uint256 tokenID = typeID + ++maxIndex[typeID]; //1 based indexing, 0 holds type data
+
+112:         uint256 tokenID = typeID + ++maxIndex[typeID]; //1 based indexing, 0 holds type data
+
+112:         uint256 tokenID = typeID + ++maxIndex[typeID]; //1 based indexing, 0 holds type data
+
+133:         _splitValue(_account, typeID + maxIndex[typeID], _values);
+
+142:             tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
+
+142:             tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
+
+142:             tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
+
+142:             tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
+
+142:             tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
+
+167:                 tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
+
+167:                 tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
+
+167:                 tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
+
+167:                 tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
+
+167:                 tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
+
+174:                 ++i;
+
+174:                 ++i;
+
+202:         maxIndex[_typeID] += len;
+
+209:             currentID += 1;
+
+213:             valueLeft -= value;
+
+219:                 ++i;
+
+219:                 ++i;
+
+232:         uint256 len = _fractionIDs.length - 1;
+
+246:             _totalValue += tokenValues[_fractionID];
+
+251:                 ++i;
+
+251:                 ++i;
+
+255:         tokenValues[target] += _totalValue;
+
+291:                 ++i;
+
+291:                 ++i;
+
+313:                 ++i;
+
+313:                 ++i;
+
+337:         ++_count;
+
+337:         ++_count;
+
+345:         ++_count;
+
+345:         ++_count;
+
+355:             sum += array[i];
+
+357:                 ++i;
+
+357:                 ++i;
+
+```
+
+```solidity
+File: Upgradeable1155.sol
+
+4: import { ERC1155Upgradeable } from "oz-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
+
+4: import { ERC1155Upgradeable } from "oz-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
+
+4: import { ERC1155Upgradeable } from "oz-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
+
+4: import { ERC1155Upgradeable } from "oz-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
+
+5: import { ERC1155BurnableUpgradeable } from "oz-upgradeable/token/ERC1155/extensions/ERC1155BurnableUpgradeable.sol";
+
+5: import { ERC1155BurnableUpgradeable } from "oz-upgradeable/token/ERC1155/extensions/ERC1155BurnableUpgradeable.sol";
+
+5: import { ERC1155BurnableUpgradeable } from "oz-upgradeable/token/ERC1155/extensions/ERC1155BurnableUpgradeable.sol";
+
+5: import { ERC1155BurnableUpgradeable } from "oz-upgradeable/token/ERC1155/extensions/ERC1155BurnableUpgradeable.sol";
+
+5: import { ERC1155BurnableUpgradeable } from "oz-upgradeable/token/ERC1155/extensions/ERC1155BurnableUpgradeable.sol";
+
+6: import { ERC1155URIStorageUpgradeable } from "oz-upgradeable/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol";
+
+6: import { ERC1155URIStorageUpgradeable } from "oz-upgradeable/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol";
+
+6: import { ERC1155URIStorageUpgradeable } from "oz-upgradeable/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol";
+
+6: import { ERC1155URIStorageUpgradeable } from "oz-upgradeable/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol";
+
+6: import { ERC1155URIStorageUpgradeable } from "oz-upgradeable/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol";
+
+7: import { OwnableUpgradeable } from "oz-upgradeable/access/OwnableUpgradeable.sol";
+
+7: import { OwnableUpgradeable } from "oz-upgradeable/access/OwnableUpgradeable.sol";
+
+7: import { OwnableUpgradeable } from "oz-upgradeable/access/OwnableUpgradeable.sol";
+
+8: import { Initializable } from "oz-upgradeable/proxy/utils/Initializable.sol";
+
+8: import { Initializable } from "oz-upgradeable/proxy/utils/Initializable.sol";
+
+8: import { Initializable } from "oz-upgradeable/proxy/utils/Initializable.sol";
+
+8: import { Initializable } from "oz-upgradeable/proxy/utils/Initializable.sol";
+
+9: import { UUPSUpgradeable } from "oz-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+
+9: import { UUPSUpgradeable } from "oz-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+
+9: import { UUPSUpgradeable } from "oz-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+
+9: import { UUPSUpgradeable } from "oz-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+
+```
+
+### <a name="GAS-5"></a>[GAS-5] Functions guaranteed to revert when called by normal users can be marked `payable`
+
+If a function modifier such as `onlyOwner` is used, the function will revert if a normal user tries to pay the function.
+Marking the function as `payable` will lower the gas cost for legitimate callers because the compiler will not include
+checks for whether a payment was provided.
+
+_Instances (7)_:
+
+```solidity
+File: HypercertMinter.sol
+
+130:     function pause() external onlyOwner {
+
+134:     function unpause() external onlyOwner {
+
+148:     function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {
+
+```
+
+```solidity
+File: SemiFungible1155.sol
+
+45:     function __SemiFungible1155_init() public virtual onlyInitializing {
+
+318:     function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {
+
+```
+
+```solidity
+File: Upgradeable1155.sol
+
+21:     function __Upgradeable1155_init() public virtual onlyInitializing {
+
+30:     function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {
+
+```
+
+### <a name="GAS-6"></a>[GAS-6] Using `private` rather than `public` for constants, saves gas
+
+If needed, the values can be read from the verified contract source code, or if there are multiple values there can be a
+single getter function that
+[returns a tuple](https://github.com/code-423n4/2022-08-frax/blob/90f55a9ce4e25bceed3a74290b854341d8de6afa/src/contracts/FraxlendPair.sol#L156-L178)
+of the values of all currently-public constants. Saves **3406-3606 gas** in deployment gas due to the compiler not
+having to create non-payable getter functions for deployment calldata, not having to store the bytes of the value
+outside of where it's used, and not adding another entry to the method ID table
+
+_Instances (1)_:
+
+```solidity
+File: HypercertMinter.sol
+
+18:     string public constant name = "HypercertMinter";
+
+```
+
+### <a name="GAS-7"></a>[GAS-7] `internal` functions not called by the contract should be removed
+
+If the functions are required by an interface, the contract should inherit from that interface and use the `override`
+keyword
+
+_Instances (2)_:
+
+```solidity
+File: SemiFungible1155.sol
+
+51:     function getItemIndex(uint256 tokenID) internal pure returns (uint256) {
+
+68:     function isTypedItem(uint256 tokenID) internal pure returns (bool) {
+
+```
+
+## Non Critical Issues
+
+|               | Issue                                                                      | Instances |
+| ------------- | :------------------------------------------------------------------------- | :-------: |
+| [NC-1](#NC-1) | `require()` / `revert()` statements should have descriptive reason strings |    19     |
+| [NC-2](#NC-2) | Event is missing `indexed` fields                                          |     5     |
+| [NC-3](#NC-3) | Functions not used internally could be marked external                     |     1     |
+
+### <a name="NC-1"></a>[NC-1] `require()` / `revert()` statements should have descriptive reason strings
+
+_Instances (19)_:
+
+```solidity
+File: AllowlistMinter.sol
+
+25:         if (merkleRoots[claimID].length == 0) revert Errors.DoesNotExist();
+
+30:         if (merkleRoots[claimID] != "") revert Errors.DuplicateEntry();
+
+37:         if (merkleRoots[claimID].length == 0) revert Errors.DoesNotExist();
+
+41:         if (hasBeenClaimed[claimID][node]) revert Errors.DuplicateEntry();
+
+43:         if (!MerkleProofUpgradeable.verifyCalldata(proof, merkleRoots[claimID], node)) revert Errors.Invalid();
+
+```
+
+```solidity
+File: HypercertMinter.sol
+
+166:                 revert Errors.TransfersNotAllowed();
+
+168:                 revert Errors.TransfersNotAllowed();
+
+```
+
+```solidity
+File: SemiFungible1155.sol
+
+108:             revert Errors.NotAllowed();
+
+128:             revert Errors.ArraySize();
+
+138:         if (!isBaseType(_typeID)) revert Errors.NotAllowed();
+
+163:             if (!isBaseType(_typeID)) revert Errors.NotAllowed();
+
+189:             revert Errors.ArraySize();
+
+193:             revert Errors.NotAllowed();
+
+230:             revert Errors.ArraySize();
+
+242:             if (getBaseType(_fractionIDs[i]) != _typeID) revert Errors.TypeMismatch();
+
+265:         if (isBaseType(_tokenID)) revert Errors.NotAllowed();
+
+266:         if (tokenValues[_tokenID] != tokenValues[_typeID]) revert Errors.FractionalBurn();
+
+289:             if (isBaseType(ids[i]) && from != address(0)) revert Errors.NotAllowed();
+
+354:             if (array[i] == 0) revert Errors.NotAllowed();
+
+```
+
+### <a name="NC-2"></a>[NC-2] Event is missing `indexed` fields
+
+Index event fields make the field more quickly accessible to off-chain tools that parse events. However, note that each
+index field costs extra gas during emission, so it's not necessarily best to index the maximum allowed per event (three
+fields). Each event should use three indexed fields if there are three or more fields, and gas usage is not particularly
+of concern for the events in question. If there are fewer than three fields, all of the fields should be indexed.
+
+_Instances (5)_:
+
+```solidity
+File: AllowlistMinter.sol
+
+14:     event AllowlistCreated(uint256 tokenID, bytes32 root);
+
+15:     event LeafClaimed(uint256 tokenID, bytes32 leaf);
+
+```
+
+```solidity
+File: SemiFungible1155.sol
+
+38:     event ValueTransfer(uint256 claimID, uint256 fromTokenID, uint256 toTokenID, uint256 value);
+
+41:     event BatchValueTransfer(uint256[] claimIDs, uint256[] fromTokenIDs, uint256[] toTokenIDs, uint256[] values);
+
+```
+
+```solidity
+File: interfaces/IHypercertToken.sol
+
+22:     event ClaimStored(uint256 indexed claimID, string uri, uint256 totalUnits);
+
+```
+
+### <a name="NC-3"></a>[NC-3] Functions not used internally could be marked external
+
+_Instances (1)_:
+
+```solidity
+File: HypercertMinter.sol
+
+141:     function uri(uint256 tokenID) public view override(IHypercertToken, SemiFungible1155) returns (string memory _uri) {
+
+```
+
+## Low Issues
+
+|             | Issue                           | Instances |
+| ----------- | :------------------------------ | :-------: |
+| [L-1](#L-1) | Initializers could be front-run |    12     |
+
+### <a name="L-1"></a>[L-1] Initializers could be front-run
+
+Initializers could be front-run, allowing an attacker to either set their own values, take ownership of the contract,
+and in the best case forcing a re-deployment
+
+_Instances (12)_:
+
+```solidity
+File: HypercertMinter.sol
+
+31:     function initialize() public virtual initializer {
+
+31:     function initialize() public virtual initializer {
+
+32:         __SemiFungible1155_init();
+
+33:         __Pausable_init();
+
+```
+
+```solidity
+File: SemiFungible1155.sol
+
+45:     function __SemiFungible1155_init() public virtual onlyInitializing {
+
+46:         __Upgradeable1155_init();
+
+```
+
+```solidity
+File: Upgradeable1155.sol
+
+21:     function __Upgradeable1155_init() public virtual onlyInitializing {
+
+22:         __ERC1155_init("");
+
+23:         __ERC1155Burnable_init();
+
+24:         __ERC1155URIStorage_init();
+
+25:         __Ownable_init();
+
+26:         __UUPSUpgradeable_init();
+
+```
+
+## Medium Issues
+
+|             | Issue                                  | Instances |
+| ----------- | :------------------------------------- | :-------: |
+| [M-1](#M-1) | Centralization Risk for trusted owners |     5     |
+
+### <a name="M-1"></a>[M-1] Centralization Risk for trusted owners
+
+#### Impact:
+
+Contracts have owners with privileged rights to perform admin tasks and need to be trusted to not perform malicious
+updates or drain funds.
+
+_Instances (5)_:
+
+```solidity
+File: HypercertMinter.sol
+
+130:     function pause() external onlyOwner {
+
+134:     function unpause() external onlyOwner {
+
+148:     function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {
+
+```
+
+```solidity
+File: SemiFungible1155.sol
+
+318:     function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {
+
+```
+
+```solidity
+File: Upgradeable1155.sol
+
+30:     function _authorizeUpgrade(address newImplementation) internal virtual override onlyOwner {
+
+```

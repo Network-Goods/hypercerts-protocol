@@ -66,7 +66,7 @@ contract SemiFungible1155 is Upgradeable1155 {
     /// @dev Identify that token at `_id` is fraction of a claim.
     /// @dev Upper 128 bits identify base type ID, lower bits should be > 0
     function isTypedItem(uint256 tokenID) internal pure returns (bool) {
-        return (tokenID & TYPE_MASK > 0) && (tokenID & NF_INDEX_MASK > 0);
+        return (tokenID & TYPE_MASK != 0) && (tokenID & NF_INDEX_MASK != 0);
     }
 
     /// READ
@@ -90,10 +90,10 @@ contract SemiFungible1155 is Upgradeable1155 {
     /// MUTATE
 
     /// @dev create token type ID based of token counter
-    // TODO should creator be msg.sender or submit account?
+
     function _createTokenType(uint256 units, string memory _uri) internal returns (uint256 typeID) {
         _notMaxType(typeCounter);
-        typeID = (++typeCounter << 128);
+        typeID = ++typeCounter << 128;
 
         creators[typeID] = _msgSender();
         tokenValues[typeID] = units;
@@ -135,8 +135,12 @@ contract SemiFungible1155 is Upgradeable1155 {
 
     /// @dev Mint a new token for an existing type
     function _mintClaim(uint256 _typeID, uint256 _units) internal returns (uint256 tokenID) {
+        if (!isBaseType(_typeID)) revert Errors.NotAllowed();
+
         _notMaxItem(maxIndex[_typeID]);
-        tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
+        unchecked {
+            tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
+        }
 
         tokenValues[tokenID] = _units;
 
@@ -154,15 +158,21 @@ contract SemiFungible1155 is Upgradeable1155 {
         uint256[] memory tokenIDs = new uint256[](len);
         uint256[] memory amounts = new uint256[](len);
 
-        for (uint256 i = 0; i < len; i++) {
+        for (uint256 i; i < len; ) {
             uint256 _typeID = _typeIDs[i];
+            if (!isBaseType(_typeID)) revert Errors.NotAllowed();
 
             _notMaxItem(maxIndex[_typeID]);
-            tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
+            unchecked {
+                tokenID = _typeID + ++maxIndex[_typeID]; //1 based indexing, 0 holds type data
+            }
 
             tokenValues[tokenID] = _units[i];
             tokenIDs[i] = tokenID;
             amounts[i] = 1;
+            unchecked {
+                ++i;
+            }
         }
 
         _mintBatch(_msgSender(), tokenIDs, amounts, "");
@@ -173,6 +183,7 @@ contract SemiFungible1155 is Upgradeable1155 {
 
     /// @dev Split the units of `_tokenID` owned by `account` across `_values`
     /// @dev `_values` must sum to total `units` held at `_tokenID`
+    // TODO _beforeValueTransferHook to validate ownership and balance
     function _splitValue(address _account, uint256 _tokenID, uint256[] memory _values) internal {
         if (_values.length > 253 || _values.length < 2) {
             revert Errors.ArraySize();
@@ -188,20 +199,28 @@ contract SemiFungible1155 is Upgradeable1155 {
         uint256 len = _values.length;
         uint256 valueLeft = tokenValues[_tokenID];
 
-        // starts with 1 because 0 remains the same
-        for (uint256 i = 1; i < len; i++) {
-            uint256 tokenID = currentID + i;
+        maxIndex[_typeID] += len;
+        tokenValues[_tokenID] = 0;
 
-            tokenValues[tokenID] = _values[i];
-            valueLeft -= _values[i];
-            _notMaxItem(tokenID);
-            _mint(_account, tokenID, 1, "");
-            emit ValueTransfer(_typeID, currentID, tokenID, _values[i]);
+        // starts with 1 because 0 remains the same
+        for (uint256 i = 1; i < len; ) {
+            _notMaxItem(currentID);
+
+            currentID += 1;
+            uint256 value = _values[i];
+
+            tokenValues[currentID] = value;
+            valueLeft -= value;
+
+            _mint(_account, currentID, 1, "");
+
+            emit ValueTransfer(_typeID, _tokenID, currentID, value);
+            unchecked {
+                ++i;
+            }
         }
 
-        //TODO state change should be before mint
-        tokenValues[currentID] = valueLeft;
-        maxIndex[_typeID] += len;
+        tokenValues[_tokenID] = valueLeft;
     }
 
     /// @dev Merge the units of `_fractionIDs`.
@@ -210,25 +229,27 @@ contract SemiFungible1155 is Upgradeable1155 {
         if (_fractionIDs.length > 253 || _fractionIDs.length < 2) {
             revert Errors.ArraySize();
         }
-        uint256 len = _fractionIDs.length;
+        uint256 len = _fractionIDs.length - 1;
 
-        uint256 target = _fractionIDs[len - 1];
+        uint256 target = _fractionIDs[len];
         uint256 _typeID = getBaseType(target);
 
-        uint256 _totalValue = 0;
-        uint256[] memory _valuesToBurn = new uint256[](len - 1);
-        uint256[] memory _idsToBurn = new uint256[](len - 1);
+        uint256 _totalValue;
+        uint256[] memory _valuesToBurn = new uint256[](len);
+        uint256[] memory _idsToBurn = new uint256[](len);
 
-        for (uint256 i = 0; i < len - 1; i++) {
+        for (uint256 i; i < len; ) {
             if (getBaseType(_fractionIDs[i]) != _typeID) revert Errors.TypeMismatch();
             uint256 _fractionID = _fractionIDs[i];
             _idsToBurn[i] = _fractionID;
             _valuesToBurn[i] = 1;
             _totalValue += tokenValues[_fractionID];
 
-            // delete owners[_fractionID];
             delete tokenValues[_fractionID];
             emit ValueTransfer(_typeID, _fractionID, target, tokenValues[_fractionID]);
+            unchecked {
+                ++i;
+            }
         }
 
         tokenValues[target] += _totalValue;
@@ -262,8 +283,13 @@ contract SemiFungible1155 is Upgradeable1155 {
         uint256[] memory amounts,
         bytes memory data
     ) internal virtual override {
-        for (uint256 i = 0; i < ids.length; ++i) {
+        uint256 len = ids.length;
+
+        for (uint256 i; i < len; ) {
             if (isBaseType(ids[i]) && from != address(0)) revert Errors.NotAllowed();
+            unchecked {
+                ++i;
+            }
         }
 
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
@@ -278,8 +304,14 @@ contract SemiFungible1155 is Upgradeable1155 {
         bytes memory data
     ) internal virtual override {
         super._afterTokenTransfer(operator, from, to, ids, amounts, data);
-        for (uint256 i = 0; i < ids.length; ++i) {
+
+        uint256 len = ids.length;
+
+        for (uint256 i; i < len; ) {
             owners[ids[i]] = to;
+            unchecked {
+                ++i;
+            }
         }
     }
 
@@ -317,14 +349,13 @@ contract SemiFungible1155 is Upgradeable1155 {
      * @dev calculate the sum of the elements of an array
      */
     function _getSum(uint256[] memory array) internal pure returns (uint256 sum) {
-        sum = 0;
-        if (array.length == 0) {
-            return sum;
-        }
-
-        for (uint256 i = 0; i < array.length; i++) {
+        uint256 len = array.length;
+        for (uint256 i; i < len; ) {
             if (array[i] == 0) revert Errors.NotAllowed();
             sum += array[i];
+            unchecked {
+                ++i;
+            }
         }
     }
 

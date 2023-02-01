@@ -72,10 +72,12 @@ contract HypercertMinter is IHypercertToken, SemiFungible1155, AllowlistMinter, 
         uint256[] calldata claimIDs,
         uint256[] calldata units
     ) external whenNotPaused {
-        //TODO determine size limit as a function of gas cap
         uint256 len = claimIDs.length;
-        for (uint256 i = 0; i < len; i++) {
+        for (uint256 i; i < len; ) {
             _processClaim(proofs[i], claimIDs[i], units[i]);
+            unchecked {
+                ++i;
+            }
         }
         _batchMintClaims(claimIDs, units);
     }
@@ -125,11 +127,11 @@ contract HypercertMinter is IHypercertToken, SemiFungible1155, AllowlistMinter, 
 
     /// PAUSABLE
 
-    function pause() public onlyOwner {
+    function pause() external onlyOwner {
         _pause();
     }
 
-    function unpause() public onlyOwner {
+    function unpause() external onlyOwner {
         _unpause();
     }
 
@@ -156,13 +158,17 @@ contract HypercertMinter is IHypercertToken, SemiFungible1155, AllowlistMinter, 
         bytes memory data
     ) internal virtual override(SemiFungible1155) {
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
-        for (uint256 i = 0; i < ids.length; i++) {
+        uint256 len = ids.length;
+        for (uint256 i; i < len; ) {
             uint256 typeID = getBaseType(ids[i]);
             TransferRestrictions policy = typeRestrictions[typeID];
             if (policy == TransferRestrictions.DisallowAll) {
                 revert Errors.TransfersNotAllowed();
             } else if (policy == TransferRestrictions.FromCreatorOnly && from != creators[typeID]) {
                 revert Errors.TransfersNotAllowed();
+            }
+            unchecked {
+                ++i;
             }
         }
     }
