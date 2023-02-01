@@ -47,7 +47,7 @@ contract HypercertMinter is IHypercertToken, SemiFungible1155, AllowlistMinter, 
     /// @dev see {IHypercertToken}
     function mintClaimWithFractions(
         uint256 units,
-        uint256[] memory fractions,
+        uint256[] calldata fractions,
         string memory _uri,
         TransferRestrictions restrictions
     ) external whenNotPaused {
@@ -99,13 +99,13 @@ contract HypercertMinter is IHypercertToken, SemiFungible1155, AllowlistMinter, 
 
     /// @notice Split a claimtokens value into parts with summed value equal to the original
     /// @dev see {IHypercertToken}
-    function splitValue(address _account, uint256 _tokenID, uint256[] memory _values) external whenNotPaused {
+    function splitValue(address _account, uint256 _tokenID, uint256[] calldata _values) external whenNotPaused {
         _splitValue(_account, _tokenID, _values);
     }
 
     /// @notice Merge the value of tokens belonging to the same claim
     /// @dev see {IHypercertToken}
-    function mergeValue(uint256[] memory _fractionIDs) external whenNotPaused {
+    function mergeValue(uint256[] calldata _fractionIDs) external whenNotPaused {
         _mergeValue(_fractionIDs);
     }
 

@@ -1009,6 +1009,17 @@ error NotAllowed()
 
 
 
+### NotApprovedOrOwner
+
+```solidity
+error NotApprovedOrOwner()
+```
+
+
+
+
+
+
 ### TransfersNotAllowed
 
 ```solidity

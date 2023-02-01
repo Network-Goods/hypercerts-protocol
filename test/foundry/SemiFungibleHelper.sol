@@ -31,7 +31,7 @@ contract SemiFungible1155Helper is SemiFungible1155, PRBTest, StdCheats, StdUtil
         return _mintValue(user, value, uri);
     }
 
-    function mintValue(address user, uint256[] memory values, string memory uri) public returns (uint256 tokenID) {
+    function mintValue(address user, uint256[] calldata values, string memory uri) public returns (uint256 tokenID) {
         return _mintValue(user, values, uri);
     }
 
@@ -39,7 +39,7 @@ contract SemiFungible1155Helper is SemiFungible1155, PRBTest, StdCheats, StdUtil
         return _mintClaim(typeID, units);
     }
 
-    function splitValue(address user, uint256 tokenID, uint256[] memory values) public {
+    function splitValue(address user, uint256 tokenID, uint256[] calldata values) public {
         _splitValue(user, tokenID, values);
     }
 
@@ -111,6 +111,15 @@ contract SemiFungible1155Helper is SemiFungible1155, PRBTest, StdCheats, StdUtil
         // of the constructor execution.
 
         return account.code.length > 0;
+    }
+
+    function swapFirstLast(uint256[] memory values) public pure returns (uint256[] memory swappedValues) {
+        swappedValues = values;
+        uint256 len = values.length - 1;
+
+        uint256 swapValue = values[len];
+        values[len] = values[0];
+        swappedValues[0] = swapValue;
     }
 
     function validateOwnerBalanceUnits(uint256 tokenID, address owner, uint256 balance, uint256 units) public {

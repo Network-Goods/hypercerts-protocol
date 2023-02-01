@@ -73,7 +73,9 @@ contract SemiFungible1155UnitsTest is PRBTest, StdCheats, StdUtils {
         semiFungible.validateOwnerBalanceUnits(baseID, alice, 1, totalValue);
         semiFungible.validateNotOwnerNoBalanceNoUnits(baseID, bob);
 
-        for (uint256 i = 0; i < tokenIDs.length; i++) {
+        values = semiFungible.swapFirstLast(values);
+
+        for (uint256 i = 0; i < tokenIDs.length - 1; i++) {
             semiFungible.validateOwnerBalanceUnits(tokenIDs[i], alice, 1, value);
             semiFungible.validateNotOwnerNoBalanceNoUnits(tokenIDs[i], bob);
         }
