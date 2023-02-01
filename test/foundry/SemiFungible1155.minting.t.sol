@@ -58,7 +58,7 @@ contract SemiFungible1155MintingTest is PRBTest, StdCheats, StdUtils, SemiFungib
         semiFungible.setMaxIndex(baseID, type(uint128).max);
 
         vm.expectRevert(stdError.arithmeticError);
-        semiFungible.mintClaim(baseID, 1000);
+        semiFungible.mintClaim(alice, baseID, 1000);
     }
 
     function testOverflowTypes() public {
@@ -85,6 +85,7 @@ contract SemiFungible1155MintingTest is PRBTest, StdCheats, StdUtils, SemiFungib
         uint256 baseID = semiFungible.mintValue(alice, 10000, _uri);
 
         assertEq(baseID, _baseID);
+        assertEq(semiFungible.ownerOf(baseID), address(0));
         assertEq(semiFungible.creator(baseID), alice);
         assertEq(semiFungible.unitsOf(baseID), 10000);
 
@@ -105,6 +106,7 @@ contract SemiFungible1155MintingTest is PRBTest, StdCheats, StdUtils, SemiFungib
         uint256 baseID = semiFungible.mintValue(alice, value, _uri);
 
         assertEq(baseID, _baseID);
+        assertEq(semiFungible.ownerOf(baseID), address(0));
         assertEq(semiFungible.creator(baseID), alice);
         assertEq(semiFungible.unitsOf(baseID), value);
 
@@ -123,7 +125,7 @@ contract SemiFungible1155MintingTest is PRBTest, StdCheats, StdUtils, SemiFungib
 
         uint256 baseID = semiFungible.mintValue(alice, values, _uri);
         assertEq(semiFungible.unitsOf(baseID), 15000);
-        assertEq(semiFungible.ownerOf(baseID), alice);
+        assertEq(semiFungible.ownerOf(baseID), address(0));
 
         // Swap because of splitting logic
         values[1] = 5000;

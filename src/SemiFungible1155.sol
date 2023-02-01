@@ -91,15 +91,15 @@ contract SemiFungible1155 is Upgradeable1155 {
 
     /// @dev create token type ID based of token counter
 
-    function _createTokenType(uint256 units, string memory _uri) internal returns (uint256 typeID) {
+    function _createTokenType(address _account, uint256 units, string memory _uri) internal returns (uint256 typeID) {
         _notMaxType(typeCounter);
         typeID = ++typeCounter << 128;
 
-        creators[typeID] = _msgSender();
+        creators[typeID] = _account;
         tokenValues[typeID] = units;
 
         _setURI(typeID, _uri);
-        emit TransferSingle(_msgSender(), address(0), address(0), typeID, 1);
+        emit TransferSingle(_account, address(0), address(0), typeID, 1);
     }
 
     /// @dev Mint a new token type and the initial value
@@ -107,7 +107,7 @@ contract SemiFungible1155 is Upgradeable1155 {
         if (_value == 0) {
             revert Errors.NotAllowed();
         }
-        typeID = _createTokenType(_value, _uri);
+        typeID = _createTokenType(_account, _value, _uri);
 
         uint256 tokenID = typeID + ++maxIndex[typeID]; //1 based indexing, 0 holds type data
 
@@ -128,7 +128,7 @@ contract SemiFungible1155 is Upgradeable1155 {
     }
 
     /// @dev Mint a new token for an existing type
-    function _mintClaim(uint256 _typeID, uint256 _units) internal returns (uint256 tokenID) {
+    function _mintClaim(address _account, uint256 _typeID, uint256 _units) internal returns (uint256 tokenID) {
         if (!isBaseType(_typeID)) revert Errors.NotAllowed();
         _notMaxItem(maxIndex[_typeID]);
 
@@ -138,13 +138,14 @@ contract SemiFungible1155 is Upgradeable1155 {
 
         tokenValues[tokenID] = _units;
 
-        _mint(_msgSender(), tokenID, 1, "");
+        _mint(_account, tokenID, 1, "");
         emit ValueTransfer(_typeID, 0, tokenID, _units);
     }
 
     /// @dev Mint new tokens for existing types
     /// @notice Enables batch claiming from multiple allowlists
     function _batchMintClaims(
+        address _account,
         uint256[] calldata _typeIDs,
         uint256[] calldata _units
     ) internal returns (uint256[] memory tokenIDs) {
@@ -168,7 +169,7 @@ contract SemiFungible1155 is Upgradeable1155 {
             }
         }
 
-        _mintBatch(_msgSender(), tokenIDs, amounts, "");
+        _mintBatch(_account, tokenIDs, amounts, "");
         emit BatchValueTransfer(_typeIDs, zeroes, tokenIDs, _units);
     }
 
@@ -177,7 +178,6 @@ contract SemiFungible1155 is Upgradeable1155 {
     function _splitValue(address _account, uint256 _tokenID, uint256[] calldata _values) internal {
         if (_values.length > 253 || _values.length < 2) revert Errors.ArraySize();
         if (tokenValues[_tokenID] != _getSum(_values)) revert Errors.NotAllowed();
-        address operator = _msgSender();
 
         // Current token
         uint256 _typeID = getBaseType(_tokenID);
@@ -216,7 +216,7 @@ contract SemiFungible1155 is Upgradeable1155 {
             }
         }
 
-        _beforeValueTransfer(operator, _account, fromIDs, toIDs, values, "");
+        _beforeValueTransfer(_msgSender(), _account, fromIDs, toIDs, values, "");
 
         for (uint256 i; i < len; ) {
             valueLeft -= values[i];
@@ -237,7 +237,7 @@ contract SemiFungible1155 is Upgradeable1155 {
 
     /// @dev Merge the units of `_fractionIDs`.
     /// @dev Base type of `_fractionIDs` must be identical for all tokens.
-    function _mergeValue(uint256[] memory _fractionIDs) internal {
+    function _mergeValue(address _account, uint256[] memory _fractionIDs) internal {
         if (_fractionIDs.length > 253 || _fractionIDs.length < 2) {
             revert Errors.ArraySize();
         }
@@ -245,8 +245,6 @@ contract SemiFungible1155 is Upgradeable1155 {
 
         uint256 target = _fractionIDs[len];
         uint256 _typeID = getBaseType(target);
-
-        address operator = _msgSender();
 
         uint256 _totalValue;
         uint256[] memory fromIDs = new uint256[](len);
@@ -268,7 +266,7 @@ contract SemiFungible1155 is Upgradeable1155 {
             }
         }
 
-        _beforeValueTransfer(operator, operator, fromIDs, toIDs, values, "");
+        _beforeValueTransfer(_msgSender(), _account, fromIDs, toIDs, values, "");
 
         for (uint256 i; i < len; ) {
             _totalValue += values[i];
@@ -289,14 +287,12 @@ contract SemiFungible1155 is Upgradeable1155 {
     /// @dev `_tokenID` must hold all value declared at base type
     function _burnValue(address _account, uint256 _tokenID) internal {
         uint256 _typeID = getBaseType(_tokenID);
-        if (tokenValues[_tokenID] != tokenValues[_typeID]) revert Errors.FractionalBurn();
 
-        address operator = _msgSender();
         uint256[] memory fromIDs = _getSingletonArray(_tokenID);
         uint256[] memory toIDs = _getSingletonArray(0);
         uint256[] memory amounts = _getSingletonArray(tokenValues[_tokenID]);
 
-        _beforeValueTransfer(operator, _account, fromIDs, toIDs, amounts, "");
+        _beforeValueTransfer(_msgSender(), _account, fromIDs, toIDs, amounts, "");
 
         delete tokenValues[_tokenID];
 
@@ -360,12 +356,12 @@ contract SemiFungible1155 is Upgradeable1155 {
         uint256 len = fromIDs.length;
 
         for (uint256 i; i < len; ) {
-            uint256 from = fromIDs[i];
-            uint256 to = toIDs[i];
+            uint256 _from = fromIDs[i];
+            uint256 _to = toIDs[i];
 
-            if (isBaseType(from)) revert Errors.NotAllowed();
-            if (getBaseType(to) > 0 && getBaseType(from) != getBaseType(to)) revert Errors.TypeMismatch();
-            if (ownerOf(from) != msg.sender) revert Errors.NotApprovedOrOwner();
+            if (isBaseType(_from)) revert Errors.NotAllowed();
+            if (getBaseType(_to) > 0 && getBaseType(_from) != getBaseType(_to)) revert Errors.TypeMismatch();
+            if (from != _msgSender() && !isApprovedForAll(from, _msgSender())) revert Errors.NotApprovedOrOwner();
             unchecked {
                 ++i;
             }

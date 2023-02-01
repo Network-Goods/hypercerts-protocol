@@ -96,7 +96,7 @@ contract SemiFungible1155DefaultTest is PRBTest, StdCheats, StdUtils, SemiFungib
             semiFungible.validateNotOwnerNoBalanceNoUnits(tokenIDs[i], bob);
         }
 
-        semiFungible.mergeValue(tokenIDs);
+        semiFungible.mergeValue(alice, tokenIDs);
 
         for (uint256 i = 0; i < (tokenIDs.length - 1); i++) {
             assertEq(semiFungible.ownerOf(tokenIDs[i]), address(0));
@@ -123,7 +123,7 @@ contract SemiFungible1155DefaultTest is PRBTest, StdCheats, StdUtils, SemiFungib
         semiFungible.mintValue(alice, values, _uri);
         assertEq(semiFungible.unitsOf(baseID), totalValue);
 
-        semiFungible.mergeValue(tokenIDs);
+        semiFungible.mergeValue(alice, tokenIDs);
 
         for (uint256 i = 0; i < (tokenIDs.length - 1); i++) {
             assertEq(semiFungible.ownerOf(tokenIDs[i]), address(0));

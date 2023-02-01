@@ -72,7 +72,7 @@ contract HypercertMinter is IHypercertToken, SemiFungible1155, AllowlistMinter, 
         uint256 units
     ) external whenNotPaused {
         _processClaim(proof, claimID, units);
-        _mintClaim(claimID, units);
+        _mintClaim(account, claimID, units);
     }
 
     /// @notice Mint semi-fungible tokens representing a fraction of the claims in `claimIDs`
@@ -91,7 +91,7 @@ contract HypercertMinter is IHypercertToken, SemiFungible1155, AllowlistMinter, 
                 ++i;
             }
         }
-        _batchMintClaims(claimIDs, units);
+        _batchMintClaims(account, claimIDs, units);
     }
 
     /// @notice Register a claim and the whitelist for minting token(s) belonging to that claim
@@ -104,7 +104,7 @@ contract HypercertMinter is IHypercertToken, SemiFungible1155, AllowlistMinter, 
         string memory _uri,
         TransferRestrictions restrictions
     ) external whenNotPaused {
-        uint256 claimID = _createTokenType(units, _uri);
+        uint256 claimID = _createTokenType(account, units, _uri);
         _createAllowlist(claimID, merkleRoot);
         typeRestrictions[claimID] = restrictions;
         emit ClaimStored(claimID, _uri, units);
@@ -119,7 +119,7 @@ contract HypercertMinter is IHypercertToken, SemiFungible1155, AllowlistMinter, 
     /// @notice Merge the value of tokens belonging to the same claim
     /// @dev see {IHypercertToken}
     function mergeValue(address _account, uint256[] calldata _fractionIDs) external whenNotPaused {
-        _mergeValue(_fractionIDs);
+        _mergeValue(_account, _fractionIDs);
     }
 
     /// @notice Burn a claimtoken

@@ -35,16 +35,16 @@ contract SemiFungible1155Helper is SemiFungible1155, PRBTest, StdCheats, StdUtil
         return _mintValue(user, values, uri);
     }
 
-    function mintClaim(uint256 typeID, uint256 units) public returns (uint256 tokenID) {
-        return _mintClaim(typeID, units);
+    function mintClaim(address account, uint256 typeID, uint256 units) public returns (uint256 tokenID) {
+        return _mintClaim(account, typeID, units);
     }
 
     function splitValue(address user, uint256 tokenID, uint256[] calldata values) public {
         _splitValue(user, tokenID, values);
     }
 
-    function mergeValue(uint256[] memory tokenIDs) public {
-        _mergeValue(tokenIDs);
+    function mergeValue(address account, uint256[] memory tokenIDs) public {
+        _mergeValue(account, tokenIDs);
     }
 
     function burnValue(address account, uint256 tokenID) public {
