@@ -81,7 +81,7 @@ function balanceOfBatch(address[] accounts, uint256[] ids) external view returns
 ### batchMintClaimsFromAllowlists
 
 ```solidity
-function batchMintClaimsFromAllowlists(bytes32[][] proofs, uint256[] claimIDs, uint256[] units) external nonpayable
+function batchMintClaimsFromAllowlists(address account, bytes32[][] proofs, uint256[] claimIDs, uint256[] units) external nonpayable
 ```
 
 Mint semi-fungible tokens representing a fraction of the claims in `claimIDs`
@@ -92,6 +92,7 @@ Mint semi-fungible tokens representing a fraction of the claims in `claimIDs`
 
 | Name | Type | Description |
 |---|---|---|
+| account | address | undefined |
 | proofs | bytes32[][] | undefined |
 | claimIDs | uint256[] | undefined |
 | units | uint256[] | undefined |
@@ -152,7 +153,7 @@ Burn a claimtoken
 ### createAllowlist
 
 ```solidity
-function createAllowlist(uint256 units, bytes32 merkleRoot, string _uri, enum IHypercertToken.TransferRestrictions restrictions) external nonpayable
+function createAllowlist(address account, uint256 units, bytes32 merkleRoot, string _uri, enum IHypercertToken.TransferRestrictions restrictions) external nonpayable
 ```
 
 Register a claim and the whitelist for minting token(s) belonging to that claim
@@ -163,6 +164,7 @@ Register a claim and the whitelist for minting token(s) belonging to that claim
 
 | Name | Type | Description |
 |---|---|---|
+| account | address | undefined |
 | units | uint256 | undefined |
 | merkleRoot | bytes32 | undefined |
 | _uri | string | undefined |
@@ -252,7 +254,7 @@ function isApprovedForAll(address account, address operator) external view retur
 ### mergeValue
 
 ```solidity
-function mergeValue(uint256[] _fractionIDs) external nonpayable
+function mergeValue(address _account, uint256[] _fractionIDs) external nonpayable
 ```
 
 Merge the value of tokens belonging to the same claim
@@ -263,12 +265,13 @@ Merge the value of tokens belonging to the same claim
 
 | Name | Type | Description |
 |---|---|---|
+| _account | address | undefined |
 | _fractionIDs | uint256[] | undefined |
 
 ### mintClaim
 
 ```solidity
-function mintClaim(uint256 units, string _uri, enum IHypercertToken.TransferRestrictions restrictions) external nonpayable
+function mintClaim(address account, uint256 units, string _uri, enum IHypercertToken.TransferRestrictions restrictions) external nonpayable
 ```
 
 Mint a semi-fungible token for the impact claim referenced via `uri`
@@ -279,6 +282,7 @@ Mint a semi-fungible token for the impact claim referenced via `uri`
 
 | Name | Type | Description |
 |---|---|---|
+| account | address | undefined |
 | units | uint256 | undefined |
 | _uri | string | undefined |
 | restrictions | enum IHypercertToken.TransferRestrictions | undefined |
@@ -286,7 +290,7 @@ Mint a semi-fungible token for the impact claim referenced via `uri`
 ### mintClaimFromAllowlist
 
 ```solidity
-function mintClaimFromAllowlist(bytes32[] proof, uint256 claimID, uint256 units) external nonpayable
+function mintClaimFromAllowlist(address account, bytes32[] proof, uint256 claimID, uint256 units) external nonpayable
 ```
 
 Mint a semi-fungible token representing a fraction of the claim
@@ -297,6 +301,7 @@ Mint a semi-fungible token representing a fraction of the claim
 
 | Name | Type | Description |
 |---|---|---|
+| account | address | undefined |
 | proof | bytes32[] | undefined |
 | claimID | uint256 | undefined |
 | units | uint256 | undefined |
@@ -304,7 +309,7 @@ Mint a semi-fungible token representing a fraction of the claim
 ### mintClaimWithFractions
 
 ```solidity
-function mintClaimWithFractions(uint256 units, uint256[] fractions, string _uri, enum IHypercertToken.TransferRestrictions restrictions) external nonpayable
+function mintClaimWithFractions(address account, uint256 units, uint256[] fractions, string _uri, enum IHypercertToken.TransferRestrictions restrictions) external nonpayable
 ```
 
 Mint semi-fungible tokens for the impact claim referenced via `uri`
@@ -315,6 +320,7 @@ Mint semi-fungible tokens for the impact claim referenced via `uri`
 
 | Name | Type | Description |
 |---|---|---|
+| account | address | undefined |
 | units | uint256 | undefined |
 | fractions | uint256[] | undefined |
 | _uri | string | undefined |
@@ -1013,6 +1019,17 @@ error Invalid()
 
 ```solidity
 error NotAllowed()
+```
+
+
+
+
+
+
+### NotApprovedOrOwner
+
+```solidity
+error NotApprovedOrOwner()
 ```
 
 

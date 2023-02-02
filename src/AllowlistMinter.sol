@@ -21,7 +21,7 @@ contract AllowlistMinter is IAllowlist {
         bytes32[] calldata proof,
         uint256 claimID,
         bytes32 leaf
-    ) public view returns (bool isAllowed) {
+    ) external view returns (bool isAllowed) {
         if (merkleRoots[claimID].length == 0) revert Errors.DoesNotExist();
         isAllowed = MerkleProofUpgradeable.verifyCalldata(proof, merkleRoots[claimID], leaf);
     }

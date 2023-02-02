@@ -84,19 +84,25 @@ contract HypercertMinterPausableTest is PRBTest, StdCheats, StdUtils, PausableTe
 
         // Validate methods blocked
         vm.expectRevert("Pausable: paused");
-        hypercertMinter.mintClaim(1, _uri, IHypercertToken.TransferRestrictions.AllowAll);
+        hypercertMinter.mintClaim(owner, 1, _uri, IHypercertToken.TransferRestrictions.AllowAll);
 
         vm.expectRevert("Pausable: paused");
-        hypercertMinter.mintClaimWithFractions(1, fractions, _uri, IHypercertToken.TransferRestrictions.AllowAll);
+        hypercertMinter.mintClaimWithFractions(
+            owner,
+            1,
+            fractions,
+            _uri,
+            IHypercertToken.TransferRestrictions.AllowAll
+        );
 
         vm.expectRevert("Pausable: paused");
-        hypercertMinter.mintClaimFromAllowlist(proofs, 2, 1000);
+        hypercertMinter.mintClaimFromAllowlist(owner, proofs, 2, 1000);
 
         vm.expectRevert("Pausable: paused");
-        hypercertMinter.batchMintClaimsFromAllowlists(bytesArrayArray, ids, fractions);
+        hypercertMinter.batchMintClaimsFromAllowlists(owner, bytesArrayArray, ids, fractions);
 
         vm.expectRevert("Pausable: paused");
-        hypercertMinter.createAllowlist(10, proofs[0], _uri, IHypercertToken.TransferRestrictions.AllowAll);
+        hypercertMinter.createAllowlist(owner, 10, proofs[0], _uri, IHypercertToken.TransferRestrictions.AllowAll);
 
         vm.expectRevert("Pausable: paused");
         hypercertMinter.splitValue(alice, 1, fractions);
@@ -117,6 +123,6 @@ contract HypercertMinterPausableTest is PRBTest, StdCheats, StdUtils, PausableTe
 
         // Unpause releases blocked methods
         changePrank(alice);
-        hypercertMinter.mintClaim(1, _uri, IHypercertToken.TransferRestrictions.AllowAll);
+        hypercertMinter.mintClaim(owner, 1, _uri, IHypercertToken.TransferRestrictions.AllowAll);
     }
 }

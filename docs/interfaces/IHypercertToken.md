@@ -30,7 +30,7 @@ Operator must be allowed by `creator` and the token must represent the total amo
 ### mergeValue
 
 ```solidity
-function mergeValue(uint256[] tokenIDs) external nonpayable
+function mergeValue(address account, uint256[] tokenIDs) external nonpayable
 ```
 
 Tokens that have been merged are burned.
@@ -41,12 +41,13 @@ Tokens that have been merged are burned.
 
 | Name | Type | Description |
 |---|---|---|
+| account | address | undefined |
 | tokenIDs | uint256[] | undefined |
 
 ### mintClaim
 
 ```solidity
-function mintClaim(uint256 units, string uri, enum IHypercertToken.TransferRestrictions restrictions) external nonpayable
+function mintClaim(address account, uint256 units, string uri, enum IHypercertToken.TransferRestrictions restrictions) external nonpayable
 ```
 
 
@@ -57,6 +58,7 @@ function mintClaim(uint256 units, string uri, enum IHypercertToken.TransferRestr
 
 | Name | Type | Description |
 |---|---|---|
+| account | address | undefined |
 | units | uint256 | undefined |
 | uri | string | undefined |
 | restrictions | enum IHypercertToken.TransferRestrictions | undefined |
@@ -64,7 +66,7 @@ function mintClaim(uint256 units, string uri, enum IHypercertToken.TransferRestr
 ### mintClaimWithFractions
 
 ```solidity
-function mintClaimWithFractions(uint256 units, uint256[] fractions, string uri, enum IHypercertToken.TransferRestrictions restrictions) external nonpayable
+function mintClaimWithFractions(address account, uint256 units, uint256[] fractions, string uri, enum IHypercertToken.TransferRestrictions restrictions) external nonpayable
 ```
 
 
@@ -75,6 +77,7 @@ function mintClaimWithFractions(uint256 units, uint256[] fractions, string uri, 
 
 | Name | Type | Description |
 |---|---|---|
+| account | address | undefined |
 | units | uint256 | undefined |
 | fractions | uint256[] | undefined |
 | uri | string | undefined |

@@ -99,14 +99,14 @@ contract HypercertBatchMintingTest is PRBTest, StdCheats, StdUtils, BatchMinting
             proofs[i] = getProof(dataset.data, index);
             ids[i] = (i + 1) << 128;
             units[i] = dataset.units[index];
-            minter.createAllowlist(10000, dataset.root, _uri, IHypercertToken.TransferRestrictions.AllowAll);
+            minter.createAllowlist(user, 10000, dataset.root, _uri, IHypercertToken.TransferRestrictions.AllowAll);
         }
 
         units[3] = 0;
 
         startHoax(user, 10 ether);
 
-        minter.batchMintClaimsFromAllowlists(proofs, ids, units);
+        minter.batchMintClaimsFromAllowlists(user, proofs, ids, units);
 
         for (uint256 i = 0; i < 4; i++) {
             MerkleDataSet memory dataset = datasets[i];
@@ -143,14 +143,14 @@ contract HypercertBatchMintingTest is PRBTest, StdCheats, StdUtils, BatchMinting
 
         uint256[] memory zeroes = new uint256[](2);
 
-        minter.createAllowlist(10000, one.root, _uri, IHypercertToken.TransferRestrictions.AllowAll);
-        minter.createAllowlist(10000, two.root, _uri, IHypercertToken.TransferRestrictions.AllowAll);
+        minter.createAllowlist(user, 10000, one.root, _uri, IHypercertToken.TransferRestrictions.AllowAll);
+        minter.createAllowlist(user, 10000, two.root, _uri, IHypercertToken.TransferRestrictions.AllowAll);
 
         startHoax(user, 10 ether);
 
         vm.expectEmit(true, true, true, true);
         emit BatchValueTransfer(ids, zeroes, tokenIDs, units);
-        minter.batchMintClaimsFromAllowlists(proofs, ids, units);
+        minter.batchMintClaimsFromAllowlists(user, proofs, ids, units);
         assertEq(minter.unitsOf(user, (1 << 128) + 1), one.units[index]);
         assertEq(minter.unitsOf(user, (2 << 128) + 1), two.units[index]);
     }
@@ -171,7 +171,7 @@ contract HypercertBatchMintingTest is PRBTest, StdCheats, StdUtils, BatchMinting
             ids[i] = (i + 1) << 128;
             tokenIDs[i] = ids[i] + 1;
             units[i] = dataset.units[index];
-            minter.createAllowlist(10000, dataset.root, _uri, IHypercertToken.TransferRestrictions.AllowAll);
+            minter.createAllowlist(user, 10000, dataset.root, _uri, IHypercertToken.TransferRestrictions.AllowAll);
         }
 
         startHoax(user, 10 ether);
@@ -180,7 +180,7 @@ contract HypercertBatchMintingTest is PRBTest, StdCheats, StdUtils, BatchMinting
 
         vm.expectEmit(true, true, true, true);
         emit BatchValueTransfer(ids, zeroes, tokenIDs, units);
-        minter.batchMintClaimsFromAllowlists(proofs, ids, units);
+        minter.batchMintClaimsFromAllowlists(user, proofs, ids, units);
 
         for (uint256 i = 0; i < 4; i++) {
             MerkleDataSet memory dataset = datasets[i];
@@ -206,7 +206,7 @@ contract HypercertBatchMintingTest is PRBTest, StdCheats, StdUtils, BatchMinting
             ids[i] = (i + 1) << 128;
             tokenIDs[i] = ids[i] + 1;
             units[i] = dataset.units[index];
-            minter.createAllowlist(10000, dataset.root, _uri, IHypercertToken.TransferRestrictions.AllowAll);
+            minter.createAllowlist(user, 10000, dataset.root, _uri, IHypercertToken.TransferRestrictions.AllowAll);
         }
 
         startHoax(user, 10 ether);
@@ -215,7 +215,7 @@ contract HypercertBatchMintingTest is PRBTest, StdCheats, StdUtils, BatchMinting
 
         vm.expectEmit(true, true, true, true);
         emit BatchValueTransfer(ids, zeroes, tokenIDs, units);
-        minter.batchMintClaimsFromAllowlists(proofs, ids, units);
+        minter.batchMintClaimsFromAllowlists(user, proofs, ids, units);
 
         for (uint256 i = 0; i < setSize; i++) {
             MerkleDataSet memory dataset = datasets[i];

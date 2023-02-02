@@ -80,7 +80,7 @@ contract HypercertMinterTest is PRBTest, StdCheats, StdUtils, MinterTestHelper {
 
         vm.expectEmit(true, true, true, true);
         emit ClaimStored(1 << 128, _uri, units);
-        hypercertMinter.mintClaim(units, _uri, IHypercertToken.TransferRestrictions.AllowAll);
+        hypercertMinter.mintClaim(alice, units, _uri, IHypercertToken.TransferRestrictions.AllowAll);
     }
 
     function testClaimTenFractions() public {
@@ -89,6 +89,7 @@ contract HypercertMinterTest is PRBTest, StdCheats, StdUtils, MinterTestHelper {
         vm.expectEmit(true, true, true, true);
         emit ClaimStored(1 << 128, _uri, totalUnits);
         hypercertMinter.mintClaimWithFractions(
+            alice,
             totalUnits,
             fractions,
             _uri,
@@ -103,6 +104,7 @@ contract HypercertMinterTest is PRBTest, StdCheats, StdUtils, MinterTestHelper {
         vm.expectEmit(true, true, true, true);
         emit ClaimStored(1 << 128, _uri, totalUnits);
         hypercertMinter.mintClaimWithFractions(
+            alice,
             totalUnits,
             fractions,
             _uri,
