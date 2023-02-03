@@ -1,4 +1,3 @@
-import * as hre from "hardhat";
 import { task } from "hardhat/config";
 
 task("upgrade", "Upgrade implementation contract and verify")

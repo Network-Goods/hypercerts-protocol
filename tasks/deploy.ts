@@ -1,4 +1,3 @@
-import * as hre from "hardhat";
 import { task } from "hardhat/config";
 
 task("deploy", "Deploy contracts and verify").setAction(async ({}, { ethers, upgrades }) => {
