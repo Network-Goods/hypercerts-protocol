@@ -1,3 +1,7 @@
+**DEPRECATED** - Please refer to [https://github.com/Network-Goods/hypercerts](https://github.com/Network-Goods/hypercerts) for the latest
+
+---
+
 # hypercerts-protocol [![Github Actions][gha-badge]][gha] [![Hardhat][hardhat-badge]][hardhat] [![License: MIT][license-badge]][license]
 
 [gha]: https://github.com/paulrberg/hardhat-template/actions
