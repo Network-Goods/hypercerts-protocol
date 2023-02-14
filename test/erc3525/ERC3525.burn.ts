@@ -25,5 +25,18 @@ export function shouldBehaveLikeSemiFungibleTokenBurn(): void {
 
       await expect(user.sft.burn(2)).to.be.revertedWith("NotApprovedOrOwner");
     });
+
+    it("doesnt reallocate value after a token is burnt", async function () {
+      const { sft, user, anon } = await setupTestERC3525();
+      await sft.mintValue(user.address, 1, 10);
+
+      expect(await sft.ownerOf(1)).to.equal(user.address);
+      await user.sft["transferFrom(uint256,address,uint256)"](1, anon.address, 5);
+      expect(await sft.ownerOf(2)).to.equal(anon.address);
+
+      await anon.sft.burn(2);
+      expect((await sft["balanceOf(address)"](anon.address)).isZero()).to.be.true;
+      expect((await sft["balanceOf(uint256)"](1)).toNumber()).to.equal(5);
+    });
   });
 }

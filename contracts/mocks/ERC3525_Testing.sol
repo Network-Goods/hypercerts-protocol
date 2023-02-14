@@ -53,6 +53,14 @@ contract ERC3525_Testing is ERC3525SlotEnumerableUpgradeable {
         return _isApprovedOrOwner(operator_, tokenId_);
     }
 
+    function splitValue(uint256 fromToken_, uint256 value_) public virtual returns (uint256 tokenId) {
+        return _splitValue(fromToken_, value_);
+    }
+
+    function mergeValue(uint256 fromToken_, uint256 toToken_) public virtual returns (uint256 tokenId) {
+        return _mergeValue(fromToken_, toToken_);
+    }
+
     function slotURI(
         uint256 /*slot_*/
     ) public pure override returns (string memory) {
